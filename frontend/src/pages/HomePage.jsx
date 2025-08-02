@@ -3,15 +3,20 @@ import React from 'react'
 import { usePlayerStore } from "../store/player";
 import { useEffect } from "react";
 import { Link } from 'react-router-dom'
+import PlayerCard from '../components/PlayerCard'
 
 const HomePage = () => {
   const {fetchPlayers,players } = usePlayerStore();
+  
   useEffect(() => {
     fetchPlayers();
-
   }, [fetchPlayers]);
+  
   console.log("players",players)
 
+  const handlePlayerDeleted = () => {
+    fetchPlayers(); // Refresh the players list after deletion
+  };
 
   return (
     <Container maxW='container.xl' py={12}>
@@ -26,7 +31,6 @@ const HomePage = () => {
           Current Players
         </Text>
 
-
         <SimpleGrid
 					columns={{
 						base: 1,
@@ -37,13 +41,14 @@ const HomePage = () => {
 					w={"full"}
 				>
 					{players.map((player) => (
-						<PlayerCard key={player._id} player={player} />
+						<PlayerCard 
+							key={player._id} 
+							player={player} 
+							onPlayerDeleted={handlePlayerDeleted}
+						/>
 					))}
 				</SimpleGrid>
 
-
-
-        
         {players.length === 0 && (
 					<Text fontSize='xl' textAlign={"center"} fontWeight='bold' color='gray.500'>
 						No player found 😢{" "}
