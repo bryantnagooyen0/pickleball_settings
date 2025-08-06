@@ -13,6 +13,25 @@ export const getPlayers = async (req,res) => {
     }
 };
 
+export const getPlayer = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ success: false, message: "Invalid Player Id" });
+    }
+
+    try {
+        const player = await Player.findById(id);
+        if (!player) {
+            return res.status(404).json({ success: false, message: "Player not found" });
+        }
+        res.status(200).json({ success: true, data: player });
+    } catch (error) {
+        console.log("error in fetching player:", error.message);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 export const createPlayer = async (req, res) => {
     const player = req.body; // user will send this data
     if(!player.name || !player.paddle || !player.image) {
