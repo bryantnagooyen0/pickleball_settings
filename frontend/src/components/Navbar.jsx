@@ -8,7 +8,7 @@ import {
   Text,
   useColorMode,
 } from '@chakra-ui/react';
-import { PlusSquareIcon } from '@chakra-ui/icons';
+import { PlusSquareIcon, SettingsIcon } from '@chakra-ui/icons';
 import { IoMoon } from 'react-icons/io5';
 import { LuSun } from 'react-icons/lu';
 
@@ -41,6 +41,12 @@ const Navbar = () => {
           <Link to={'/create'}>
             <Button>
               <PlusSquareIcon fontSize={20} />
+            </Button>
+          </Link>
+
+          <Link to={'/paddles'}>
+            <Button>
+              <SettingsIcon fontSize={20} />
             </Button>
           </Link>
 

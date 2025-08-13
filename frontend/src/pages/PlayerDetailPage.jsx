@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import EquipmentModule from '../components/EquipmentModule';
+import { usePaddleStore } from '../store/paddle';
 
 const PlayerDetailPage = () => {
   const { playerId } = useParams();
@@ -23,6 +24,7 @@ const PlayerDetailPage = () => {
   const toast = useToast();
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { paddles, fetchPaddles } = usePaddleStore();
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -57,7 +59,32 @@ const PlayerDetailPage = () => {
     };
 
     fetchPlayer();
-  }, [playerId, navigate, toast]);
+    fetchPaddles();
+  }, [playerId, navigate, toast, fetchPaddles]);
+
+  // Enhance player data with paddle template information when paddles are loaded
+  useEffect(() => {
+    if (player && paddles.length > 0 && !player.paddleCore && player.paddle) {
+      // If player has a paddle but missing core details, try to find the paddle template
+      const paddleTemplate = paddles.find(p => p.name === player.paddle);
+      if (paddleTemplate) {
+        // Merge paddle template data with player data
+        const enhancedPlayerData = {
+          ...player,
+          paddleCore: player.paddleCore || paddleTemplate.core || '',
+          paddleWeight: player.paddleWeight || paddleTemplate.weight || '',
+          paddleBrand: player.paddleBrand || paddleTemplate.brand || '',
+          paddleModel: player.paddleModel || paddleTemplate.model || '',
+          paddleShape: player.paddleShape || paddleTemplate.shape || '',
+          paddleThickness: player.paddleThickness || paddleTemplate.thickness || '',
+          paddleHandleLength: player.paddleHandleLength || paddleTemplate.handleLength || '',
+          paddleColor: player.paddleColor || paddleTemplate.color || '',
+          paddleImage: player.paddleImage || paddleTemplate.image || '',
+        };
+        setPlayer(enhancedPlayerData);
+      }
+    }
+  }, [paddles.length, player?.paddle, player?.paddleCore]);
 
   if (loading) {
     return (
@@ -190,6 +217,7 @@ const PlayerDetailPage = () => {
                 imageField='paddleImage'
                 nameField='paddle'
                 brandField='paddleBrand'
+                modelField='paddleModel'
                 badgeColor='blue'
                 specifications={[
                   { label: 'Shape', field: 'paddleShape' },

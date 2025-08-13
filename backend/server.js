@@ -5,6 +5,7 @@ import path from "path";
 import { connectDB } from "./config/db.js";
 import mongoose from "mongoose";
 import playerRoutes from "./routes/player.route.js";
+import paddleRoutes from "./routes/paddle.route.js";
 import cors from 'cors';
 
 dotenv.config({ path: path.resolve('./backend/.env') });
@@ -18,6 +19,7 @@ app.use(cors());
 app.use(express.json()); //allows us to accepd JSON data in the req.body
 
 app.use("/api/players", playerRoutes)
+app.use("/api/paddles", paddleRoutes)
 
 
 app.listen(PORT,() =>{

@@ -11,23 +11,30 @@ import {
   VStack,
   Spinner,
   Center,
+  Text,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '../store/player';
+import PaddleSelector from '../components/PaddleSelector';
 
 const EditPage = () => {
   const { playerId } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
   const [loading, setLoading] = useState(true);
+  const [selectedPaddle, setSelectedPaddle] = useState(null);
   const [player, setPlayer] = useState({
     name: '',
     paddle: '',
+    paddleBrand: '',
+    paddleModel: '',
     paddleShape: '',
     paddleThickness: '',
     paddleHandleLength: '',
     paddleColor: '',
     paddleImage: '',
+    paddleCore: '',
+    paddleWeight: '',
     image: '',
     age: '',
     height: '',
@@ -42,6 +49,16 @@ const EditPage = () => {
 
   const { updatePlayer } = usePlayerStore();
 
+  // Handle paddle selection
+  const handlePaddleSelect = (paddle) => {
+    setSelectedPaddle(paddle);
+  };
+
+  // Handle paddle data changes
+  const handlePaddleDataChange = (paddleData) => {
+    setPlayer(prev => ({ ...prev, ...paddleData }));
+  };
+
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
@@ -49,6 +66,22 @@ const EditPage = () => {
         if (response.ok) {
           const result = await response.json();
           setPlayer(result.data);
+          
+          // Set selected paddle if player has paddle data
+          if (result.data.paddle) {
+            setSelectedPaddle({
+              name: result.data.paddle,
+              brand: result.data.paddleBrand || '',
+              model: result.data.paddleModel || '',
+              shape: result.data.paddleShape || '',
+              thickness: result.data.paddleThickness || '',
+              handleLength: result.data.paddleHandleLength || '',
+              color: result.data.paddleColor || '',
+              image: result.data.paddleImage || '',
+              core: result.data.paddleCore || '',
+              weight: result.data.paddleWeight || ''
+            });
+          }
         } else {
           toast({
             title: 'Error',
@@ -130,14 +163,18 @@ const EditPage = () => {
                 setPlayer({ ...player, name: e.target.value })
               }
             />
-            <Input
-              placeholder='Paddle'
-              name='paddle'
-              value={player.paddle}
-              onChange={e =>
-                setPlayer({ ...player, paddle: e.target.value })
-              }
-            />
+            
+            <Box w="full">
+              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                Paddle
+              </Text>
+              <PaddleSelector
+                selectedPaddle={selectedPaddle}
+                onPaddleSelect={handlePaddleSelect}
+                onPaddleDataChange={handlePaddleDataChange}
+                showCreateButton={true}
+              />
+            </Box>
             <Input
               placeholder='Paddle Shape (optional)'
               name='paddleShape'

@@ -29,6 +29,22 @@ const playerSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    paddleCore: {
+        type: String,
+        required: false
+    },
+    paddleWeight: {
+        type: String,
+        required: false
+    },
+    paddleBrand: {
+        type: String,
+        required: false
+    },
+    paddleModel: {
+        type: String,
+        required: false
+    },
     shoes:{
         type: String,
         required: false

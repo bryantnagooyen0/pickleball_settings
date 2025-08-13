@@ -10,18 +10,25 @@ import {
   useColorModeValue,
   useToast,
   VStack,
+  Text,
 } from '@chakra-ui/react';
 import { usePlayerStore } from '../store/player';
+import PaddleSelector from '../components/PaddleSelector';
 
 const CreatePage = () => {
+  const [selectedPaddle, setSelectedPaddle] = useState(null);
   const [newPlayer, setNewPlayer] = useState({
     name: '',
     paddle: '',
+    paddleBrand: '',
+    paddleModel: '',
     paddleShape: '',
     paddleThickness: '',
     paddleHandleLength: '',
     paddleColor: '',
     paddleImage: '',
+    paddleCore: '',
+    paddleWeight: '',
     image: '',
     age: '',
     height: '',
@@ -37,6 +44,16 @@ const CreatePage = () => {
   const toast = useToast();
 
   const { createPlayer } = usePlayerStore();
+
+  // Handle paddle selection
+  const handlePaddleSelect = (paddle) => {
+    setSelectedPaddle(paddle);
+  };
+
+  // Handle paddle data changes
+  const handlePaddleDataChange = (paddleData) => {
+    setNewPlayer(prev => ({ ...prev, ...paddleData }));
+  };
 
   const handleAddPlayer = async () => {
     const { success, message } = await createPlayer(newPlayer);
@@ -58,11 +75,15 @@ const CreatePage = () => {
     setNewPlayer({
       name: '',
       paddle: '',
+      paddleBrand: '',
+      paddleModel: '',
       paddleShape: '',
       paddleThickness: '',
       paddleHandleLength: '',
       paddleColor: '',
       paddleImage: '',
+      paddleCore: '',
+      paddleWeight: '',
       image: '',
       age: '',
       height: '',
@@ -74,6 +95,7 @@ const CreatePage = () => {
       overgrips: '',
       weight: '',
     });
+    setSelectedPaddle(null);
   };
 
   return (
@@ -99,57 +121,18 @@ const CreatePage = () => {
                 setNewPlayer({ ...newPlayer, name: e.target.value })
               }
             />
-            <Input
-              placeholder='Paddle'
-              name='paddle'
-              value={newPlayer.paddle}
-              onChange={e =>
-                setNewPlayer({ ...newPlayer, paddle: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Shape (optional)'
-              name='paddleShape'
-              value={newPlayer.paddleShape}
-              onChange={e =>
-                setNewPlayer({ ...newPlayer, paddleShape: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Thickness (optional)'
-              name='paddleThickness'
-              value={newPlayer.paddleThickness}
-              onChange={e =>
-                setNewPlayer({ ...newPlayer, paddleThickness: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Handle Length (optional)'
-              name='paddleHandleLength'
-              value={newPlayer.paddleHandleLength}
-              onChange={e =>
-                setNewPlayer({
-                  ...newPlayer,
-                  paddleHandleLength: e.target.value,
-                })
-              }
-            />
-            <Input
-              placeholder='Paddle Color (optional)'
-              name='paddleColor'
-              value={newPlayer.paddleColor}
-              onChange={e =>
-                setNewPlayer({ ...newPlayer, paddleColor: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Image URL (optional)'
-              name='paddleImage'
-              value={newPlayer.paddleImage}
-              onChange={e =>
-                setNewPlayer({ ...newPlayer, paddleImage: e.target.value })
-              }
-            />
+            
+            <Box w="full">
+              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                Paddle
+              </Text>
+              <PaddleSelector
+                selectedPaddle={selectedPaddle}
+                onPaddleSelect={handlePaddleSelect}
+                onPaddleDataChange={handlePaddleDataChange}
+                showCreateButton={true}
+              />
+            </Box>
             <Input
               placeholder='Image URL'
               name='image'

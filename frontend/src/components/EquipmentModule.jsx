@@ -50,6 +50,7 @@ const EquipmentModule = ({
   imageField,
   nameField,
   brandField,
+  modelField,
   specifications = [],
   modifications = [],
   badgeColor = 'blue',
@@ -88,6 +89,11 @@ const EquipmentModule = ({
     return player[brandField];
   };
 
+  const getModel = () => {
+    if (!modelField) return null;
+    return player[modelField];
+  };
+
   const renderSpecifications = () => {
     if (specifications.length === 0) return null;
 
@@ -99,7 +105,7 @@ const EquipmentModule = ({
               {spec.label}
             </Text>
             <Text fontSize='md' fontWeight='semibold' color='gray.800'>
-              {player[spec.field] || spec.default || 'Standard'}
+              {player[spec.field] || spec.default || 'Not specified'}
             </Text>
           </Box>
         ))}
@@ -216,11 +222,18 @@ const EquipmentModule = ({
                   <Text fontSize='lg' fontWeight='bold' color='gray.800'>
                     {getName()}
                   </Text>
-                  {getBrand() && (
-                    <Badge colorScheme={badgeColor} variant='subtle' size='sm'>
-                      {getBrand()}
-                    </Badge>
-                  )}
+                  <HStack spacing={2}>
+                    {getBrand() && (
+                      <Badge colorScheme={badgeColor} variant='subtle' size='sm'>
+                        {getBrand()}
+                      </Badge>
+                    )}
+                    {getModel() && (
+                      <Badge colorScheme={badgeColor} variant='outline' size='sm'>
+                        {getModel()}
+                      </Badge>
+                    )}
+                  </HStack>
                 </VStack>
               </HStack>
               <Button
