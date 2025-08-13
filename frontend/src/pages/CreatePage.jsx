@@ -6,6 +6,7 @@ import {
   Container,
   Heading,
   Input,
+  Textarea,
   useColorModeValue,
   useToast,
   VStack,
@@ -26,6 +27,7 @@ const CreatePage = () => {
     height: '',
     mlpTeam: '',
     currentLocation: '',
+    about: '',
     shoeImage: '',
     shoeModel: '',
     overgrips: '',
@@ -66,6 +68,7 @@ const CreatePage = () => {
       height: '',
       mlpTeam: '',
       currentLocation: '',
+      about: '',
       shoeImage: '',
       shoeModel: '',
       overgrips: '',
@@ -187,6 +190,15 @@ const CreatePage = () => {
               onChange={e =>
                 setNewPlayer({ ...newPlayer, currentLocation: e.target.value })
               }
+            />
+            <Textarea
+              placeholder='About (optional)'
+              name='about'
+              value={newPlayer.about}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, about: e.target.value })
+              }
+              rows={4}
             />
             <Input
               placeholder='Shoe Image URL (optional)'

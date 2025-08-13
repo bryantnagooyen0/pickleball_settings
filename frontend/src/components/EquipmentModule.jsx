@@ -10,7 +10,7 @@ import {
   Icon,
   Badge,
 } from '@chakra-ui/react';
-import { FaShoppingBag, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaShoppingBag } from 'react-icons/fa';
 import { TbShoe } from 'react-icons/tb';
 
 // Custom Paddle SVG Icon Component
@@ -58,11 +58,6 @@ const EquipmentModule = ({
   const handleCheckPrice = (item = null) => {
     // TODO: Implement price checking functionality
     console.log('Check price for:', item || nameField);
-  };
-
-  const handleMoreFromBrand = (item = null) => {
-    // TODO: Implement brand search functionality
-    console.log('More from brand for:', item || nameField);
   };
 
   const getIcon = () => {
@@ -145,25 +140,14 @@ const EquipmentModule = ({
                   </Badge>
                 )}
               </VStack>
-              <HStack spacing={2}>
-                <Button
-                  size='sm'
-                  variant='outline'
-                  colorScheme='gray'
-                  leftIcon={<FaExternalLinkAlt />}
-                  onClick={() => handleMoreFromBrand(mod.field)}
-                >
-                  More from brand
-                </Button>
-                <Button
-                  size='sm'
-                  colorScheme='blue'
-                  leftIcon={<FaShoppingBag />}
-                  onClick={() => handleCheckPrice(mod.field)}
-                >
-                  Check price
-                </Button>
-              </HStack>
+              <Button
+                size='sm'
+                colorScheme='blue'
+                leftIcon={<FaShoppingBag />}
+                onClick={() => handleCheckPrice(mod.field)}
+              >
+                Check price
+              </Button>
             </HStack>
           </Box>
         ))}
@@ -239,25 +223,14 @@ const EquipmentModule = ({
                   )}
                 </VStack>
               </HStack>
-              <HStack spacing={2}>
-                <Button
-                  size='sm'
-                  variant='outline'
-                  colorScheme='gray'
-                  leftIcon={<FaExternalLinkAlt />}
-                  onClick={() => handleMoreFromBrand()}
-                >
-                  More from brand
-                </Button>
-                <Button
-                  size='sm'
-                  colorScheme='blue'
-                  leftIcon={<FaShoppingBag />}
-                  onClick={() => handleCheckPrice()}
-                >
-                  Check price
-                </Button>
-              </HStack>
+              <Button
+                size='sm'
+                colorScheme='blue'
+                leftIcon={<FaShoppingBag />}
+                onClick={() => handleCheckPrice()}
+              >
+                Check price
+              </Button>
             </HStack>
           </Box>
         )}

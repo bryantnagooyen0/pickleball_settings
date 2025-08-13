@@ -1,0 +1,277 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Input,
+  Textarea,
+  useColorModeValue,
+  useToast,
+  VStack,
+  Spinner,
+  Center,
+} from '@chakra-ui/react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { usePlayerStore } from '../store/player';
+
+const EditPage = () => {
+  const { playerId } = useParams();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [loading, setLoading] = useState(true);
+  const [player, setPlayer] = useState({
+    name: '',
+    paddle: '',
+    paddleShape: '',
+    paddleThickness: '',
+    paddleHandleLength: '',
+    paddleColor: '',
+    paddleImage: '',
+    image: '',
+    age: '',
+    height: '',
+    mlpTeam: '',
+    currentLocation: '',
+    about: '',
+    shoeImage: '',
+    shoeModel: '',
+    overgrips: '',
+    weight: '',
+  });
+
+  const { updatePlayer } = usePlayerStore();
+
+  useEffect(() => {
+    const fetchPlayer = async () => {
+      try {
+        const response = await fetch(`/api/players/${playerId}`);
+        if (response.ok) {
+          const result = await response.json();
+          setPlayer(result.data);
+        } else {
+          toast({
+            title: 'Error',
+            description: 'Player not found',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+          });
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error fetching player:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch player details',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlayer();
+  }, [playerId, navigate, toast]);
+
+  const handleUpdatePlayer = async () => {
+    const { success, message } = await updatePlayer(playerId, player);
+    if (!success) {
+      toast({
+        title: 'Error',
+        description: message,
+        status: 'error',
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: message,
+        status: 'success',
+        isClosable: true,
+      });
+      navigate(`/player/${playerId}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container maxW='container.sm' py={12}>
+        <Center>
+          <Spinner size='xl' />
+        </Center>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxW={'container.sm'}>
+      <VStack spacing={8}>
+        <Heading as={'h1'} size={'2xl'} textAlign={'center'} mb={8}>
+          Edit Player
+        </Heading>
+
+        <Box
+          w={'full'}
+          bg={useColorModeValue('white', 'gray.800')}
+          p={6}
+          rounded={'lg'}
+          shadow={'md'}
+        >
+          <VStack spacing={4}>
+            <Input
+              placeholder='Player Name'
+              name='name'
+              value={player.name}
+              onChange={e =>
+                setPlayer({ ...player, name: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Paddle'
+              name='paddle'
+              value={player.paddle}
+              onChange={e =>
+                setPlayer({ ...player, paddle: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Paddle Shape (optional)'
+              name='paddleShape'
+              value={player.paddleShape || ''}
+              onChange={e =>
+                setPlayer({ ...player, paddleShape: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Paddle Thickness (optional)'
+              name='paddleThickness'
+              value={player.paddleThickness || ''}
+              onChange={e =>
+                setPlayer({ ...player, paddleThickness: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Paddle Handle Length (optional)'
+              name='paddleHandleLength'
+              value={player.paddleHandleLength || ''}
+              onChange={e =>
+                setPlayer({
+                  ...player,
+                  paddleHandleLength: e.target.value,
+                })
+              }
+            />
+            <Input
+              placeholder='Paddle Color (optional)'
+              name='paddleColor'
+              value={player.paddleColor || ''}
+              onChange={e =>
+                setPlayer({ ...player, paddleColor: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Paddle Image URL (optional)'
+              name='paddleImage'
+              value={player.paddleImage || ''}
+              onChange={e =>
+                setPlayer({ ...player, paddleImage: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Image URL'
+              name='image'
+              value={player.image}
+              onChange={e =>
+                setPlayer({ ...player, image: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Age (optional)'
+              name='age'
+              type='number'
+              value={player.age || ''}
+              onChange={e =>
+                setPlayer({ ...player, age: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Height (optional)'
+              name='height'
+              value={player.height || ''}
+              onChange={e =>
+                setPlayer({ ...player, height: e.target.value })
+              }
+            />
+            <Input
+              placeholder='MLP Team (optional)'
+              name='mlpTeam'
+              value={player.mlpTeam || ''}
+              onChange={e =>
+                setPlayer({ ...player, mlpTeam: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Current Location (optional)'
+              name='currentLocation'
+              value={player.currentLocation || ''}
+              onChange={e =>
+                setPlayer({ ...player, currentLocation: e.target.value })
+              }
+            />
+            <Textarea
+              placeholder='About (optional)'
+              name='about'
+              value={player.about || ''}
+              onChange={e =>
+                setPlayer({ ...player, about: e.target.value })
+              }
+              rows={4}
+            />
+            <Input
+              placeholder='Shoe Image URL (optional)'
+              name='shoeImage'
+              value={player.shoeImage || ''}
+              onChange={e =>
+                setPlayer({ ...player, shoeImage: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Shoe Model (optional)'
+              name='shoeModel'
+              value={player.shoeModel || ''}
+              onChange={e =>
+                setPlayer({ ...player, shoeModel: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Overgrips (optional)'
+              name='overgrips'
+              value={player.overgrips || ''}
+              onChange={e =>
+                setPlayer({ ...player, overgrips: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Weight (optional)'
+              name='weight'
+              value={player.weight || ''}
+              onChange={e =>
+                setPlayer({ ...player, weight: e.target.value })
+              }
+            />
+
+            <Button colorScheme='blue' onClick={handleUpdatePlayer} w='full'>
+              Update Player
+            </Button>
+          </VStack>
+        </Box>
+      </VStack>
+    </Container>
+  );
+};
+
+export default EditPage;

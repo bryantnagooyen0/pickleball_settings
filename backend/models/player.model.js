@@ -61,6 +61,10 @@ const playerSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    about: {
+        type: String,
+        required: false
+    },
     overgrips: {
         type: String,
         required: false

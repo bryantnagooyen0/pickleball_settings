@@ -14,6 +14,7 @@ import {
   ModalBody,
   ModalCloseButton,
   Input,
+  Textarea,
   useToast,
   HStack,
   AlertDialog,
@@ -41,6 +42,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
     height: player.height || '',
     mlpTeam: player.mlpTeam || '',
     currentLocation: player.currentLocation || '',
+    about: player.about || '',
     overgrips: player.overgrips || '',
     weight: player.weight || '',
   });
@@ -61,6 +63,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
       });
 
       if (response.ok) {
+        const updatedPlayer = await response.json();
         onClose();
         toast({
           title: 'Success',
@@ -69,7 +72,11 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
           duration: 3000,
           isClosable: true,
         });
-        // Refresh the players list
+        // Update the local player data
+        Object.assign(player, updatedPlayer.data);
+        // Force a re-render by updating the component
+        setEditPlayer({ ...editPlayer, ...updatedPlayer.data });
+        // Refresh the page to show updated data
         window.location.reload();
       }
     } catch (error) {
@@ -311,6 +318,14 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
                     currentLocation: e.target.value,
                   })
                 }
+              />
+              <Textarea
+                placeholder='About (optional)'
+                value={editPlayer.about}
+                onChange={e =>
+                  setEditPlayer({ ...editPlayer, about: e.target.value })
+                }
+                rows={4}
               />
               <Input
                 placeholder='Shoe Image URL (optional)'

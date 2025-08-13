@@ -99,7 +99,7 @@ const PlayerDetailPage = () => {
             bg='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
             color='white'
           >
-            <Box display='flex' alignItems='center' gap={8}>
+            <Box display='flex' alignItems='flex-start' gap={8}>
               <Image
                 src={player.image}
                 alt={player.name}
@@ -109,33 +109,68 @@ const PlayerDetailPage = () => {
                 objectFit='cover'
                 border='4px solid white'
                 boxShadow='lg'
+                flexShrink={0}
               />
               <Box flex={1}>
-                <Text fontSize='4xl' fontWeight='bold' mb={2}>
+                <Text fontSize='4xl' fontWeight='bold' mb={4}>
                   {player.name}
                 </Text>
-                <VStack align='start' spacing={2}>
+
+                {/* Player Info Grid */}
+                <SimpleGrid columns={2} spacing={4} mb={4}>
                   {player.age && (
-                    <Text fontSize='lg'>
-                      <strong>Age:</strong> {player.age} years old
-                    </Text>
+                    <Box>
+                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                        Age
+                      </Text>
+                      <Text fontSize='lg' fontWeight='semibold'>
+                        {player.age} years old
+                      </Text>
+                    </Box>
                   )}
                   {player.height && (
-                    <Text fontSize='lg'>
-                      <strong>Height:</strong> {player.height}
-                    </Text>
+                    <Box>
+                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                        Height
+                      </Text>
+                      <Text fontSize='lg' fontWeight='semibold'>
+                        {player.height}
+                      </Text>
+                    </Box>
                   )}
                   {player.mlpTeam && (
-                    <Text fontSize='lg'>
-                      <strong>MLP Team:</strong> {player.mlpTeam}
-                    </Text>
+                    <Box>
+                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                        MLP Team
+                      </Text>
+                      <Text fontSize='lg' fontWeight='semibold'>
+                        {player.mlpTeam}
+                      </Text>
+                    </Box>
                   )}
                   {player.currentLocation && (
-                    <Text fontSize='lg'>
-                      <strong>Location:</strong> {player.currentLocation}
-                    </Text>
+                    <Box>
+                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                        Location
+                      </Text>
+                      <Text fontSize='lg' fontWeight='semibold'>
+                        {player.currentLocation}
+                      </Text>
+                    </Box>
                   )}
-                </VStack>
+                </SimpleGrid>
+
+                {/* About Section */}
+                {player.about && (
+                  <Box mt={4}>
+                    <Text fontSize='sm' color='white' opacity={0.8} mb={2}>
+                      About
+                    </Text>
+                    <Text fontSize='md' lineHeight='1.6'>
+                      {player.about}
+                    </Text>
+                  </Box>
+                )}
               </Box>
             </Box>
           </Box>
@@ -175,11 +210,6 @@ const PlayerDetailPage = () => {
                 nameField='shoeModel'
                 brandField='shoeBrand'
                 badgeColor='green'
-                specifications={[
-                  { label: 'Size', field: 'shoeSize' },
-                  { label: 'Type', field: 'shoeType' },
-                  { label: 'Color', field: 'shoeColor' },
-                ]}
               />
 
               {/* Modifications Module */}
