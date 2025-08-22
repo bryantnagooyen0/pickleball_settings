@@ -1,8 +1,8 @@
 # Pickleball Settings Manager
 
-A full-stack web application for managing pickleball players and their equipment settings. Built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
+A full-stack web application for managing pickleball pros and their equipment settings. Built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
 
-## 🏓 Features
+## Features
 
 - **Player Management**: Add and view pickleball players
 - **Equipment Tracking**: Store player equipment information (paddle, shoes, etc.)
@@ -10,7 +10,7 @@ A full-stack web application for managing pickleball players and their equipment
 - **Dark/Light Mode**: Toggle between color themes
 - **Real-time Updates**: Instant feedback for user actions
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React 19** - Modern React with hooks
@@ -27,7 +27,7 @@ A full-stack web application for managing pickleball players and their equipment
 - **Mongoose** - MongoDB object modeling
 - **dotenv** - Environment variable management
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 pickleball_settings/
@@ -57,7 +57,7 @@ pickleball_settings/
 └── package.json
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -109,7 +109,7 @@ pickleball_settings/
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:5000
 
-## 📖 Usage
+## Usage
 
 ### Adding a Player
 1. Navigate to the "Create" page
@@ -124,7 +124,7 @@ pickleball_settings/
 - Each player card shows their name, paddle, and image
 - Players are displayed in a responsive grid layout
 
-## 🔧 API Endpoints
+## API Endpoints
 
 - `GET /api/players` - Get all players
 - `POST /api/players` - Create a new player
@@ -132,7 +132,7 @@ pickleball_settings/
 - `PUT /api/players/:id` - Update a player
 - `DELETE /api/players/:id` - Delete a player
 
-## 🎨 Features
+## Features
 
 ### Player Model
 ```javascript
@@ -153,7 +153,7 @@ pickleball_settings/
 - Loading states and error handling
 - Clean, modern interface with Chakra UI components
 
-## 🚀 Deployment
+## Deployment
 
 ### Frontend Deployment
 ```bash
@@ -166,7 +166,7 @@ npm run build
 - Set up environment variables
 - Use a process manager like PM2
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -174,14 +174,6 @@ npm run build
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the ISC License.
-
-## 🆘 Support
-
-If you encounter any issues or have questions, please open an issue in the repository.
-
----
-
-**Happy Pickleball! 🏓** 
