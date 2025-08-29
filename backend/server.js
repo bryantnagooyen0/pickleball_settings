@@ -1,9 +1,7 @@
 import dotenv from "dotenv";
 import express from 'express';
-import Player from './models/player.model.js';
 import path from "path";
 import { connectDB } from "./config/db.js";
-import mongoose from "mongoose";
 import playerRoutes from "./routes/player.route.js";
 import paddleRoutes from "./routes/paddle.route.js";
 import cors from 'cors';

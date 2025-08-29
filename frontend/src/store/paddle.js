@@ -54,7 +54,9 @@ export const usePaddleStore = create(set => ({
             paddle._id === paddleId ? data.data : paddle
           )
         }));
-        return { success: true, message: 'Paddle updated successfully' };
+        
+        // Use the message from the backend which includes info about updated players
+        return { success: true, message: data.message || 'Paddle updated successfully' };
       } else {
         return { success: false, message: data.message || 'Failed to update paddle' };
       }

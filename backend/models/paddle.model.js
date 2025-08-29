@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const paddleSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     brand: {
         type: String,
@@ -23,6 +22,14 @@ const paddleSchema = new mongoose.Schema({
         required: false
     },
     handleLength: {
+        type: String,
+        required: false
+    },
+    length: {
+        type: String,
+        required: false
+    },
+    width: {
         type: String,
         required: false
     },
@@ -54,8 +61,7 @@ const paddleSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Create a compound index for brand and model to ensure uniqueness
-paddleSchema.index({ brand: 1, model: 1 }, { unique: true });
+// No compound unique index - allow same brand/model with different specifications
 
 const Paddle = mongoose.model('Paddle', paddleSchema);
 

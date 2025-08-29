@@ -1,4 +1,5 @@
 import Paddle from "../models/paddle.model.js";
+import Player from "../models/player.model.js";
 import mongoose from "mongoose";
 
 export const getPaddles = async (req, res) => {
@@ -46,14 +47,7 @@ export const createPaddle = async (req, res) => {
         res.status(201).json({ success: true, data: newPaddle });
     } catch (error) {
         console.error("Error in Create Paddle:", error.message);
-        if (error.code === 11000) {
-            res.status(400).json({ 
-                success: false, 
-                message: "A paddle with this brand and model already exists" 
-            });
-        } else {
-            res.status(500).json({ success: false, message: "Server Error" });
-        }
+        res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 
@@ -66,21 +60,47 @@ export const updatePaddle = async (req, res) => {
     }
 
     try {
-        const updatedPaddle = await Paddle.findByIdAndUpdate(id, paddleData, { new: true });
-        if (!updatedPaddle) {
+        // First, get the original paddle to find players using it
+        const originalPaddle = await Paddle.findById(id);
+        if (!originalPaddle) {
             return res.status(404).json({ success: false, message: "Paddle not found" });
         }
-        res.status(200).json({ success: true, data: updatedPaddle });
+
+        // Update the paddle template
+        const updatedPaddle = await Paddle.findByIdAndUpdate(id, paddleData, { new: true });
+        
+        // Find all players who are using this paddle and update their paddle specifications
+        const playersToUpdate = await Player.find({ paddle: originalPaddle.name });
+        
+        if (playersToUpdate.length > 0) {
+            const updatePromises = playersToUpdate.map(player => {
+                const playerUpdate = {
+                    paddleBrand: paddleData.brand || player.paddleBrand,
+                    paddleModel: paddleData.model || player.paddleModel,
+                    paddleShape: paddleData.shape || player.paddleShape,
+                    paddleThickness: paddleData.thickness || player.paddleThickness,
+                    paddleHandleLength: paddleData.handleLength || player.paddleHandleLength,
+                    paddleLength: paddleData.length || player.paddleLength,
+                    paddleWidth: paddleData.width || player.paddleWidth,
+                    paddleCore: paddleData.core || player.paddleCore,
+                    paddleImage: paddleData.image || player.paddleImage
+                };
+                
+                return Player.findByIdAndUpdate(player._id, playerUpdate, { new: true });
+            });
+            
+            await Promise.all(updatePromises);
+            console.log(`Updated ${playersToUpdate.length} players using paddle: ${originalPaddle.name}`);
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            data: updatedPaddle,
+            message: `Paddle updated successfully. ${playersToUpdate.length} players using this paddle were also updated.`
+        });
     } catch (error) {
         console.error("Error in Update Paddle:", error.message);
-        if (error.code === 11000) {
-            res.status(400).json({ 
-                success: false, 
-                message: "A paddle with this brand and model already exists" 
-            });
-        } else {
-            res.status(500).json({ success: false, message: "Server Error" });
-        }
+        res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 

@@ -32,11 +32,13 @@ import {
   InputLeftElement,
 } from '@chakra-ui/react';
 import { usePaddleStore } from '../store/paddle';
+import { usePlayerStore } from '../store/player';
 import { SearchIcon, EditIcon, DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useRef } from 'react';
 
 const PaddleManagementPage = () => {
   const { paddles, fetchPaddles, createPaddle, updatePaddle, deletePaddle } = usePaddleStore();
+  const { refreshPlayers } = usePlayerStore();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -52,8 +54,8 @@ const PaddleManagementPage = () => {
     shape: '',
     thickness: '',
     handleLength: '',
-    color: '',
-    weight: '',
+    length: '',
+    width: '',
     core: '',
     image: '',
     description: ''
@@ -93,6 +95,12 @@ const PaddleManagementPage = () => {
         duration: 3000,
         isClosable: true,
       });
+      
+      // If this was an update, refresh player data to reflect the changes
+      if (isEditing) {
+        await refreshPlayers();
+      }
+      
       handleClose();
     } else {
       toast({
@@ -114,8 +122,8 @@ const PaddleManagementPage = () => {
       shape: paddle.shape || '',
       thickness: paddle.thickness || '',
       handleLength: paddle.handleLength || '',
-      color: paddle.color || '',
-      weight: paddle.weight || '',
+      length: paddle.length || '',
+      width: paddle.width || '',
       core: paddle.core || '',
       image: paddle.image || '',
       description: paddle.description || ''
@@ -157,8 +165,8 @@ const PaddleManagementPage = () => {
       shape: '',
       thickness: '',
       handleLength: '',
-      color: '',
-      weight: '',
+      length: '',
+      width: '',
       core: '',
       image: '',
       description: ''
@@ -177,8 +185,8 @@ const PaddleManagementPage = () => {
       shape: '',
       thickness: '',
       handleLength: '',
-      color: '',
-      weight: '',
+      length: '',
+      width: '',
       core: '',
       image: '',
       description: ''
@@ -366,16 +374,16 @@ const PaddleManagementPage = () => {
                   onChange={(e) => setPaddleForm({...paddleForm, handleLength: e.target.value})}
                 />
                 <Input
-                  placeholder="Color"
-                  value={paddleForm.color}
-                  onChange={(e) => setPaddleForm({...paddleForm, color: e.target.value})}
+                  placeholder="Paddle Length"
+                  value={paddleForm.length}
+                  onChange={(e) => setPaddleForm({...paddleForm, length: e.target.value})}
                 />
               </HStack>
               <HStack spacing={4} w="full">
                 <Input
-                  placeholder="Weight"
-                  value={paddleForm.weight}
-                  onChange={(e) => setPaddleForm({...paddleForm, weight: e.target.value})}
+                  placeholder="Paddle Width"
+                  value={paddleForm.width}
+                  onChange={(e) => setPaddleForm({...paddleForm, width: e.target.value})}
                 />
                 <Input
                   placeholder="Core"

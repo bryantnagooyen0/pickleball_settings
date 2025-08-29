@@ -78,6 +78,8 @@ const PlayerDetailPage = () => {
           paddleShape: player.paddleShape || paddleTemplate.shape || '',
           paddleThickness: player.paddleThickness || paddleTemplate.thickness || '',
           paddleHandleLength: player.paddleHandleLength || paddleTemplate.handleLength || '',
+          paddleLength: player.paddleLength || paddleTemplate.length || '',
+          paddleWidth: player.paddleWidth || paddleTemplate.width || '',
           paddleColor: player.paddleColor || paddleTemplate.color || '',
           paddleImage: player.paddleImage || paddleTemplate.image || '',
         };
@@ -221,11 +223,11 @@ const PlayerDetailPage = () => {
                 badgeColor='blue'
                 specifications={[
                   { label: 'Shape', field: 'paddleShape' },
+                  { label: 'Paddle Length', field: 'paddleLength' },
                   { label: 'Thickness', field: 'paddleThickness' },
-                  { label: 'Handle Length', field: 'paddleHandleLength' },
-                  { label: 'Color', field: 'paddleColor' },
-                  { label: 'Weight', field: 'paddleWeight' },
+                  { label: 'Paddle Width', field: 'paddleWidth' },
                   { label: 'Core', field: 'paddleCore' },
+                  { label: 'Handle Length', field: 'paddleHandleLength' },
                 ]}
               />
 

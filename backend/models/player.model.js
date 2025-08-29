@@ -21,6 +21,14 @@ const playerSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    paddleLength: {
+        type: String,
+        required: false
+    },
+    paddleWidth: {
+        type: String,
+        required: false
+    },
     paddleColor: {
         type: String,
         required: false

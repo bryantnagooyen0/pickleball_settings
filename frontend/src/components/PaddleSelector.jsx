@@ -78,10 +78,10 @@ const PaddleSelector = ({
       paddleShape: paddle.shape || '',
       paddleThickness: paddle.thickness || '',
       paddleHandleLength: paddle.handleLength || '',
-      paddleColor: paddle.color || '',
+      paddleLength: paddle.length || '',
+      paddleWidth: paddle.width || '',
       paddleImage: paddle.image || '',
-      paddleCore: paddle.core || '',
-      paddleWeight: paddle.weight || ''
+      paddleCore: paddle.core || ''
     });
     
     onClose();
