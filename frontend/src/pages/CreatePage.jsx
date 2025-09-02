@@ -7,7 +7,6 @@ import {
   Heading,
   Input,
   Textarea,
-  useColorModeValue,
   useToast,
   VStack,
   Text,
@@ -106,11 +105,12 @@ const CreatePage = () => {
         </Heading>
 
         <Box
-          w={'full'}
-          bg={useColorModeValue('white', 'gray.800')}
-          p={6}
-          rounded={'lg'}
-          shadow={'md'}
+          bg={'white'}
+          p={8}
+          borderRadius="lg"
+          boxShadow="lg"
+          maxW="600px"
+          mx="auto"
         >
           <VStack spacing={4}>
             <Input

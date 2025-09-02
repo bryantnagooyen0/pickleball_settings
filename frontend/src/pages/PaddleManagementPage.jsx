@@ -7,7 +7,6 @@ import {
   Button,
   Input,
   Textarea,
-  useColorModeValue,
   useToast,
   SimpleGrid,
   HStack,
@@ -241,7 +240,7 @@ const PaddleManagementPage = () => {
           {filteredPaddles.map(paddle => (
             <Box
               key={paddle._id}
-              bg={useColorModeValue('white', 'gray.800')}
+              bg={'white'}
               p={6}
               rounded="lg"
               shadow="md"

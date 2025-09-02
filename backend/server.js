@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json()); //allows us to accepd JSON data in the req.body
+app.use(express.json()); //allows us to accept JSON data in the req.body
 
 app.use("/api/players", playerRoutes)
 app.use("/api/paddles", paddleRoutes)
