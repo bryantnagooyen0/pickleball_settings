@@ -187,6 +187,16 @@ const PlayerDetailPage = () => {
                       </Text>
                     </Box>
                   )}
+                  {player.sponsor && (
+                    <Box>
+                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                        Sponsor
+                      </Text>
+                      <Text fontSize='lg' fontWeight='semibold'>
+                        {player.sponsor}
+                      </Text>
+                    </Box>
+                  )}
                 </SimpleGrid>
 
                 {/* About Section */}

@@ -175,14 +175,27 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
               {player.name}
             </Text>
 
-            <Box>
-              <Text fontSize='sm' color='gray.600' fontWeight='medium'>
-                Paddle:
-              </Text>
-              <Badge colorScheme='blue' variant='subtle' fontSize='sm'>
-                {player.paddle}
-              </Badge>
-            </Box>
+            <HStack spacing={4} w='full' align='start' justifyContent='space-between'>
+              <Box>
+                <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                  Paddle:
+                </Text>
+                <Badge colorScheme='blue' variant='subtle' fontSize='sm'>
+                  {player.paddle}
+                </Badge>
+              </Box>
+
+              {player.sponsor && (
+                <Box>
+                  <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                    Sponsor:
+                  </Text>
+                  <Badge colorScheme='purple' variant='subtle' fontSize='sm'>
+                    {player.sponsor}
+                  </Badge>
+                </Box>
+              )}
+            </HStack>
 
             {player.shoes && (
               <Box>
@@ -346,6 +359,13 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
                 value={editPlayer.overgrips}
                 onChange={e =>
                   setEditPlayer({ ...editPlayer, overgrips: e.target.value })
+                }
+              />
+              <Input
+                placeholder='Sponsor (optional)'
+                value={editPlayer.sponsor}
+                onChange={e =>
+                  setEditPlayer({ ...editPlayer, sponsor: e.target.value })
                 }
               />
               <Input

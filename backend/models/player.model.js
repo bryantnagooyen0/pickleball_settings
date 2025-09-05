@@ -97,6 +97,10 @@ const playerSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    sponsor: {
+        type: String,
+        required: false
+    },
 }, {
     timestamps: true // createdAt, updatedAt
 });

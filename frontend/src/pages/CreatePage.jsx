@@ -93,6 +93,7 @@ const CreatePage = () => {
       shoeModel: '',
       overgrips: '',
       weight: '',
+      sponsor: '',
     });
     setSelectedPaddle(null);
   };
@@ -205,6 +206,14 @@ const CreatePage = () => {
               value={newPlayer.overgrips}
               onChange={e =>
                 setNewPlayer({ ...newPlayer, overgrips: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Sponsor (optional)'
+              name='sponsor'
+              value={newPlayer.sponsor}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, sponsor: e.target.value })
               }
             />
             <Input

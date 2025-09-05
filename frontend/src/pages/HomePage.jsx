@@ -48,7 +48,8 @@ const HomePage = () => {
     currentLocation: '',
     ageRange: '',
     overgrips: '',
-    weight: ''
+    weight: '',
+    sponsor: ''
   });
 
   // Get unique values for filter options
@@ -61,7 +62,8 @@ const HomePage = () => {
       mlpTeam: [...new Set(players.map(p => p.mlpTeam).filter(Boolean))],
       currentLocation: [...new Set(players.map(p => p.currentLocation).filter(Boolean))],
       overgrips: [...new Set(players.map(p => p.overgrips).filter(Boolean))],
-      weight: [...new Set(players.map(p => p.weight).filter(Boolean))]
+      weight: [...new Set(players.map(p => p.weight).filter(Boolean))],
+      sponsor: [...new Set(players.map(p => p.sponsor).filter(Boolean))]
     };
     return options;
   }, [players]);
@@ -79,7 +81,8 @@ const HomePage = () => {
     // Search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(player =>
-        player.name.toLowerCase().includes(searchQuery.toLowerCase())
+        player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (player.sponsor && player.sponsor.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -122,7 +125,8 @@ const HomePage = () => {
       currentLocation: '',
       ageRange: '',
       overgrips: '',
-      weight: ''
+      weight: '',
+      sponsor: ''
     });
   };
 
@@ -150,7 +154,7 @@ const HomePage = () => {
                   <SearchIcon color="gray.400" />
                 </InputLeftElement>
                 <Input
-                  placeholder="Search players by name..."
+                  placeholder="Search players by name or sponsor..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   size="lg"
@@ -388,6 +392,19 @@ const HomePage = () => {
                 >
                   {filterOptions.weight.map(weight => (
                     <option key={weight} value={weight}>{weight}</option>
+                  ))}
+                </Select>
+              </Box>
+
+              <Box>
+                <Text fontWeight="bold" mb={2}>Sponsor</Text>
+                <Select
+                  placeholder="All sponsors"
+                  value={filters.sponsor}
+                  onChange={(e) => setFilters({...filters, sponsor: e.target.value})}
+                >
+                  {filterOptions.sponsor.map(sponsor => (
+                    <option key={sponsor} value={sponsor}>{sponsor}</option>
                   ))}
                 </Select>
               </Box>

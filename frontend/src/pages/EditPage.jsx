@@ -297,6 +297,14 @@ const EditPage = () => {
               }
             />
             <Input
+              placeholder='Sponsor (optional)'
+              name='sponsor'
+              value={player.sponsor || ''}
+              onChange={e =>
+                setPlayer({ ...player, sponsor: e.target.value })
+              }
+            />
+            <Input
               placeholder='Weight (optional)'
               name='weight'
               value={player.weight || ''}
