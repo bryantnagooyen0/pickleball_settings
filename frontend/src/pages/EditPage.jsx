@@ -51,12 +51,12 @@ const EditPage = () => {
   const { updatePlayer } = usePlayerStore();
 
   // Handle paddle selection
-  const handlePaddleSelect = (paddle) => {
+  const handlePaddleSelect = paddle => {
     setSelectedPaddle(paddle);
   };
 
   // Handle paddle data changes
-  const handlePaddleDataChange = (paddleData) => {
+  const handlePaddleDataChange = paddleData => {
     setPlayer(prev => ({ ...prev, ...paddleData }));
   };
 
@@ -67,7 +67,7 @@ const EditPage = () => {
         if (response.ok) {
           const result = await response.json();
           setPlayer(result.data);
-          
+
           // Set selected paddle if player has paddle data
           if (result.data.paddle) {
             setSelectedPaddle({
@@ -82,7 +82,7 @@ const EditPage = () => {
               color: result.data.paddleColor || '',
               image: result.data.paddleImage || '',
               core: result.data.paddleCore || '',
-              weight: result.data.paddleWeight || ''
+              weight: result.data.paddleWeight || '',
             });
           }
         } else {
@@ -153,23 +153,21 @@ const EditPage = () => {
         <Box
           bg={'white'}
           p={8}
-          borderRadius="lg"
-          boxShadow="lg"
-          maxW="600px"
-          mx="auto"
+          borderRadius='lg'
+          boxShadow='lg'
+          maxW='600px'
+          mx='auto'
         >
           <VStack spacing={4}>
             <Input
               placeholder='Player Name'
               name='name'
               value={player.name}
-              onChange={e =>
-                setPlayer({ ...player, name: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, name: e.target.value })}
             />
-            
-            <Box w="full">
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+
+            <Box w='full'>
+              <Text fontSize='sm' fontWeight='medium' mb={2} color='gray.700'>
                 Paddle
               </Text>
               <PaddleSelector
@@ -226,34 +224,26 @@ const EditPage = () => {
               placeholder='Image URL'
               name='image'
               value={player.image}
-              onChange={e =>
-                setPlayer({ ...player, image: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, image: e.target.value })}
             />
             <Input
               placeholder='Age (optional)'
               name='age'
               type='number'
               value={player.age || ''}
-              onChange={e =>
-                setPlayer({ ...player, age: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, age: e.target.value })}
             />
             <Input
               placeholder='Height (optional)'
               name='height'
               value={player.height || ''}
-              onChange={e =>
-                setPlayer({ ...player, height: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, height: e.target.value })}
             />
             <Input
               placeholder='MLP Team (optional)'
               name='mlpTeam'
               value={player.mlpTeam || ''}
-              onChange={e =>
-                setPlayer({ ...player, mlpTeam: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, mlpTeam: e.target.value })}
             />
             <Input
               placeholder='Current Location (optional)'
@@ -267,9 +257,7 @@ const EditPage = () => {
               placeholder='About (optional)'
               name='about'
               value={player.about || ''}
-              onChange={e =>
-                setPlayer({ ...player, about: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, about: e.target.value })}
               rows={4}
             />
             <Input
@@ -300,17 +288,13 @@ const EditPage = () => {
               placeholder='Sponsor (optional)'
               name='sponsor'
               value={player.sponsor || ''}
-              onChange={e =>
-                setPlayer({ ...player, sponsor: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, sponsor: e.target.value })}
             />
             <Input
               placeholder='Weight (optional)'
               name='weight'
               value={player.weight || ''}
-              onChange={e =>
-                setPlayer({ ...player, weight: e.target.value })
-              }
+              onChange={e => setPlayer({ ...player, weight: e.target.value })}
             />
 
             <Button colorScheme='blue' onClick={handleUpdatePlayer} w='full'>

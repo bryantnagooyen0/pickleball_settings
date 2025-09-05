@@ -36,7 +36,8 @@ import { SearchIcon, EditIcon, DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useRef } from 'react';
 
 const PaddleManagementPage = () => {
-  const { paddles, fetchPaddles, createPaddle, updatePaddle, deletePaddle } = usePaddleStore();
+  const { paddles, fetchPaddles, createPaddle, updatePaddle, deletePaddle } =
+    usePaddleStore();
   const { refreshPlayers } = usePlayerStore();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -57,17 +58,18 @@ const PaddleManagementPage = () => {
     width: '',
     core: '',
     image: '',
-    description: ''
+    description: '',
   });
 
   useEffect(() => {
     fetchPaddles();
   }, [fetchPaddles]);
 
-  const filteredPaddles = paddles.filter(paddle =>
-    paddle.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    paddle.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    paddle.model.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPaddles = paddles.filter(
+    paddle =>
+      paddle.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      paddle.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      paddle.model.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSubmit = async () => {
@@ -82,7 +84,7 @@ const PaddleManagementPage = () => {
       return;
     }
 
-    const result = isEditing 
+    const result = isEditing
       ? await updatePaddle(selectedPaddle._id, paddleForm)
       : await createPaddle(paddleForm);
 
@@ -94,12 +96,12 @@ const PaddleManagementPage = () => {
         duration: 3000,
         isClosable: true,
       });
-      
+
       // If this was an update, refresh player data to reflect the changes
       if (isEditing) {
         await refreshPlayers();
       }
-      
+
       handleClose();
     } else {
       toast({
@@ -112,7 +114,7 @@ const PaddleManagementPage = () => {
     }
   };
 
-  const handleEdit = (paddle) => {
+  const handleEdit = paddle => {
     setSelectedPaddle(paddle);
     setPaddleForm({
       name: paddle.name,
@@ -125,7 +127,7 @@ const PaddleManagementPage = () => {
       width: paddle.width || '',
       core: paddle.core || '',
       image: paddle.image || '',
-      description: paddle.description || ''
+      description: paddle.description || '',
     });
     setIsEditing(true);
     onOpen();
@@ -168,7 +170,7 @@ const PaddleManagementPage = () => {
       width: '',
       core: '',
       image: '',
-      description: ''
+      description: '',
     });
     setSelectedPaddle(null);
     setIsEditing(false);
@@ -188,7 +190,7 @@ const PaddleManagementPage = () => {
       width: '',
       core: '',
       image: '',
-      description: ''
+      description: '',
     });
     onOpen();
   };
@@ -206,108 +208,108 @@ const PaddleManagementPage = () => {
           Paddle Management
         </Text>
 
-        <HStack w="full" justify="space-between">
-          <Box flex={1} maxW="md">
+        <HStack w='full' justify='space-between'>
+          <Box flex={1} maxW='md'>
             <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <SearchIcon color="gray.400" />
+              <InputLeftElement pointerEvents='none'>
+                <SearchIcon color='gray.400' />
               </InputLeftElement>
               <Input
-                placeholder="Search paddles..."
+                placeholder='Search paddles...'
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                bg="white"
-                border="2px"
-                borderColor="gray.200"
+                onChange={e => setSearchQuery(e.target.value)}
+                bg='white'
+                border='2px'
+                borderColor='gray.200'
                 _focus={{
-                  borderColor: "blue.500",
-                  boxShadow: "0 0 0 1px blue.500",
+                  borderColor: 'blue.500',
+                  boxShadow: '0 0 0 1px blue.500',
                 }}
               />
             </InputGroup>
           </Box>
-          
+
           <Button
             leftIcon={<AddIcon />}
-            colorScheme="blue"
+            colorScheme='blue'
             onClick={handleAddNew}
           >
             Add New Paddle
           </Button>
         </HStack>
 
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w='full'>
           {filteredPaddles.map(paddle => (
             <Box
               key={paddle._id}
               bg={'white'}
               p={6}
-              rounded="lg"
-              shadow="md"
-              border="1px"
-              borderColor="gray.200"
+              rounded='lg'
+              shadow='md'
+              border='1px'
+              borderColor='gray.200'
             >
-              <VStack spacing={4} align="start">
+              <VStack spacing={4} align='start'>
                 {paddle.image && (
                   <Image
                     src={paddle.image}
                     alt={paddle.name}
-                    borderRadius="md"
-                    w="full"
-                    h="200px"
-                    objectFit="cover"
+                    borderRadius='md'
+                    w='full'
+                    h='200px'
+                    objectFit='cover'
                   />
                 )}
-                
-                <VStack spacing={2} align="start" w="full">
-                  <Text fontSize="xl" fontWeight="bold">
+
+                <VStack spacing={2} align='start' w='full'>
+                  <Text fontSize='xl' fontWeight='bold'>
                     {paddle.name}
                   </Text>
-                  <Text fontSize="md" color="gray.600">
+                  <Text fontSize='md' color='gray.600'>
                     {paddle.brand} - {paddle.model}
                   </Text>
-                  
-                  <HStack spacing={2} flexWrap="wrap">
+
+                  <HStack spacing={2} flexWrap='wrap'>
                     {paddle.shape && (
-                      <Badge colorScheme="blue" variant="subtle">
+                      <Badge colorScheme='blue' variant='subtle'>
                         {paddle.shape}
                       </Badge>
                     )}
                     {paddle.thickness && (
-                      <Badge colorScheme="green" variant="subtle">
+                      <Badge colorScheme='green' variant='subtle'>
                         {paddle.thickness}
                       </Badge>
                     )}
                     {paddle.weight && (
-                      <Badge colorScheme="purple" variant="subtle">
+                      <Badge colorScheme='purple' variant='subtle'>
                         {paddle.weight}
                       </Badge>
                     )}
                   </HStack>
 
                   {paddle.description && (
-                    <Text fontSize="sm" color="gray.500" noOfLines={2}>
+                    <Text fontSize='sm' color='gray.500' noOfLines={2}>
                       {paddle.description}
                     </Text>
                   )}
                 </VStack>
 
-                <HStack spacing={2} w="full">
-                  <Tooltip label="Edit Paddle">
+                <HStack spacing={2} w='full'>
+                  <Tooltip label='Edit Paddle'>
                     <IconButton
                       icon={<EditIcon />}
-                      size="sm"
-                      colorScheme="blue"
-                      variant="outline"
+                      size='sm'
+                      colorScheme='blue'
+                      variant='outline'
                       onClick={() => handleEdit(paddle)}
                     />
                   </Tooltip>
-                  <Tooltip label="Delete Paddle">
+                  <Tooltip label='Delete Paddle'>
                     <IconButton
                       icon={<DeleteIcon />}
-                      size="sm"
-                      colorScheme="red"
-                      variant="outline"
+                      size='sm'
+                      colorScheme='red'
+                      variant='outline'
                       onClick={() => {
                         setSelectedPaddle(paddle);
                         setIsDeleteOpen(true);
@@ -321,14 +323,16 @@ const PaddleManagementPage = () => {
         </SimpleGrid>
 
         {filteredPaddles.length === 0 && (
-          <Text fontSize="xl" textAlign="center" color="gray.500">
-            {searchQuery ? 'No paddles found matching your search' : 'No paddles found'}
+          <Text fontSize='xl' textAlign='center' color='gray.500'>
+            {searchQuery
+              ? 'No paddles found matching your search'
+              : 'No paddles found'}
           </Text>
         )}
       </VStack>
 
       {/* Add/Edit Modal */}
-      <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+      <Modal isOpen={isOpen} onClose={handleClose} size='xl'>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
@@ -338,71 +342,96 @@ const PaddleManagementPage = () => {
           <ModalBody pb={6}>
             <VStack spacing={4}>
               <Input
-                placeholder="Paddle Name"
+                placeholder='Paddle Name'
                 value={paddleForm.name}
-                onChange={(e) => setPaddleForm({...paddleForm, name: e.target.value})}
+                onChange={e =>
+                  setPaddleForm({ ...paddleForm, name: e.target.value })
+                }
               />
-              <HStack spacing={4} w="full">
+              <HStack spacing={4} w='full'>
                 <Input
-                  placeholder="Brand"
+                  placeholder='Brand'
                   value={paddleForm.brand}
-                  onChange={(e) => setPaddleForm({...paddleForm, brand: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, brand: e.target.value })
+                  }
                 />
                 <Input
-                  placeholder="Model"
+                  placeholder='Model'
                   value={paddleForm.model}
-                  onChange={(e) => setPaddleForm({...paddleForm, model: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, model: e.target.value })
+                  }
                 />
               </HStack>
-              <HStack spacing={4} w="full">
+              <HStack spacing={4} w='full'>
                 <Input
-                  placeholder="Shape"
+                  placeholder='Shape'
                   value={paddleForm.shape}
-                  onChange={(e) => setPaddleForm({...paddleForm, shape: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, shape: e.target.value })
+                  }
                 />
                 <Input
-                  placeholder="Thickness"
+                  placeholder='Thickness'
                   value={paddleForm.thickness}
-                  onChange={(e) => setPaddleForm({...paddleForm, thickness: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, thickness: e.target.value })
+                  }
                 />
               </HStack>
-              <HStack spacing={4} w="full">
+              <HStack spacing={4} w='full'>
                 <Input
-                  placeholder="Handle Length"
+                  placeholder='Handle Length'
                   value={paddleForm.handleLength}
-                  onChange={(e) => setPaddleForm({...paddleForm, handleLength: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({
+                      ...paddleForm,
+                      handleLength: e.target.value,
+                    })
+                  }
                 />
                 <Input
-                  placeholder="Paddle Length"
+                  placeholder='Paddle Length'
                   value={paddleForm.length}
-                  onChange={(e) => setPaddleForm({...paddleForm, length: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, length: e.target.value })
+                  }
                 />
               </HStack>
-              <HStack spacing={4} w="full">
+              <HStack spacing={4} w='full'>
                 <Input
-                  placeholder="Paddle Width"
+                  placeholder='Paddle Width'
                   value={paddleForm.width}
-                  onChange={(e) => setPaddleForm({...paddleForm, width: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, width: e.target.value })
+                  }
                 />
                 <Input
-                  placeholder="Core"
+                  placeholder='Core'
                   value={paddleForm.core}
-                  onChange={(e) => setPaddleForm({...paddleForm, core: e.target.value})}
+                  onChange={e =>
+                    setPaddleForm({ ...paddleForm, core: e.target.value })
+                  }
                 />
               </HStack>
               <Input
-                placeholder="Image URL"
+                placeholder='Image URL'
                 value={paddleForm.image}
-                onChange={(e) => setPaddleForm({...paddleForm, image: e.target.value})}
+                onChange={e =>
+                  setPaddleForm({ ...paddleForm, image: e.target.value })
+                }
               />
               <Textarea
-                placeholder="Description"
+                placeholder='Description'
                 value={paddleForm.description}
-                onChange={(e) => setPaddleForm({...paddleForm, description: e.target.value})}
+                onChange={e =>
+                  setPaddleForm({ ...paddleForm, description: e.target.value })
+                }
                 rows={3}
               />
-              <HStack spacing={4} w="full">
-                <Button colorScheme="blue" onClick={handleSubmit} flex={1}>
+              <HStack spacing={4} w='full'>
+                <Button colorScheme='blue' onClick={handleSubmit} flex={1}>
                   {isEditing ? 'Update' : 'Create'} Paddle
                 </Button>
                 <Button onClick={handleClose} flex={1}>
@@ -422,17 +451,18 @@ const PaddleManagementPage = () => {
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
               Delete Paddle
             </AlertDialogHeader>
             <AlertDialogBody>
-              Are you sure you want to delete "{selectedPaddle?.name}"? This action cannot be undone.
+              Are you sure you want to delete "{selectedPaddle?.name}"? This
+              action cannot be undone.
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={() => setIsDeleteOpen(false)}>
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={handleDelete} ml={3}>
+              <Button colorScheme='red' onClick={handleDelete} ml={3}>
                 Delete
               </Button>
             </AlertDialogFooter>

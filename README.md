@@ -13,6 +13,7 @@ A full-stack web application for managing pickleball pros and their equipment se
 ## Tech Stack
 
 ### Frontend
+
 - **React 19** - Modern React with hooks
 - **Vite** - Fast build tool and development server
 - **Chakra UI** - Component library for beautiful UI
@@ -21,6 +22,7 @@ A full-stack web application for managing pickleball pros and their equipment se
 - **Framer Motion** - Animation library
 
 ### Backend
+
 - **Node.js** - JavaScript runtime
 - **Express.js** - Web framework
 - **MongoDB** - NoSQL database
@@ -68,25 +70,29 @@ pickleball_settings/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd pickleball_settings
    ```
 
 2. **Install backend dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Install frontend dependencies**
+
    ```bash
    cd frontend
    npm install
    ```
 
 4. **Set up environment variables**
-   
+
    Create a `.env` file in the `backend` directory:
+
    ```env
    MONGODB_URI=your_mongodb_connection_string
    PORT=5000
@@ -95,11 +101,13 @@ pickleball_settings/
 5. **Start the development servers**
 
    In the root directory (for backend):
+
    ```bash
    npm run dev
    ```
 
    In a new terminal, navigate to frontend directory:
+
    ```bash
    cd frontend
    npm run dev
@@ -112,6 +120,7 @@ pickleball_settings/
 ## Usage
 
 ### Adding a Player
+
 1. Navigate to the "Create" page
 2. Fill in the player information:
    - **Name**: Player's full name
@@ -120,6 +129,7 @@ pickleball_settings/
 3. Click "Add Player" to save
 
 ### Viewing Players
+
 - The home page displays all registered players
 - Each player card shows their name, paddle, and image
 - Players are displayed in a responsive grid layout
@@ -135,6 +145,7 @@ pickleball_settings/
 ## Features
 
 ### Player Model
+
 ```javascript
 {
   name: String (required),
@@ -147,6 +158,7 @@ pickleball_settings/
 ```
 
 ### UI Features
+
 - Responsive design that works on desktop and mobile
 - Dark/light mode toggle
 - Toast notifications for user feedback
@@ -156,12 +168,14 @@ pickleball_settings/
 ## Deployment
 
 ### Frontend Deployment
+
 ```bash
 cd frontend
 npm run build
 ```
 
 ### Backend Deployment
+
 - Ensure MongoDB is accessible
 - Set up environment variables
 - Use a process manager like PM2

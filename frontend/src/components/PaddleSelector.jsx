@@ -23,11 +23,11 @@ import {
 import { SearchIcon, AddIcon } from '@chakra-ui/icons';
 import { usePaddleStore } from '../store/paddle';
 
-const PaddleSelector = ({ 
-  selectedPaddle, 
-  onPaddleSelect, 
+const PaddleSelector = ({
+  selectedPaddle,
+  onPaddleSelect,
   onPaddleDataChange,
-  showCreateButton = true 
+  showCreateButton = true,
 }) => {
   const { paddles, fetchPaddles, searchPaddles } = usePaddleStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -67,9 +67,9 @@ const PaddleSelector = ({
     }
   };
 
-  const handlePaddleSelect = (paddle) => {
+  const handlePaddleSelect = paddle => {
     onPaddleSelect(paddle);
-    
+
     // Auto-fill paddle data
     onPaddleDataChange({
       paddle: paddle.name,
@@ -81,9 +81,9 @@ const PaddleSelector = ({
       paddleLength: paddle.length || '',
       paddleWidth: paddle.width || '',
       paddleImage: paddle.image || '',
-      paddleCore: paddle.core || ''
+      paddleCore: paddle.core || '',
     });
-    
+
     onClose();
   };
 
@@ -94,18 +94,18 @@ const PaddleSelector = ({
       <Box>
         <HStack spacing={2}>
           <Input
-            placeholder="Search or select paddle..."
+            placeholder='Search or select paddle...'
             value={selectedPaddle ? selectedPaddle.name : ''}
             onClick={onOpen}
             readOnly
-            cursor="pointer"
+            cursor='pointer'
           />
           {showCreateButton && (
             <Button
-              size="sm"
+              size='sm'
               leftIcon={<AddIcon />}
               onClick={() => window.open('/paddles', '_blank')}
-              title="Create new paddle template"
+              title='Create new paddle template'
             >
               New
             </Button>
@@ -113,7 +113,7 @@ const PaddleSelector = ({
         </HStack>
       </Box>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal isOpen={isOpen} onClose={onClose} size='xl'>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Select Paddle</ModalHeader>
@@ -121,84 +121,96 @@ const PaddleSelector = ({
           <ModalBody pb={6}>
             <VStack spacing={4}>
               <InputGroup>
-                <InputLeftElement pointerEvents="none">
-                  <SearchIcon color="gray.400" />
+                <InputLeftElement pointerEvents='none'>
+                  <SearchIcon color='gray.400' />
                 </InputLeftElement>
                 <Input
-                  placeholder="Search paddles..."
+                  placeholder='Search paddles...'
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleSearch()}
                 />
               </InputGroup>
-              
-              <Button 
-                colorScheme="blue" 
+
+              <Button
+                colorScheme='blue'
                 onClick={handleSearch}
                 isLoading={isSearching}
-                w="full"
+                w='full'
               >
                 Search
               </Button>
 
               <Divider />
 
-              <VStack spacing={2} maxH="400px" overflowY="auto" w="full">
+              <VStack spacing={2} maxH='400px' overflowY='auto' w='full'>
                 {displayPaddles.map(paddle => (
                   <Box
                     key={paddle._id}
-                    w="full"
+                    w='full'
                     p={4}
-                    border="1px"
-                    borderColor="gray.200"
-                    borderRadius="md"
-                    cursor="pointer"
+                    border='1px'
+                    borderColor='gray.200'
+                    borderRadius='md'
+                    cursor='pointer'
                     _hover={{
-                      bg: "gray.50",
-                      borderColor: "blue.300"
+                      bg: 'gray.50',
+                      borderColor: 'blue.300',
                     }}
                     onClick={() => handlePaddleSelect(paddle)}
                   >
-                    <HStack spacing={4} align="start">
+                    <HStack spacing={4} align='start'>
                       {paddle.image && (
                         <Image
                           src={paddle.image}
                           alt={paddle.name}
-                          borderRadius="md"
-                          w="60px"
-                          h="60px"
-                          objectFit="cover"
+                          borderRadius='md'
+                          w='60px'
+                          h='60px'
+                          objectFit='cover'
                         />
                       )}
-                      
-                      <VStack align="start" flex={1} spacing={1}>
-                        <Text fontWeight="bold" fontSize="md">
+
+                      <VStack align='start' flex={1} spacing={1}>
+                        <Text fontWeight='bold' fontSize='md'>
                           {paddle.name}
                         </Text>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize='sm' color='gray.600'>
                           {paddle.brand} - {paddle.model}
                         </Text>
-                        
-                        <HStack spacing={2} flexWrap="wrap">
+
+                        <HStack spacing={2} flexWrap='wrap'>
                           {paddle.shape && (
-                            <Badge size="sm" colorScheme="blue" variant="subtle">
+                            <Badge
+                              size='sm'
+                              colorScheme='blue'
+                              variant='subtle'
+                            >
                               {paddle.shape}
                             </Badge>
                           )}
                           {paddle.thickness && (
-                            <Badge size="sm" colorScheme="green" variant="subtle">
+                            <Badge
+                              size='sm'
+                              colorScheme='green'
+                              variant='subtle'
+                            >
                               {paddle.thickness}
                             </Badge>
                           )}
                           {paddle.weight && (
-                            <Badge size="sm" colorScheme="purple" variant="subtle">
+                            <Badge
+                              size='sm'
+                              colorScheme='purple'
+                              variant='subtle'
+                            >
                               {paddle.weight}
                             </Badge>
                           )}
                         </HStack>
 
                         {paddle.description && (
-                          <Text fontSize="xs" color="gray.500" noOfLines={2}>
+                          <Text fontSize='xs' color='gray.500' noOfLines={2}>
                             {paddle.description}
                           </Text>
                         )}
@@ -209,8 +221,10 @@ const PaddleSelector = ({
               </VStack>
 
               {displayPaddles.length === 0 && (
-                <Text textAlign="center" color="gray.500">
-                  {searchQuery ? 'No paddles found matching your search' : 'No paddles available'}
+                <Text textAlign='center' color='gray.500'>
+                  {searchQuery
+                    ? 'No paddles found matching your search'
+                    : 'No paddles available'}
                 </Text>
               )}
             </VStack>

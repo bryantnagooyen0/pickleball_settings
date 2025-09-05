@@ -224,12 +224,20 @@ const EquipmentModule = ({
                   </Text>
                   <HStack spacing={2}>
                     {getBrand() && (
-                      <Badge colorScheme={badgeColor} variant='subtle' size='sm'>
+                      <Badge
+                        colorScheme={badgeColor}
+                        variant='subtle'
+                        size='sm'
+                      >
                         {getBrand()}
                       </Badge>
                     )}
                     {getModel() && (
-                      <Badge colorScheme={badgeColor} variant='outline' size='sm'>
+                      <Badge
+                        colorScheme={badgeColor}
+                        variant='outline'
+                        size='sm'
+                      >
                         {getModel()}
                       </Badge>
                     )}

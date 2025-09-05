@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export const usePlayerStore = create(set => ({
   players: [],
   setPlayers: players => set({ players }),
-  
+
   fetchPlayers: async () => {
     try {
       const res = await fetch('/api/players');
@@ -45,7 +45,10 @@ export const usePlayerStore = create(set => ({
         set(state => ({ players: [...state.players, data.data] }));
         return { success: true, message: 'Player created successfully' };
       } else {
-        return { success: false, message: data.message || 'Failed to create player' };
+        return {
+          success: false,
+          message: data.message || 'Failed to create player',
+        };
       }
     } catch (error) {
       console.error('Error creating player:', error);
@@ -68,13 +71,16 @@ export const usePlayerStore = create(set => ({
       const data = await res.json();
       if (res.ok) {
         set(state => ({
-          players: state.players.map(player => 
+          players: state.players.map(player =>
             player._id === playerId ? data.data : player
-          )
+          ),
         }));
         return { success: true, message: 'Player updated successfully' };
       } else {
-        return { success: false, message: data.message || 'Failed to update player' };
+        return {
+          success: false,
+          message: data.message || 'Failed to update player',
+        };
       }
     } catch (error) {
       console.error('Error updating player:', error);
@@ -82,14 +88,17 @@ export const usePlayerStore = create(set => ({
     }
   },
 
-  getPlayer: async (playerId) => {
+  getPlayer: async playerId => {
     try {
       const res = await fetch(`/api/players/${playerId}`);
       const data = await res.json();
       if (res.ok) {
         return { success: true, data: data.data };
       } else {
-        return { success: false, message: data.message || 'Failed to fetch player' };
+        return {
+          success: false,
+          message: data.message || 'Failed to fetch player',
+        };
       }
     } catch (error) {
       console.error('Error fetching player:', error);

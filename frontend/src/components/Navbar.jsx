@@ -1,12 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Button,
-  Container,
-  Flex,
-  HStack,
-  Text,
-} from '@chakra-ui/react';
+import { Button, Container, Flex, HStack, Text } from '@chakra-ui/react';
 import { PlusSquareIcon, SettingsIcon } from '@chakra-ui/icons';
 
 const Navbar = () => {

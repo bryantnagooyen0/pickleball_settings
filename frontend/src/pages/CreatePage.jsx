@@ -45,12 +45,12 @@ const CreatePage = () => {
   const { createPlayer } = usePlayerStore();
 
   // Handle paddle selection
-  const handlePaddleSelect = (paddle) => {
+  const handlePaddleSelect = paddle => {
     setSelectedPaddle(paddle);
   };
 
   // Handle paddle data changes
-  const handlePaddleDataChange = (paddleData) => {
+  const handlePaddleDataChange = paddleData => {
     setNewPlayer(prev => ({ ...prev, ...paddleData }));
   };
 
@@ -108,10 +108,10 @@ const CreatePage = () => {
         <Box
           bg={'white'}
           p={8}
-          borderRadius="lg"
-          boxShadow="lg"
-          maxW="600px"
-          mx="auto"
+          borderRadius='lg'
+          boxShadow='lg'
+          maxW='600px'
+          mx='auto'
         >
           <VStack spacing={4}>
             <Input
@@ -122,9 +122,9 @@ const CreatePage = () => {
                 setNewPlayer({ ...newPlayer, name: e.target.value })
               }
             />
-            
-            <Box w="full">
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+
+            <Box w='full'>
+              <Text fontSize='sm' fontWeight='medium' mb={2} color='gray.700'>
                 Paddle
               </Text>
               <PaddleSelector

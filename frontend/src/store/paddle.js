@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export const usePaddleStore = create(set => ({
   paddles: [],
   setPaddles: paddles => set({ paddles }),
-  
+
   fetchPaddles: async () => {
     try {
       const res = await fetch('/api/paddles');
@@ -30,7 +30,10 @@ export const usePaddleStore = create(set => ({
         set(state => ({ paddles: [...state.paddles, data.data] }));
         return { success: true, message: 'Paddle created successfully' };
       } else {
-        return { success: false, message: data.message || 'Failed to create paddle' };
+        return {
+          success: false,
+          message: data.message || 'Failed to create paddle',
+        };
       }
     } catch (error) {
       console.error('Error creating paddle:', error);
@@ -50,15 +53,21 @@ export const usePaddleStore = create(set => ({
       const data = await res.json();
       if (res.ok) {
         set(state => ({
-          paddles: state.paddles.map(paddle => 
+          paddles: state.paddles.map(paddle =>
             paddle._id === paddleId ? data.data : paddle
-          )
+          ),
         }));
-        
+
         // Use the message from the backend which includes info about updated players
-        return { success: true, message: data.message || 'Paddle updated successfully' };
+        return {
+          success: true,
+          message: data.message || 'Paddle updated successfully',
+        };
       } else {
-        return { success: false, message: data.message || 'Failed to update paddle' };
+        return {
+          success: false,
+          message: data.message || 'Failed to update paddle',
+        };
       }
     } catch (error) {
       console.error('Error updating paddle:', error);
@@ -73,12 +82,15 @@ export const usePaddleStore = create(set => ({
       });
       if (res.ok) {
         set(state => ({
-          paddles: state.paddles.filter(paddle => paddle._id !== paddleId)
+          paddles: state.paddles.filter(paddle => paddle._id !== paddleId),
         }));
         return { success: true, message: 'Paddle deleted successfully' };
       } else {
         const data = await res.json();
-        return { success: false, message: data.message || 'Failed to delete paddle' };
+        return {
+          success: false,
+          message: data.message || 'Failed to delete paddle',
+        };
       }
     } catch (error) {
       console.error('Error deleting paddle:', error);
@@ -88,12 +100,17 @@ export const usePaddleStore = create(set => ({
 
   searchPaddles: async query => {
     try {
-      const res = await fetch(`/api/paddles/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(
+        `/api/paddles/search?q=${encodeURIComponent(query)}`
+      );
       const data = await res.json();
       if (res.ok) {
         return { success: true, data: data.data };
       } else {
-        return { success: false, message: data.message || 'Failed to search paddles' };
+        return {
+          success: false,
+          message: data.message || 'Failed to search paddles',
+        };
       }
     } catch (error) {
       console.error('Error searching paddles:', error);

@@ -1,21 +1,27 @@
-import express from "express";
+import express from 'express';
 
-import {createPlayer, deletePlayer, getPlayers, getPlayer, updatePlayer} from "../controllers/player.controller.js";
+import {
+  createPlayer,
+  deletePlayer,
+  getPlayers,
+  getPlayer,
+  updatePlayer,
+} from '../controllers/player.controller.js';
 
 const router = express.Router();
 
-router.get("/", getPlayers);
+router.get('/', getPlayers);
 
-router.get("/:id", getPlayer);
+router.get('/:id', getPlayer);
 
-router.post("/", createPlayer );
+router.post('/', createPlayer);
 
-router.put("/:id", updatePlayer);
+router.put('/:id', updatePlayer);
 
-router.delete("/:id", deletePlayer);
+router.delete('/:id', deletePlayer);
 
-router.get("/", (req,res) => {
-    res.send('API is working');
+router.get('/', (req, res) => {
+  res.send('API is working');
 });
 
 export default router;

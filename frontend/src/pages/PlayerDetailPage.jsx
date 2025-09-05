@@ -76,8 +76,10 @@ const PlayerDetailPage = () => {
           paddleBrand: player.paddleBrand || paddleTemplate.brand || '',
           paddleModel: player.paddleModel || paddleTemplate.model || '',
           paddleShape: player.paddleShape || paddleTemplate.shape || '',
-          paddleThickness: player.paddleThickness || paddleTemplate.thickness || '',
-          paddleHandleLength: player.paddleHandleLength || paddleTemplate.handleLength || '',
+          paddleThickness:
+            player.paddleThickness || paddleTemplate.thickness || '',
+          paddleHandleLength:
+            player.paddleHandleLength || paddleTemplate.handleLength || '',
           paddleLength: player.paddleLength || paddleTemplate.length || '',
           paddleWidth: player.paddleWidth || paddleTemplate.width || '',
           paddleColor: player.paddleColor || paddleTemplate.color || '',

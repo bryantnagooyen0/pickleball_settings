@@ -1,11 +1,11 @@
-import { 
-  Container, 
-  VStack, 
-  Text, 
-  SimpleGrid, 
-  Input, 
-  InputGroup, 
-  InputLeftElement, 
+import {
+  Container,
+  VStack,
+  Text,
+  SimpleGrid,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Box,
   HStack,
   Select,
@@ -23,7 +23,7 @@ import {
   Badge,
   Flex,
   IconButton,
-  Tooltip
+  Tooltip,
 } from '@chakra-ui/react';
 import React, { useState, useMemo } from 'react';
 import { usePlayerStore } from '../store/player';
@@ -37,7 +37,7 @@ const HomePage = () => {
   const { fetchPlayers, players } = usePlayerStore();
   const [searchQuery, setSearchQuery] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     paddle: '',
@@ -49,21 +49,27 @@ const HomePage = () => {
     ageRange: '',
     overgrips: '',
     weight: '',
-    sponsor: ''
+    sponsor: '',
   });
 
   // Get unique values for filter options
   const filterOptions = useMemo(() => {
     const options = {
       paddle: [...new Set(players.map(p => p.paddle).filter(Boolean))],
-      paddleThickness: [...new Set(players.map(p => p.paddleThickness).filter(Boolean))],
-      paddleShape: [...new Set(players.map(p => p.paddleShape).filter(Boolean))],
+      paddleThickness: [
+        ...new Set(players.map(p => p.paddleThickness).filter(Boolean)),
+      ],
+      paddleShape: [
+        ...new Set(players.map(p => p.paddleShape).filter(Boolean)),
+      ],
       shoeModel: [...new Set(players.map(p => p.shoeModel).filter(Boolean))],
       mlpTeam: [...new Set(players.map(p => p.mlpTeam).filter(Boolean))],
-      currentLocation: [...new Set(players.map(p => p.currentLocation).filter(Boolean))],
+      currentLocation: [
+        ...new Set(players.map(p => p.currentLocation).filter(Boolean)),
+      ],
       overgrips: [...new Set(players.map(p => p.overgrips).filter(Boolean))],
       weight: [...new Set(players.map(p => p.weight).filter(Boolean))],
-      sponsor: [...new Set(players.map(p => p.sponsor).filter(Boolean))]
+      sponsor: [...new Set(players.map(p => p.sponsor).filter(Boolean))],
     };
     return options;
   }, [players]);
@@ -80,9 +86,11 @@ const HomePage = () => {
 
     // Search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(player =>
-        player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (player.sponsor && player.sponsor.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(
+        player =>
+          player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (player.sponsor &&
+            player.sponsor.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -93,17 +101,25 @@ const HomePage = () => {
           if (key === 'ageRange') {
             const age = parseInt(player.age);
             if (!age) return false;
-            
+
             switch (value) {
-              case '18-25': return age >= 18 && age <= 25;
-              case '26-35': return age >= 26 && age <= 35;
-              case '36-45': return age >= 36 && age <= 45;
-              case '46+': return age >= 46;
-              default: return true;
+              case '18-25':
+                return age >= 18 && age <= 25;
+              case '26-35':
+                return age >= 26 && age <= 35;
+              case '36-45':
+                return age >= 36 && age <= 45;
+              case '46+':
+                return age >= 46;
+              default:
+                return true;
             }
           }
-          
-          return player[key] && player[key].toLowerCase().includes(value.toLowerCase());
+
+          return (
+            player[key] &&
+            player[key].toLowerCase().includes(value.toLowerCase())
+          );
         });
       }
     });
@@ -126,11 +142,13 @@ const HomePage = () => {
       ageRange: '',
       overgrips: '',
       weight: '',
-      sponsor: ''
+      sponsor: '',
     });
   };
 
-  const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
+  const activeFiltersCount = Object.values(filters).filter(
+    v => v !== ''
+  ).length;
 
   return (
     <Container maxW='container.xl' py={12}>
@@ -146,58 +164,59 @@ const HomePage = () => {
         </Text>
 
         {/* Search and Filter Bar */}
-        <VStack w="full" spacing={4}>
-          <HStack w="full" spacing={4}>
+        <VStack w='full' spacing={4}>
+          <HStack w='full' spacing={4}>
             <Box flex={1}>
               <InputGroup>
-                <InputLeftElement pointerEvents="none">
-                  <SearchIcon color="gray.400" />
+                <InputLeftElement pointerEvents='none'>
+                  <SearchIcon color='gray.400' />
                 </InputLeftElement>
                 <Input
-                  placeholder="Search players by name or sponsor..."
+                  placeholder='Search players by name or sponsor...'
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  size="lg"
-                  bg="white"
-                  border="2px"
-                  borderColor="gray.200"
+                  onChange={e => setSearchQuery(e.target.value)}
+                  size='lg'
+                  bg='white'
+                  border='2px'
+                  borderColor='gray.200'
                   _focus={{
-                    borderColor: "blue.500",
-                    boxShadow: "0 0 0 1px blue.500",
+                    borderColor: 'blue.500',
+                    boxShadow: '0 0 0 1px blue.500',
                   }}
                   _hover={{
-                    borderColor: "gray.300",
+                    borderColor: 'gray.300',
                   }}
                 />
               </InputGroup>
             </Box>
-            
-            <Tooltip label="Filter Players" placement="top">
+
+            <Tooltip label='Filter Players' placement='top'>
               <IconButton
                 icon={<FaFilter />}
                 onClick={onOpen}
-                size="lg"
-                colorScheme={activeFiltersCount > 0 ? "blue" : "gray"}
-                aria-label="Filter players"
-                position="relative"
+                size='lg'
+                colorScheme={activeFiltersCount > 0 ? 'blue' : 'gray'}
+                aria-label='Filter players'
+                position='relative'
               />
             </Tooltip>
           </HStack>
 
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
-            <HStack w="full" flexWrap="wrap" spacing={2}>
-              <Text fontSize="sm" color="gray.600" fontWeight="medium">
+            <HStack w='full' flexWrap='wrap' spacing={2}>
+              <Text fontSize='sm' color='gray.600' fontWeight='medium'>
                 Active filters:
               </Text>
-              {Object.entries(filters).map(([key, value]) => 
-                value && (
-                  <Badge key={key} colorScheme="blue" variant="subtle">
-                    {key}: {value}
-                  </Badge>
-                )
+              {Object.entries(filters).map(
+                ([key, value]) =>
+                  value && (
+                    <Badge key={key} colorScheme='blue' variant='subtle'>
+                      {key}: {value}
+                    </Badge>
+                  )
               )}
-              <Button size="xs" variant="ghost" onClick={clearFilters}>
+              <Button size='xs' variant='ghost' onClick={clearFilters}>
                 Clear all
               </Button>
             </HStack>
@@ -231,9 +250,9 @@ const HomePage = () => {
           >
             {searchQuery.trim() || activeFiltersCount > 0 ? (
               <>
-                No players found matching your criteria 
+                No players found matching your criteria
                 <br />
-                <Text fontSize="md" mt={2}>
+                <Text fontSize='md' mt={2}>
                   Try adjusting your search terms or filters
                 </Text>
               </>
@@ -256,52 +275,70 @@ const HomePage = () => {
       </VStack>
 
       {/* Filter Drawer */}
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
+      <Drawer isOpen={isOpen} placement='right' onClose={onClose} size='md'>
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader borderBottomWidth="1px">Filter Players</DrawerHeader>
+          <DrawerHeader borderBottomWidth='1px'>Filter Players</DrawerHeader>
 
           <DrawerBody>
-            <VStack spacing={6} align="stretch">
+            <VStack spacing={6} align='stretch'>
               {/* Paddle Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Paddle</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Paddle
+                </Text>
                 <Select
-                  placeholder="All paddles"
+                  placeholder='All paddles'
                   value={filters.paddle}
-                  onChange={(e) => setFilters({...filters, paddle: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, paddle: e.target.value })
+                  }
                 >
                   {filterOptions.paddle.map(paddle => (
-                    <option key={paddle} value={paddle}>{paddle}</option>
+                    <option key={paddle} value={paddle}>
+                      {paddle}
+                    </option>
                   ))}
                 </Select>
               </Box>
 
               {/* Paddle Thickness Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Paddle Thickness</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Paddle Thickness
+                </Text>
                 <Select
-                  placeholder="All thicknesses"
+                  placeholder='All thicknesses'
                   value={filters.paddleThickness}
-                  onChange={(e) => setFilters({...filters, paddleThickness: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, paddleThickness: e.target.value })
+                  }
                 >
                   {filterOptions.paddleThickness.map(thickness => (
-                    <option key={thickness} value={thickness}>{thickness}</option>
+                    <option key={thickness} value={thickness}>
+                      {thickness}
+                    </option>
                   ))}
                 </Select>
               </Box>
 
               {/* Paddle Shape Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Paddle Shape</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Paddle Shape
+                </Text>
                 <Select
-                  placeholder="All shapes"
+                  placeholder='All shapes'
                   value={filters.paddleShape}
-                  onChange={(e) => setFilters({...filters, paddleShape: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, paddleShape: e.target.value })
+                  }
                 >
                   {filterOptions.paddleShape.map(shape => (
-                    <option key={shape} value={shape}>{shape}</option>
+                    <option key={shape} value={shape}>
+                      {shape}
+                    </option>
                   ))}
                 </Select>
               </Box>
@@ -310,14 +347,20 @@ const HomePage = () => {
 
               {/* Shoes Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Shoe Model</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Shoe Model
+                </Text>
                 <Select
-                  placeholder="All shoes"
+                  placeholder='All shoes'
                   value={filters.shoeModel}
-                  onChange={(e) => setFilters({...filters, shoeModel: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, shoeModel: e.target.value })
+                  }
                 >
                   {filterOptions.shoeModel.map(shoe => (
-                    <option key={shoe} value={shoe}>{shoe}</option>
+                    <option key={shoe} value={shoe}>
+                      {shoe}
+                    </option>
                   ))}
                 </Select>
               </Box>
@@ -326,43 +369,59 @@ const HomePage = () => {
 
               {/* Age Range Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Age Range</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Age Range
+                </Text>
                 <Select
-                  placeholder="All ages"
+                  placeholder='All ages'
                   value={filters.ageRange}
-                  onChange={(e) => setFilters({...filters, ageRange: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, ageRange: e.target.value })
+                  }
                 >
-                  <option value="18-25">18-25</option>
-                  <option value="26-35">26-35</option>
-                  <option value="36-45">36-45</option>
-                  <option value="46+">46+</option>
+                  <option value='18-25'>18-25</option>
+                  <option value='26-35'>26-35</option>
+                  <option value='36-45'>36-45</option>
+                  <option value='46+'>46+</option>
                 </Select>
               </Box>
 
               {/* MLP Team Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>MLP Team</Text>
+                <Text fontWeight='bold' mb={2}>
+                  MLP Team
+                </Text>
                 <Select
-                  placeholder="All teams"
+                  placeholder='All teams'
                   value={filters.mlpTeam}
-                  onChange={(e) => setFilters({...filters, mlpTeam: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, mlpTeam: e.target.value })
+                  }
                 >
                   {filterOptions.mlpTeam.map(team => (
-                    <option key={team} value={team}>{team}</option>
+                    <option key={team} value={team}>
+                      {team}
+                    </option>
                   ))}
                 </Select>
               </Box>
 
               {/* Location Filter */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Location</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Location
+                </Text>
                 <Select
-                  placeholder="All locations"
+                  placeholder='All locations'
                   value={filters.currentLocation}
-                  onChange={(e) => setFilters({...filters, currentLocation: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, currentLocation: e.target.value })
+                  }
                 >
                   {filterOptions.currentLocation.map(location => (
-                    <option key={location} value={location}>{location}</option>
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
                   ))}
                 </Select>
               </Box>
@@ -371,40 +430,58 @@ const HomePage = () => {
 
               {/* Modifications Filters */}
               <Box>
-                <Text fontWeight="bold" mb={2}>Overgrips</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Overgrips
+                </Text>
                 <Select
-                  placeholder="All overgrips"
+                  placeholder='All overgrips'
                   value={filters.overgrips}
-                  onChange={(e) => setFilters({...filters, overgrips: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, overgrips: e.target.value })
+                  }
                 >
                   {filterOptions.overgrips.map(overgrip => (
-                    <option key={overgrip} value={overgrip}>{overgrip}</option>
+                    <option key={overgrip} value={overgrip}>
+                      {overgrip}
+                    </option>
                   ))}
                 </Select>
               </Box>
 
               <Box>
-                <Text fontWeight="bold" mb={2}>Weight</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Weight
+                </Text>
                 <Select
-                  placeholder="All weights"
+                  placeholder='All weights'
                   value={filters.weight}
-                  onChange={(e) => setFilters({...filters, weight: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, weight: e.target.value })
+                  }
                 >
                   {filterOptions.weight.map(weight => (
-                    <option key={weight} value={weight}>{weight}</option>
+                    <option key={weight} value={weight}>
+                      {weight}
+                    </option>
                   ))}
                 </Select>
               </Box>
 
               <Box>
-                <Text fontWeight="bold" mb={2}>Sponsor</Text>
+                <Text fontWeight='bold' mb={2}>
+                  Sponsor
+                </Text>
                 <Select
-                  placeholder="All sponsors"
+                  placeholder='All sponsors'
                   value={filters.sponsor}
-                  onChange={(e) => setFilters({...filters, sponsor: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, sponsor: e.target.value })
+                  }
                 >
                   {filterOptions.sponsor.map(sponsor => (
-                    <option key={sponsor} value={sponsor}>{sponsor}</option>
+                    <option key={sponsor} value={sponsor}>
+                      {sponsor}
+                    </option>
                   ))}
                 </Select>
               </Box>
@@ -413,10 +490,10 @@ const HomePage = () => {
 
               {/* Action Buttons */}
               <HStack spacing={4}>
-                <Button colorScheme="blue" onClick={onClose} flex={1}>
+                <Button colorScheme='blue' onClick={onClose} flex={1}>
                   Apply Filters
                 </Button>
-                <Button variant="outline" onClick={clearFilters} flex={1}>
+                <Button variant='outline' onClick={clearFilters} flex={1}>
                   Clear All
                 </Button>
               </HStack>

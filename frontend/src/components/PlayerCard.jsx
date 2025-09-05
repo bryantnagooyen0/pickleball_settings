@@ -175,7 +175,12 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
               {player.name}
             </Text>
 
-            <HStack spacing={4} w='full' align='start' justifyContent='space-between'>
+            <HStack
+              spacing={4}
+              w='full'
+              align='start'
+              justifyContent='space-between'
+            >
               <Box>
                 <Text fontSize='sm' color='gray.600' fontWeight='medium'>
                   Paddle:
