@@ -37,7 +37,14 @@ const CreatePage = () => {
     shoeImage: '',
     shoeModel: '',
     overgrips: '',
+    overgripImage: '',
     weight: '',
+    weightImage: '',
+    totalWeight: '',
+    weightLocation: '',
+    tapeDetails: '',
+    additionalModification: '',
+    additionalModificationImage: '',
   });
 
   const toast = useToast();
@@ -92,7 +99,14 @@ const CreatePage = () => {
       shoeImage: '',
       shoeModel: '',
       overgrips: '',
+      overgripImage: '',
       weight: '',
+      weightImage: '',
+      totalWeight: '',
+      weightLocation: '',
+      tapeDetails: '',
+      additionalModification: '',
+      additionalModificationImage: '',
       sponsor: '',
     });
     setSelectedPaddle(null);
@@ -209,6 +223,14 @@ const CreatePage = () => {
               }
             />
             <Input
+              placeholder='Overgrip Image URL (optional)'
+              name='overgripImage'
+              value={newPlayer.overgripImage}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, overgripImage: e.target.value })
+              }
+            />
+            <Input
               placeholder='Sponsor (optional)'
               name='sponsor'
               value={newPlayer.sponsor}
@@ -222,6 +244,54 @@ const CreatePage = () => {
               value={newPlayer.weight}
               onChange={e =>
                 setNewPlayer({ ...newPlayer, weight: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Weight Image URL (optional)'
+              name='weightImage'
+              value={newPlayer.weightImage}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, weightImage: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Total Weight (optional)'
+              name='totalWeight'
+              value={newPlayer.totalWeight}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, totalWeight: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Weight Location (optional)'
+              name='weightLocation'
+              value={newPlayer.weightLocation}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, weightLocation: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Tape Details (optional)'
+              name='tapeDetails'
+              value={newPlayer.tapeDetails}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, tapeDetails: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Additional Modification (optional)'
+              name='additionalModification'
+              value={newPlayer.additionalModification}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, additionalModification: e.target.value })
+              }
+            />
+            <Input
+              placeholder='Additional Modification Image URL (optional)'
+              name='additionalModificationImage'
+              value={newPlayer.additionalModificationImage}
+              onChange={e =>
+                setNewPlayer({ ...newPlayer, additionalModificationImage: e.target.value })
               }
             />
 

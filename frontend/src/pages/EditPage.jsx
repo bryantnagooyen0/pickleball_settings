@@ -11,6 +11,8 @@ import {
   Spinner,
   Center,
   Text,
+  FormControl,
+  FormLabel,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '../store/player';
@@ -45,7 +47,14 @@ const EditPage = () => {
     shoeImage: '',
     shoeModel: '',
     overgrips: '',
+    overgripImage: '',
     weight: '',
+    weightImage: '',
+    totalWeight: '',
+    weightLocation: '',
+    tapeDetails: '',
+    additionalModification: '',
+    additionalModificationImage: '',
   });
 
   const { updatePlayer } = usePlayerStore();
@@ -159,143 +168,258 @@ const EditPage = () => {
           mx='auto'
         >
           <VStack spacing={4}>
-            <Input
-              placeholder='Player Name'
-              name='name'
-              value={player.name}
-              onChange={e => setPlayer({ ...player, name: e.target.value })}
-            />
+            <FormControl>
+              <FormLabel>Player Name</FormLabel>
+              <Input
+                placeholder='Enter player name'
+                name='name'
+                value={player.name}
+                onChange={e => setPlayer({ ...player, name: e.target.value })}
+              />
+            </FormControl>
 
-            <Box w='full'>
-              <Text fontSize='sm' fontWeight='medium' mb={2} color='gray.700'>
-                Paddle
-              </Text>
+            <FormControl>
+              <FormLabel>Paddle</FormLabel>
               <PaddleSelector
                 selectedPaddle={selectedPaddle}
                 onPaddleSelect={handlePaddleSelect}
                 onPaddleDataChange={handlePaddleDataChange}
                 showCreateButton={true}
               />
-            </Box>
-            <Input
-              placeholder='Paddle Shape (optional)'
-              name='paddleShape'
-              value={player.paddleShape || ''}
-              onChange={e =>
-                setPlayer({ ...player, paddleShape: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Thickness (optional)'
-              name='paddleThickness'
-              value={player.paddleThickness || ''}
-              onChange={e =>
-                setPlayer({ ...player, paddleThickness: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Handle Length (optional)'
-              name='paddleHandleLength'
-              value={player.paddleHandleLength || ''}
-              onChange={e =>
-                setPlayer({
-                  ...player,
-                  paddleHandleLength: e.target.value,
-                })
-              }
-            />
-            <Input
-              placeholder='Paddle Color (optional)'
-              name='paddleColor'
-              value={player.paddleColor || ''}
-              onChange={e =>
-                setPlayer({ ...player, paddleColor: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Paddle Image URL (optional)'
-              name='paddleImage'
-              value={player.paddleImage || ''}
-              onChange={e =>
-                setPlayer({ ...player, paddleImage: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Image URL'
-              name='image'
-              value={player.image}
-              onChange={e => setPlayer({ ...player, image: e.target.value })}
-            />
-            <Input
-              placeholder='Age (optional)'
-              name='age'
-              type='number'
-              value={player.age || ''}
-              onChange={e => setPlayer({ ...player, age: e.target.value })}
-            />
-            <Input
-              placeholder='Height (optional)'
-              name='height'
-              value={player.height || ''}
-              onChange={e => setPlayer({ ...player, height: e.target.value })}
-            />
-            <Input
-              placeholder='MLP Team (optional)'
-              name='mlpTeam'
-              value={player.mlpTeam || ''}
-              onChange={e => setPlayer({ ...player, mlpTeam: e.target.value })}
-            />
-            <Input
-              placeholder='Current Location (optional)'
-              name='currentLocation'
-              value={player.currentLocation || ''}
-              onChange={e =>
-                setPlayer({ ...player, currentLocation: e.target.value })
-              }
-            />
-            <Textarea
-              placeholder='About (optional)'
-              name='about'
-              value={player.about || ''}
-              onChange={e => setPlayer({ ...player, about: e.target.value })}
-              rows={4}
-            />
-            <Input
-              placeholder='Shoe Image URL (optional)'
-              name='shoeImage'
-              value={player.shoeImage || ''}
-              onChange={e =>
-                setPlayer({ ...player, shoeImage: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Shoe Model (optional)'
-              name='shoeModel'
-              value={player.shoeModel || ''}
-              onChange={e =>
-                setPlayer({ ...player, shoeModel: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Overgrips (optional)'
-              name='overgrips'
-              value={player.overgrips || ''}
-              onChange={e =>
-                setPlayer({ ...player, overgrips: e.target.value })
-              }
-            />
-            <Input
-              placeholder='Sponsor (optional)'
-              name='sponsor'
-              value={player.sponsor || ''}
-              onChange={e => setPlayer({ ...player, sponsor: e.target.value })}
-            />
-            <Input
-              placeholder='Weight (optional)'
-              name='weight'
-              value={player.weight || ''}
-              onChange={e => setPlayer({ ...player, weight: e.target.value })}
-            />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Paddle Shape</FormLabel>
+              <Input
+                placeholder='Enter paddle shape (optional)'
+                name='paddleShape'
+                value={player.paddleShape || ''}
+                onChange={e =>
+                  setPlayer({ ...player, paddleShape: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Paddle Thickness</FormLabel>
+              <Input
+                placeholder='Enter paddle thickness (optional)'
+                name='paddleThickness'
+                value={player.paddleThickness || ''}
+                onChange={e =>
+                  setPlayer({ ...player, paddleThickness: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Paddle Handle Length</FormLabel>
+              <Input
+                placeholder='Enter handle length (optional)'
+                name='paddleHandleLength'
+                value={player.paddleHandleLength || ''}
+                onChange={e =>
+                  setPlayer({
+                    ...player,
+                    paddleHandleLength: e.target.value,
+                  })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Paddle Image URL</FormLabel>
+              <Input
+                placeholder='Enter paddle image URL (optional)'
+                name='paddleImage'
+                value={player.paddleImage || ''}
+                onChange={e =>
+                  setPlayer({ ...player, paddleImage: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Player Image URL</FormLabel>
+              <Input
+                placeholder='Enter player image URL'
+                name='image'
+                value={player.image}
+                onChange={e => setPlayer({ ...player, image: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Age</FormLabel>
+              <Input
+                placeholder='Enter age (optional)'
+                name='age'
+                type='number'
+                value={player.age || ''}
+                onChange={e => setPlayer({ ...player, age: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Height</FormLabel>
+              <Input
+                placeholder='Enter height (optional)'
+                name='height'
+                value={player.height || ''}
+                onChange={e => setPlayer({ ...player, height: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>MLP Team</FormLabel>
+              <Input
+                placeholder='Enter MLP team (optional)'
+                name='mlpTeam'
+                value={player.mlpTeam || ''}
+                onChange={e => setPlayer({ ...player, mlpTeam: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Current Location</FormLabel>
+              <Input
+                placeholder='Enter current location (optional)'
+                name='currentLocation'
+                value={player.currentLocation || ''}
+                onChange={e =>
+                  setPlayer({ ...player, currentLocation: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>About</FormLabel>
+              <Textarea
+                placeholder='Enter player description (optional)'
+                name='about'
+                value={player.about || ''}
+                onChange={e => setPlayer({ ...player, about: e.target.value })}
+                rows={4}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Shoe Image URL</FormLabel>
+              <Input
+                placeholder='Enter shoe image URL (optional)'
+                name='shoeImage'
+                value={player.shoeImage || ''}
+                onChange={e =>
+                  setPlayer({ ...player, shoeImage: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Shoe Model</FormLabel>
+              <Input
+                placeholder='Enter shoe model (optional)'
+                name='shoeModel'
+                value={player.shoeModel || ''}
+                onChange={e =>
+                  setPlayer({ ...player, shoeModel: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Overgrips</FormLabel>
+              <Input
+                placeholder='Enter overgrips (optional)'
+                name='overgrips'
+                value={player.overgrips || ''}
+                onChange={e =>
+                  setPlayer({ ...player, overgrips: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Overgrip Image URL</FormLabel>
+              <Input
+                placeholder='Enter overgrip image URL (optional)'
+                name='overgripImage'
+                value={player.overgripImage || ''}
+                onChange={e =>
+                  setPlayer({ ...player, overgripImage: e.target.value })
+                }
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Sponsor</FormLabel>
+              <Input
+                placeholder='Enter sponsor (optional)'
+                name='sponsor'
+                value={player.sponsor || ''}
+                onChange={e => setPlayer({ ...player, sponsor: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Weight Image URL</FormLabel>
+              <Input
+                placeholder='Enter weight image URL (optional)'
+                name='weightImage'
+                value={player.weightImage || ''}
+                onChange={e => setPlayer({ ...player, weightImage: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Total Weight</FormLabel>
+              <Input
+                placeholder='Enter total weight (optional)'
+                name='totalWeight'
+                value={player.totalWeight || ''}
+                onChange={e => setPlayer({ ...player, totalWeight: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Weight Location</FormLabel>
+              <Input
+                placeholder='Enter weight location (optional)'
+                name='weightLocation'
+                value={player.weightLocation || ''}
+                onChange={e => setPlayer({ ...player, weightLocation: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Tape Details</FormLabel>
+              <Input
+                placeholder='Enter tape details (optional)'
+                name='tapeDetails'
+                value={player.tapeDetails || ''}
+                onChange={e => setPlayer({ ...player, tapeDetails: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Additional Modification</FormLabel>
+              <Input
+                placeholder='Enter additional modification (optional)'
+                name='additionalModification'
+                value={player.additionalModification || ''}
+                onChange={e => setPlayer({ ...player, additionalModification: e.target.value })}
+              />
+            </FormControl>
+            
+            <FormControl>
+              <FormLabel>Additional Modification Image URL</FormLabel>
+              <Input
+                placeholder='Enter additional modification image URL (optional)'
+                name='additionalModificationImage'
+                value={player.additionalModificationImage || ''}
+                onChange={e => setPlayer({ ...player, additionalModificationImage: e.target.value })}
+              />
+            </FormControl>
 
             <Button colorScheme='blue' onClick={handleUpdatePlayer} w='full'>
               Update Player

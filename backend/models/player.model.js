@@ -94,7 +94,35 @@ const playerSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    overgripImage: {
+      type: String,
+      required: false,
+    },
     weight: {
+      type: String,
+      required: false,
+    },
+    weightImage: {
+      type: String,
+      required: false,
+    },
+    totalWeight: {
+      type: String,
+      required: false,
+    },
+    weightLocation: {
+      type: String,
+      required: false,
+    },
+    tapeDetails: {
+      type: String,
+      required: false,
+    },
+    additionalModification: {
+      type: String,
+      required: false,
+    },
+    additionalModificationImage: {
       type: String,
       required: false,
     },

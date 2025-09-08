@@ -118,45 +118,181 @@ const EquipmentModule = ({
 
     return (
       <VStack spacing={4}>
-        {modifications.map((mod, index) => (
-          <Box
-            key={index}
-            bg='gray.50'
-            p={4}
-            borderRadius='md'
-            border='1px solid'
-            borderColor='gray.200'
-            w='full'
-          >
-            <HStack justify='space-between' align='center'>
-              <VStack align='start' spacing={1}>
-                <Text fontSize='sm' color='gray.600' fontWeight='medium'>
-                  {mod.label}
-                </Text>
-                <Text fontSize='md' fontWeight='semibold' color='gray.800'>
-                  {player[mod.field] || 'None specified'}
-                </Text>
-                {player[mod.brandField] && (
-                  <Badge
-                    colorScheme={mod.badgeColor || 'purple'}
-                    variant='subtle'
-                    size='sm'
-                  >
-                    {player[mod.brandField]}
-                  </Badge>
-                )}
-              </VStack>
-              <Button
-                size='sm'
-                colorScheme='blue'
-                leftIcon={<FaShoppingBag />}
-                onClick={() => handleCheckPrice(mod.field)}
+        {modifications.map((mod, index) => {
+          const imageField = mod.imageField || `${mod.field}Image`;
+          const imageUrl = player[imageField];
+          
+          // Skip additional modification if both text and image are not filled
+          if (mod.field === 'additionalModification') {
+            const hasText = player[mod.field] && player[mod.field].trim() !== '';
+            const hasImage = imageUrl && imageUrl.trim() !== '';
+            if (!hasText || !hasImage) {
+              return null;
+            }
+          }
+          
+          // Special layout for weight module
+          if (mod.field === 'weight') {
+            return (
+              <Box
+                key={index}
+                bg='gray.50'
+                p={6}
+                borderRadius='md'
+                border='1px solid'
+                borderColor='gray.200'
+                w='full'
               >
-                Check price
-              </Button>
-            </HStack>
-          </Box>
-        ))}
+                {/* Weight Setup Title */}
+                <Text 
+                  fontSize='lg' 
+                  fontWeight='bold' 
+                  color='gray.800' 
+                  textAlign='center' 
+                  mb={4}
+                >
+                  Weight Setup
+                </Text>
+                
+                <HStack align='flex-start' spacing={6}>
+                  {/* Left side - Image */}
+                  <Box>
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={mod.label}
+                        w={64}
+                        h={64}
+                        borderRadius='md'
+                        objectFit='contain'
+                        border='none'
+                      />
+                    ) : (
+                      <Box
+                        w={16}
+                        h={16}
+                        bg='gray.300'
+                        borderRadius='md'
+                        display='flex'
+                        alignItems='center'
+                        justifyContent='center'
+                      >
+                        <Icon as={getIcon()} w={8} h={8} color='gray.500' />
+                      </Box>
+                    )}
+                  </Box>
+                  
+                  {/* Right side - Weight details */}
+                  <VStack align='start' spacing={3} flex={1}>
+                    <Box>
+                      <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
+                        Total Weight
+                      </Text>
+                      <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                        {player.totalWeight || 'Not specified'}
+                      </Text>
+                    </Box>
+                    
+                    <Box>
+                      <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
+                        Weight Location
+                      </Text>
+                      <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                        {player.weightLocation || 'Not specified'}
+                      </Text>
+                    </Box>
+                    
+                    <Box>
+                      <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
+                        Tape Details
+                      </Text>
+                      <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                        {player.tapeDetails || 'Not specified'}
+                      </Text>
+                    </Box>
+                    
+                    {player[mod.brandField] && (
+                      <Badge
+                        colorScheme={mod.badgeColor || 'purple'}
+                        variant='subtle'
+                        size='sm'
+                      >
+                        {player[mod.brandField]}
+                      </Badge>
+                    )}
+                  </VStack>
+                </HStack>
+              </Box>
+            );
+          }
+          
+          // Default layout for other modifications
+          return (
+            <Box
+              key={index}
+              bg='gray.50'
+              p={4}
+              borderRadius='md'
+              border='1px solid'
+              borderColor='gray.200'
+              w='full'
+            >
+              <HStack justify='space-between' align='center'>
+                <HStack spacing={4}>
+                  {imageUrl ? (
+                    <Image
+                      src={imageUrl}
+                      alt={mod.label}
+                      w={16}
+                      h={16}
+                      borderRadius='md'
+                      objectFit='cover'
+                      border='1px solid'
+                      borderColor='gray.300'
+                    />
+                  ) : (
+                    <Box
+                      w={16}
+                      h={16}
+                      bg='gray.300'
+                      borderRadius='md'
+                      display='flex'
+                      alignItems='center'
+                      justifyContent='center'
+                    >
+                      <Icon as={getIcon()} w={8} h={8} color='gray.500' />
+                    </Box>
+                  )}
+                  <VStack align='start' spacing={1}>
+                    <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                      {mod.label}
+                    </Text>
+                    <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                      {player[mod.field] || 'None specified'}
+                    </Text>
+                    {player[mod.brandField] && (
+                      <Badge
+                        colorScheme={mod.badgeColor || 'purple'}
+                        variant='subtle'
+                        size='sm'
+                      >
+                        {player[mod.brandField]}
+                      </Badge>
+                    )}
+                  </VStack>
+                </HStack>
+                <Button
+                  size='sm'
+                  colorScheme='blue'
+                  leftIcon={<FaShoppingBag />}
+                  onClick={() => handleCheckPrice(mod.field)}
+                >
+                  Check price
+                </Button>
+              </HStack>
+            </Box>
+          );
+        })}
       </VStack>
     );
   };

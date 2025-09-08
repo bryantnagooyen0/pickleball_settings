@@ -264,14 +264,23 @@ const PlayerDetailPage = () => {
                   {
                     label: 'Overgrips',
                     field: 'overgrips',
+                    imageField: 'overgripImage',
                     brandField: 'overgripBrand',
                     badgeColor: 'purple',
                   },
                   {
                     label: 'Weight',
                     field: 'weight',
+                    imageField: 'weightImage',
                     brandField: 'weightType',
                     badgeColor: 'orange',
+                  },
+                  {
+                    label: 'Additional modification',
+                    field: 'additionalModification',
+                    imageField: 'additionalModificationImage',
+                    brandField: 'additionalModificationBrand',
+                    badgeColor: 'green',
                   },
                 ]}
               />

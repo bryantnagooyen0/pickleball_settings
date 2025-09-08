@@ -23,6 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  FormControl,
+  FormLabel,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +46,14 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
     currentLocation: player.currentLocation || '',
     about: player.about || '',
     overgrips: player.overgrips || '',
+    overgripImage: player.overgripImage || '',
     weight: player.weight || '',
+    weightImage: player.weightImage || '',
+    totalWeight: player.totalWeight || '',
+    weightLocation: player.weightLocation || '',
+    tapeDetails: player.tapeDetails || '',
+    additionalModification: player.additionalModification || '',
+    additionalModificationImage: player.additionalModificationImage || '',
   });
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -243,143 +252,292 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4} pb={4}>
-              <Input
-                placeholder='Player Name'
-                value={editPlayer.name}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, name: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Paddle'
-                value={editPlayer.paddle}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, paddle: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Paddle Shape (optional)'
-                value={editPlayer.paddleShape}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, paddleShape: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Paddle Thickness (optional)'
-                value={editPlayer.paddleThickness}
-                onChange={e =>
-                  setEditPlayer({
-                    ...editPlayer,
-                    paddleThickness: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder='Paddle Handle Length (optional)'
-                value={editPlayer.paddleHandleLength}
-                onChange={e =>
-                  setEditPlayer({
-                    ...editPlayer,
-                    paddleHandleLength: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder='Paddle Color (optional)'
-                value={editPlayer.paddleColor}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, paddleColor: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Paddle Image URL (optional)'
-                value={editPlayer.paddleImage}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, paddleImage: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Image URL'
-                value={editPlayer.image}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, image: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Age (optional)'
-                type='number'
-                value={editPlayer.age}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, age: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Height (optional)'
-                value={editPlayer.height}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, height: e.target.value })
-                }
-              />
-              <Input
-                placeholder='MLP Team (optional)'
-                value={editPlayer.mlpTeam}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, mlpTeam: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Current Location (optional)'
-                value={editPlayer.currentLocation}
-                onChange={e =>
-                  setEditPlayer({
-                    ...editPlayer,
-                    currentLocation: e.target.value,
-                  })
-                }
-              />
-              <Textarea
-                placeholder='About (optional)'
-                value={editPlayer.about}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, about: e.target.value })
-                }
-                rows={4}
-              />
-              <Input
-                placeholder='Shoe Image URL (optional)'
-                value={editPlayer.shoeImage}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, shoeImage: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Shoe Model (optional)'
-                value={editPlayer.shoeModel}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, shoeModel: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Overgrips (optional)'
-                value={editPlayer.overgrips}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, overgrips: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Sponsor (optional)'
-                value={editPlayer.sponsor}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, sponsor: e.target.value })
-                }
-              />
-              <Input
-                placeholder='Weight (optional)'
-                value={editPlayer.weight}
-                onChange={e =>
-                  setEditPlayer({ ...editPlayer, weight: e.target.value })
-                }
-              />
+              <FormControl>
+                <FormLabel>Player Name</FormLabel>
+                <Input
+                  placeholder='Enter player name'
+                  value={editPlayer.name}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, name: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Paddle</FormLabel>
+                <Input
+                  placeholder='Enter paddle model'
+                  value={editPlayer.paddle}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, paddle: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Paddle Shape</FormLabel>
+                <Input
+                  placeholder='Enter paddle shape (optional)'
+                  value={editPlayer.paddleShape}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, paddleShape: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Paddle Thickness</FormLabel>
+                <Input
+                  placeholder='Enter paddle thickness (optional)'
+                  value={editPlayer.paddleThickness}
+                  onChange={e =>
+                    setEditPlayer({
+                      ...editPlayer,
+                      paddleThickness: e.target.value,
+                    })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Paddle Handle Length</FormLabel>
+                <Input
+                  placeholder='Enter handle length (optional)'
+                  value={editPlayer.paddleHandleLength}
+                  onChange={e =>
+                    setEditPlayer({
+                      ...editPlayer,
+                      paddleHandleLength: e.target.value,
+                    })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Paddle Color</FormLabel>
+                <Input
+                  placeholder='Enter paddle color (optional)'
+                  value={editPlayer.paddleColor}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, paddleColor: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Paddle Image URL</FormLabel>
+                <Input
+                  placeholder='Enter paddle image URL (optional)'
+                  value={editPlayer.paddleImage}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, paddleImage: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Player Image URL</FormLabel>
+                <Input
+                  placeholder='Enter player image URL'
+                  value={editPlayer.image}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, image: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Age</FormLabel>
+                <Input
+                  placeholder='Enter age (optional)'
+                  type='number'
+                  value={editPlayer.age}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, age: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Height</FormLabel>
+                <Input
+                  placeholder='Enter height (optional)'
+                  value={editPlayer.height}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, height: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>MLP Team</FormLabel>
+                <Input
+                  placeholder='Enter MLP team (optional)'
+                  value={editPlayer.mlpTeam}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, mlpTeam: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Current Location</FormLabel>
+                <Input
+                  placeholder='Enter current location (optional)'
+                  value={editPlayer.currentLocation}
+                  onChange={e =>
+                    setEditPlayer({
+                      ...editPlayer,
+                      currentLocation: e.target.value,
+                    })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>About</FormLabel>
+                <Textarea
+                  placeholder='Enter player description (optional)'
+                  value={editPlayer.about}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, about: e.target.value })
+                  }
+                  rows={4}
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Shoe Image URL</FormLabel>
+                <Input
+                  placeholder='Enter shoe image URL (optional)'
+                  value={editPlayer.shoeImage}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, shoeImage: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Shoe Model</FormLabel>
+                <Input
+                  placeholder='Enter shoe model (optional)'
+                  value={editPlayer.shoeModel}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, shoeModel: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Overgrips</FormLabel>
+                <Input
+                  placeholder='Enter overgrips (optional)'
+                  value={editPlayer.overgrips}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, overgrips: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Overgrip Image URL</FormLabel>
+                <Input
+                  placeholder='Enter overgrip image URL (optional)'
+                  value={editPlayer.overgripImage}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, overgripImage: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Sponsor</FormLabel>
+                <Input
+                  placeholder='Enter sponsor (optional)'
+                  value={editPlayer.sponsor}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, sponsor: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Weight</FormLabel>
+                <Input
+                  placeholder='Enter weight (optional)'
+                  value={editPlayer.weight}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, weight: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Weight Image URL</FormLabel>
+                <Input
+                  placeholder='Enter weight image URL (optional)'
+                  value={editPlayer.weightImage}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, weightImage: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Total Weight</FormLabel>
+                <Input
+                  placeholder='Enter total weight (optional)'
+                  value={editPlayer.totalWeight}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, totalWeight: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Weight Location</FormLabel>
+                <Input
+                  placeholder='Enter weight location (optional)'
+                  value={editPlayer.weightLocation}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, weightLocation: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Tape Details</FormLabel>
+                <Input
+                  placeholder='Enter tape details (optional)'
+                  value={editPlayer.tapeDetails}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, tapeDetails: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Additional Modification</FormLabel>
+                <Input
+                  placeholder='Enter additional modification (optional)'
+                  value={editPlayer.additionalModification}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, additionalModification: e.target.value })
+                  }
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Additional Modification Image URL</FormLabel>
+                <Input
+                  placeholder='Enter additional modification image URL (optional)'
+                  value={editPlayer.additionalModificationImage}
+                  onChange={e =>
+                    setEditPlayer({ ...editPlayer, additionalModificationImage: e.target.value })
+                  }
+                />
+              </FormControl>
+              
               <Button colorScheme='blue' onClick={handleUpdate} w='full'>
                 Update Player
               </Button>
