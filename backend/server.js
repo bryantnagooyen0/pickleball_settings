@@ -4,6 +4,7 @@ import path from 'path';
 import { connectDB } from './config/db.js';
 import playerRoutes from './routes/player.route.js';
 import paddleRoutes from './routes/paddle.route.js';
+import userRoutes from './controllers/users_controller.mjs';
 import cors from 'cors';
 
 dotenv.config({ path: path.resolve('./backend/.env') });
@@ -16,6 +17,7 @@ app.use(express.json()); //allows us to accept JSON data in the req.body
 
 app.use('/api/players', playerRoutes);
 app.use('/api/paddles', paddleRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(PORT, () => {
   connectDB();
