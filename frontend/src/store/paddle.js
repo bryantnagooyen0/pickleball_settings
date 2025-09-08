@@ -18,10 +18,12 @@ export const usePaddleStore = create(set => ({
 
   createPaddle: async newPaddle => {
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch('/api/paddles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newPaddle),
       });
@@ -43,10 +45,12 @@ export const usePaddleStore = create(set => ({
 
   updatePaddle: async (paddleId, updatedPaddle) => {
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`/api/paddles/${paddleId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(updatedPaddle),
       });
@@ -77,8 +81,12 @@ export const usePaddleStore = create(set => ({
 
   deletePaddle: async paddleId => {
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`/api/paddles/${paddleId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       if (res.ok) {
         set(state => ({

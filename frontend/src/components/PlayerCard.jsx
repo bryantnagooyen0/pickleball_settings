@@ -29,6 +29,18 @@ import {
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Helper function to decode JWT and get role
+const getRoleFromToken = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role || null;
+  } catch {
+    return null;
+  }
+};
+
 const PlayerCard = ({ player, onPlayerDeleted }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [editPlayer, setEditPlayer] = useState({
@@ -63,10 +75,12 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
 
   const handleUpdate = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/players/${player._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(editPlayer),
       });
@@ -103,8 +117,12 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/players/${player._id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
@@ -222,24 +240,26 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
               </Box>
             )}
 
-            <HStack spacing={2} w='full'>
-              <Button
-                size='sm'
-                colorScheme='blue'
-                onClick={e => handleButtonClick(e, 'edit')}
-                flex={1}
-              >
-                Edit
-              </Button>
-              <Button
-                size='sm'
-                colorScheme='red'
-                onClick={e => handleButtonClick(e, 'delete')}
-                flex={1}
-              >
-                Delete
-              </Button>
-            </HStack>
+            {getRoleFromToken() === 'admin' && (
+              <HStack spacing={2} w='full'>
+                <Button
+                  size='sm'
+                  colorScheme='blue'
+                  onClick={e => handleButtonClick(e, 'edit')}
+                  flex={1}
+                >
+                  Edit
+                </Button>
+                <Button
+                  size='sm'
+                  colorScheme='red'
+                  onClick={e => handleButtonClick(e, 'delete')}
+                  flex={1}
+                >
+                  Delete
+                </Button>
+              </HStack>
+            )}
           </VStack>
         </Box>
       </Box>

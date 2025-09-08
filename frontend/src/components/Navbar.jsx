@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  Box,
   Button,
   Container,
   Flex,
   HStack,
   Text,
+  Image,
   useDisclosure,
   AlertDialog,
   AlertDialogOverlay,
@@ -65,26 +67,51 @@ const Navbar = () => {
     navigate('/');
   };
   return (
-    <Container maxW={'1140px'} px={4}>
+    <Box
+      position="sticky"
+      top={0}
+      zIndex={1000}
+      bg="white"
+      borderBottom="1px"
+      borderColor="gray.200"
+      boxShadow="sm"
+      w="100vw"
+      px={6}
+    >
       <Flex
         h={16}
         alignItems={'center'}
         justifyContent={'space-between'}
+        w={'full'}
         flexDir={{
           base: 'column',
           sm: 'row',
         }}
       >
-        <Text
-          fontSize={{ base: '22', sm: '28' }}
-          fontWeight={'bold'}
-          textTransform={'uppercase'}
-          textAlign={'center'}
-          bgGradient={'linear(to-r, cyan.400, blue.500)'}
-          bgClip={'text'}
-        >
-          <Link to={'/'}>Player List</Link>
-        </Text>
+        <HStack spacing={4} alignItems={'center'}>
+          {/* Logo */}
+          <Link to={'/'}>
+            <Box>
+                <Image
+                  src="/logo6.png" 
+                  alt="Pickleball Settings Logo"
+                  height="60px"
+                objectFit="contain"
+              />
+            </Box>
+          </Link>
+          
+          {/* Navigation Buttons */}
+          <HStack spacing={2} alignItems={'center'}>
+            <Link to={'/'}>
+              <Button variant={'outline'}>Players</Button>
+            </Link>
+            
+            <Link to={'/paddles'}>
+              <Button variant={'outline'}>Paddles</Button>
+            </Link>
+          </HStack>
+        </HStack>
 
         <HStack spacing={2} alignItems={'center'}>
           {userRole === 'admin' && (
@@ -95,11 +122,6 @@ const Navbar = () => {
             </Link>
           )}
 
-          <Link to={'/paddles'}>
-            <Button>
-              <SettingsIcon fontSize={20} />
-            </Button>
-          </Link>
           {hasToken ? (
             <>
               <Link to={'/account'}>
@@ -149,7 +171,7 @@ const Navbar = () => {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
-    </Container>
+    </Box>
   );
 };
 

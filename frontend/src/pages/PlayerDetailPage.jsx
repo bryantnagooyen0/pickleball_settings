@@ -18,6 +18,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import EquipmentModule from '../components/EquipmentModule';
 import { usePaddleStore } from '../store/paddle';
 
+// Helper function to decode JWT and get role
+const getRoleFromToken = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role || null;
+  } catch {
+    return null;
+  }
+};
+
 const PlayerDetailPage = () => {
   const { playerId } = useParams();
   const navigate = useNavigate();
@@ -286,13 +298,15 @@ const PlayerDetailPage = () => {
               />
 
               <HStack spacing={4} w='full' pt={4}>
-                <Button
-                  colorScheme='blue'
-                  onClick={() => navigate(`/edit/${playerId}`)}
-                  flex={1}
-                >
-                  Edit Player
-                </Button>
+                {getRoleFromToken() === 'admin' && (
+                  <Button
+                    colorScheme='blue'
+                    onClick={() => navigate(`/edit/${playerId}`)}
+                    flex={1}
+                  >
+                    Edit Player
+                  </Button>
+                )}
                 <Button
                   colorScheme='red'
                   variant='outline'

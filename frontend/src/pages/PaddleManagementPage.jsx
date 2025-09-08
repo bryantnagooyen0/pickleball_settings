@@ -35,6 +35,18 @@ import { usePlayerStore } from '../store/player';
 import { SearchIcon, EditIcon, DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useRef } from 'react';
 
+// Helper function to decode JWT and get role
+const getRoleFromToken = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role || null;
+  } catch {
+    return null;
+  }
+};
+
 const PaddleManagementPage = () => {
   const { paddles, fetchPaddles, createPaddle, updatePaddle, deletePaddle } =
     usePaddleStore();
@@ -229,13 +241,15 @@ const PaddleManagementPage = () => {
             </InputGroup>
           </Box>
 
-          <Button
-            leftIcon={<AddIcon />}
-            colorScheme='blue'
-            onClick={handleAddNew}
-          >
-            Add New Paddle
-          </Button>
+          {getRoleFromToken() === 'admin' && (
+            <Button
+              leftIcon={<AddIcon />}
+              colorScheme='blue'
+              onClick={handleAddNew}
+            >
+              Add New Paddle
+            </Button>
+          )}
         </HStack>
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w='full'>
@@ -294,29 +308,31 @@ const PaddleManagementPage = () => {
                   )}
                 </VStack>
 
-                <HStack spacing={2} w='full'>
-                  <Tooltip label='Edit Paddle'>
-                    <IconButton
-                      icon={<EditIcon />}
-                      size='sm'
-                      colorScheme='blue'
-                      variant='outline'
-                      onClick={() => handleEdit(paddle)}
-                    />
-                  </Tooltip>
-                  <Tooltip label='Delete Paddle'>
-                    <IconButton
-                      icon={<DeleteIcon />}
-                      size='sm'
-                      colorScheme='red'
-                      variant='outline'
-                      onClick={() => {
-                        setSelectedPaddle(paddle);
-                        setIsDeleteOpen(true);
-                      }}
-                    />
-                  </Tooltip>
-                </HStack>
+                {getRoleFromToken() === 'admin' && (
+                  <HStack spacing={2} w='full'>
+                    <Tooltip label='Edit Paddle'>
+                      <IconButton
+                        icon={<EditIcon />}
+                        size='sm'
+                        colorScheme='blue'
+                        variant='outline'
+                        onClick={() => handleEdit(paddle)}
+                      />
+                    </Tooltip>
+                    <Tooltip label='Delete Paddle'>
+                      <IconButton
+                        icon={<DeleteIcon />}
+                        size='sm'
+                        colorScheme='red'
+                        variant='outline'
+                        onClick={() => {
+                          setSelectedPaddle(paddle);
+                          setIsDeleteOpen(true);
+                        }}
+                      />
+                    </Tooltip>
+                  </HStack>
+                )}
               </VStack>
             </Box>
           ))}
