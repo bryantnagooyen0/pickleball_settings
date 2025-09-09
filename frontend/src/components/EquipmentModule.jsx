@@ -206,7 +206,12 @@ const EquipmentModule = ({
                       <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
                         Tape Details
                       </Text>
-                      <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                      <Text 
+                        fontSize='md' 
+                        fontWeight='semibold' 
+                        color='gray.800'
+                        whiteSpace='pre-line'
+                      >
                         {player.tapeDetails || 'Not specified'}
                       </Text>
                     </Box>

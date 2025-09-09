@@ -5,6 +5,7 @@ import EditPage from './pages/EditPage';
 import HomePage from './pages/HomePage';
 import PlayerDetailPage from './pages/PlayerDetailPage';
 import PaddleManagementPage from './pages/PaddleManagementPage';
+import PaddleDetailPage from './pages/PaddleDetailPage';
 import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -21,6 +22,7 @@ function App() {
           <Route path='/edit/:playerId' element={<EditPage />} />
           <Route path='/player/:playerId' element={<PlayerDetailPage />} />
           <Route path='/paddles' element={<PaddleManagementPage />} />
+          <Route path='/paddle/:paddleId' element={<PaddleDetailPage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/signup' element={<SignupPage />} />
           <Route path='/account' element={<AccountPage />} />

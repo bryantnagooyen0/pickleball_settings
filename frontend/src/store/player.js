@@ -33,10 +33,12 @@ export const usePlayerStore = create(set => ({
       return { success: false, message: 'Please fill in all fields.' };
     }
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch('/api/players', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newPlayer),
       });
@@ -61,10 +63,12 @@ export const usePlayerStore = create(set => ({
       return { success: false, message: 'Please fill in all required fields.' };
     }
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`/api/players/${playerId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(updatedPlayer),
       });

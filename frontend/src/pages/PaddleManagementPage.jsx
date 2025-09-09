@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container,
   VStack,
@@ -29,11 +29,14 @@ import {
   Tooltip,
   InputGroup,
   InputLeftElement,
+  Center,
+  Spinner,
 } from '@chakra-ui/react';
 import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import { SearchIcon, EditIcon, DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Helper function to decode JWT and get role
 const getRoleFromToken = () => {
@@ -52,11 +55,13 @@ const PaddleManagementPage = () => {
     usePaddleStore();
   const { refreshPlayers } = usePlayerStore();
   const toast = useToast();
+  const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedPaddle, setSelectedPaddle] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const cancelRef = useRef();
 
   const [paddleForm, setPaddleForm] = useState({
@@ -74,15 +79,27 @@ const PaddleManagementPage = () => {
   });
 
   useEffect(() => {
-    fetchPaddles();
-  }, [fetchPaddles]);
+    const loadPaddles = async () => {
+      setIsLoading(true);
+      await fetchPaddles();
+      setIsLoading(false);
+    };
+    loadPaddles();
+  }, []); // Empty dependency array - only run once on mount
 
-  const filteredPaddles = paddles.filter(
-    paddle =>
-      paddle.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paddle.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paddle.model.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPaddles = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return paddles;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    return paddles.filter(
+      paddle =>
+        paddle.name?.toLowerCase().includes(query) ||
+        paddle.brand?.toLowerCase().includes(query) ||
+        paddle.model?.toLowerCase().includes(query)
+    );
+  }, [paddles, searchQuery]);
 
   const handleSubmit = async () => {
     if (!paddleForm.name || !paddleForm.brand) {
@@ -207,6 +224,20 @@ const PaddleManagementPage = () => {
     onOpen();
   };
 
+  const handlePaddleClick = (paddle) => {
+    navigate(`/paddle/${paddle._id}`);
+  };
+
+  const handleButtonClick = (e, action, paddle) => {
+    e.stopPropagation();
+    if (action === 'edit') {
+      handleEdit(paddle);
+    } else if (action === 'delete') {
+      setSelectedPaddle(paddle);
+      setIsDeleteOpen(true);
+    }
+  };
+
   return (
     <Container maxW='container.xl' py={8}>
       <VStack spacing={6}>
@@ -252,8 +283,13 @@ const PaddleManagementPage = () => {
           )}
         </HStack>
 
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w='full'>
-          {filteredPaddles.map(paddle => (
+        {isLoading ? (
+          <Center py={12}>
+            <Spinner size='xl' />
+          </Center>
+        ) : (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w='full'>
+            {filteredPaddles.map(paddle => (
             <Box
               key={paddle._id}
               bg={'white'}
@@ -262,6 +298,10 @@ const PaddleManagementPage = () => {
               shadow='md'
               border='1px'
               borderColor='gray.200'
+              cursor='pointer'
+              _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
+              transition='all 0.2s'
+              onClick={() => handlePaddleClick(paddle)}
             >
               <VStack spacing={4} align='start'>
                 {paddle.image && (
@@ -271,7 +311,8 @@ const PaddleManagementPage = () => {
                     borderRadius='md'
                     w='full'
                     h='200px'
-                    objectFit='cover'
+                    objectFit='contain'
+                    bg='white'
                   />
                 )}
 
@@ -280,23 +321,30 @@ const PaddleManagementPage = () => {
                     {paddle.name}
                   </Text>
                   <Text fontSize='md' color='gray.600'>
-                    {paddle.brand} - {paddle.model}
+                    {paddle.model}
                   </Text>
 
-                  <HStack spacing={2} flexWrap='wrap'>
-                    {paddle.shape && (
-                      <Badge colorScheme='blue' variant='subtle'>
-                        {paddle.shape}
-                      </Badge>
-                    )}
-                    {paddle.thickness && (
-                      <Badge colorScheme='green' variant='subtle'>
-                        {paddle.thickness}
-                      </Badge>
-                    )}
-                    {paddle.weight && (
-                      <Badge colorScheme='purple' variant='subtle'>
-                        {paddle.weight}
+                  <HStack spacing={2} flexWrap='wrap' justify='space-between' w='full'>
+                    <HStack spacing={2} flexWrap='wrap'>
+                      {paddle.shape && (
+                        <Badge colorScheme='blue' variant='subtle'>
+                          {paddle.shape}
+                        </Badge>
+                      )}
+                      {paddle.thickness && (
+                        <Badge colorScheme='green' variant='subtle'>
+                          {paddle.thickness}
+                        </Badge>
+                      )}
+                      {paddle.weight && (
+                        <Badge colorScheme='purple' variant='subtle'>
+                          {paddle.weight}
+                        </Badge>
+                      )}
+                    </HStack>
+                    {paddle.brand && (
+                      <Badge colorScheme='red' variant='subtle'>
+                        {paddle.brand}
                       </Badge>
                     )}
                   </HStack>
@@ -316,7 +364,7 @@ const PaddleManagementPage = () => {
                         size='sm'
                         colorScheme='blue'
                         variant='outline'
-                        onClick={() => handleEdit(paddle)}
+                        onClick={(e) => handleButtonClick(e, 'edit', paddle)}
                       />
                     </Tooltip>
                     <Tooltip label='Delete Paddle'>
@@ -325,10 +373,7 @@ const PaddleManagementPage = () => {
                         size='sm'
                         colorScheme='red'
                         variant='outline'
-                        onClick={() => {
-                          setSelectedPaddle(paddle);
-                          setIsDeleteOpen(true);
-                        }}
+                        onClick={(e) => handleButtonClick(e, 'delete', paddle)}
                       />
                     </Tooltip>
                   </HStack>
@@ -336,9 +381,10 @@ const PaddleManagementPage = () => {
               </VStack>
             </Box>
           ))}
-        </SimpleGrid>
+          </SimpleGrid>
+        )}
 
-        {filteredPaddles.length === 0 && (
+        {!isLoading && filteredPaddles.length === 0 && (
           <Text fontSize='xl' textAlign='center' color='gray.500'>
             {searchQuery
               ? 'No paddles found matching your search'

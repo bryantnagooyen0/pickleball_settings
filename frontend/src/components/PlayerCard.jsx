@@ -178,6 +178,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
         borderRadius='lg'
         overflow='hidden'
         boxShadow='md'
+        bg='white'
         _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
         transition='all 0.2s'
         cursor='pointer'

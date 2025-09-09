@@ -393,11 +393,12 @@ const EditPage = () => {
             
             <FormControl>
               <FormLabel>Tape Details</FormLabel>
-              <Input
+              <Textarea
                 placeholder='Enter tape details (optional)'
                 name='tapeDetails'
                 value={player.tapeDetails || ''}
                 onChange={e => setPlayer({ ...player, tapeDetails: e.target.value })}
+                rows={3}
               />
             </FormControl>
             

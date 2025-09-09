@@ -1,10 +1,17 @@
 import { create } from 'zustand';
 
-export const usePaddleStore = create(set => ({
+export const usePaddleStore = create((set, get) => ({
   paddles: [],
   setPaddles: paddles => set({ paddles }),
 
-  fetchPaddles: async () => {
+  fetchPaddles: async (forceRefresh = false) => {
+    const { paddles } = get();
+    
+    // If we already have paddles and not forcing refresh, don't fetch again
+    if (paddles.length > 0 && !forceRefresh) {
+      return;
+    }
+    
     try {
       const res = await fetch('/api/paddles');
       const data = await res.json();
@@ -103,6 +110,18 @@ export const usePaddleStore = create(set => ({
     } catch (error) {
       console.error('Error deleting paddle:', error);
       return { success: false, message: 'Failed to delete paddle' };
+    }
+  },
+
+  refreshPaddles: async () => {
+    try {
+      const res = await fetch('/api/paddles');
+      const data = await res.json();
+      if (res.ok) {
+        set({ paddles: data.data });
+      }
+    } catch (error) {
+      console.error('Error refreshing paddles:', error);
     }
   },
 

@@ -38,18 +38,29 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // Filter states
-  const [filters, setFilters] = useState({
-    paddle: '',
-    paddleThickness: '',
-    paddleShape: '',
-    shoeModel: '',
-    mlpTeam: '',
-    currentLocation: '',
-    ageRange: '',
-    overgrips: '',
-    weight: '',
-    sponsor: '',
+  // Filter states - load from localStorage or use defaults
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem('playerFilters');
+    if (savedFilters) {
+      try {
+        return JSON.parse(savedFilters);
+      } catch (error) {
+        console.error('Error parsing saved filters:', error);
+      }
+    }
+    return {
+      paddle: '',
+      paddleThickness: '',
+      paddleShape: '',
+      shoeModel: '',
+      mlpTeam: '',
+      currentLocation: '',
+      ageRange: '',
+      overgrips: '',
+      totalWeight: '',
+      weightComplete: '',
+      sponsor: '',
+    };
   });
 
   // Get unique values for filter options
@@ -68,7 +79,7 @@ const HomePage = () => {
         ...new Set(players.map(p => p.currentLocation).filter(Boolean)),
       ],
       overgrips: [...new Set(players.map(p => p.overgrips).filter(Boolean))],
-      weight: [...new Set(players.map(p => p.weight).filter(Boolean))],
+      totalWeight: [...new Set(players.map(p => p.totalWeight).filter(Boolean))],
       sponsor: [...new Set(players.map(p => p.sponsor).filter(Boolean))],
     };
     return options;
@@ -77,6 +88,11 @@ const HomePage = () => {
   useEffect(() => {
     fetchPlayers();
   }, [fetchPlayers]);
+
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('playerFilters', JSON.stringify(filters));
+  }, [filters]);
 
   console.log('players', players);
 
@@ -116,6 +132,15 @@ const HomePage = () => {
             }
           }
 
+          if (key === 'weightComplete') {
+            if (value === 'yes') {
+              return player.weightImage && player.weightLocation;
+            } else if (value === 'no') {
+              return !player.weightImage || !player.weightLocation;
+            }
+            return true;
+          }
+
           return (
             player[key] &&
             player[key].toLowerCase().includes(value.toLowerCase())
@@ -132,7 +157,7 @@ const HomePage = () => {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       paddle: '',
       paddleThickness: '',
       paddleShape: '',
@@ -141,9 +166,12 @@ const HomePage = () => {
       currentLocation: '',
       ageRange: '',
       overgrips: '',
-      weight: '',
+      totalWeight: '',
+      weightComplete: '',
       sponsor: '',
-    });
+    };
+    setFilters(clearedFilters);
+    localStorage.setItem('playerFilters', JSON.stringify(clearedFilters));
   };
 
   const activeFiltersCount = Object.values(filters).filter(
@@ -450,20 +478,36 @@ const HomePage = () => {
 
               <Box>
                 <Text fontWeight='bold' mb={2}>
-                  Weight
+                  Total Weight
                 </Text>
                 <Select
-                  placeholder='All weights'
-                  value={filters.weight}
+                  placeholder='All total weights'
+                  value={filters.totalWeight}
                   onChange={e =>
-                    setFilters({ ...filters, weight: e.target.value })
+                    setFilters({ ...filters, totalWeight: e.target.value })
                   }
                 >
-                  {filterOptions.weight.map(weight => (
-                    <option key={weight} value={weight}>
-                      {weight}
+                  {filterOptions.totalWeight.map(totalWeight => (
+                    <option key={totalWeight} value={totalWeight}>
+                      {totalWeight}
                     </option>
                   ))}
+                </Select>
+              </Box>
+
+              <Box>
+                <Text fontWeight='bold' mb={2}>
+                  Weight Info
+                </Text>
+                <Select
+                  placeholder='All players'
+                  value={filters.weightComplete}
+                  onChange={e =>
+                    setFilters({ ...filters, weightComplete: e.target.value })
+                  }
+                >
+                  <option value='yes'>Known weight setup</option>
+                  <option value='no'>Unknown weight setup</option>
                 </Select>
               </Box>
 
