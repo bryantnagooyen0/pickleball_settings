@@ -35,7 +35,7 @@ router.post('/signup', async (req, res) => {
 // POST /login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, rememberMe } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -51,10 +51,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Set token expiration based on remember me option
+    const tokenExpiration = rememberMe ? '30d' : '7d';
+
     const token = jwt.sign(
       { id: user._id.toString(), role: user.role, username: user.username },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: tokenExpiration }
     );
 
     return res.status(200).json({ token, username: user.username });

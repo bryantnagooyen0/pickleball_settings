@@ -82,8 +82,12 @@ export const updatePaddle = async (req, res) => {
       new: true,
     });
 
-    // Find all players who are using this paddle and update their paddle specifications
-    const playersToUpdate = await Player.find({ paddle: originalPaddle.name });
+    // Find all players who are using this paddle (matching name, shape, and thickness) and update their paddle specifications
+    const playersToUpdate = await Player.find({
+      paddle: originalPaddle.name,
+      ...(originalPaddle.shape && { paddleShape: originalPaddle.shape }),
+      ...(originalPaddle.thickness && { paddleThickness: originalPaddle.thickness })
+    });
 
     if (playersToUpdate.length > 0) {
       const updatePromises = playersToUpdate.map(player => {

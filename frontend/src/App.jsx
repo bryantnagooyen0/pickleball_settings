@@ -1,5 +1,5 @@
-import { Box } from '@chakra-ui/react';
-import { Routes, Route } from 'react-router-dom';
+import { Box, Spinner, Center } from '@chakra-ui/react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
 import HomePage from './pages/HomePage';
@@ -10,6 +10,37 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AccountPage from './pages/AccountPage';
+import { useAuth } from './hooks/useAuth';
+
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <Center minH="100vh">
+        <Spinner size="xl" color="blue.500" />
+      </Center>
+    );
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// Public Route component (redirect to home if already authenticated)
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <Center minH="100vh">
+        <Spinner size="xl" color="blue.500" />
+      </Center>
+    );
+  }
+  
+  return isAuthenticated ? <Navigate to="/" replace /> : children;
+};
 
 function App() {
   return (
@@ -18,14 +49,14 @@ function App() {
         <Navbar />
         <Routes>
           <Route path='/' element={<HomePage />} />
-          <Route path='/create' element={<CreatePage />} />
-          <Route path='/edit/:playerId' element={<EditPage />} />
+          <Route path='/create' element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
+          <Route path='/edit/:playerId' element={<ProtectedRoute><EditPage /></ProtectedRoute>} />
           <Route path='/player/:playerId' element={<PlayerDetailPage />} />
-          <Route path='/paddles' element={<PaddleManagementPage />} />
+          <Route path='/paddles' element={<ProtectedRoute><PaddleManagementPage /></ProtectedRoute>} />
           <Route path='/paddle/:paddleId' element={<PaddleDetailPage />} />
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/signup' element={<SignupPage />} />
-          <Route path='/account' element={<AccountPage />} />
+          <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path='/signup' element={<PublicRoute><SignupPage /></PublicRoute>} />
+          <Route path='/account' element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         </Routes>
       </Box>
     </>

@@ -9,15 +9,19 @@ import {
   Input,
   Stack,
   useToast,
+  Checkbox,
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +30,7 @@ function LoginPage() {
       const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, rememberMe }),
       });
 
       const data = await res.json();
@@ -34,10 +38,8 @@ function LoginPage() {
         throw new Error(data?.message || 'Login failed');
       }
 
-      localStorage.setItem('token', data.token);
-      if (data.username) {
-        localStorage.setItem('username', data.username);
-      }
+      // Use the auth hook to handle login
+      login(data.token, data.username, rememberMe);
       toast({ title: 'Logged in', status: 'success', duration: 2000, isClosable: true });
       navigate('/');
     } catch (err) {
@@ -61,6 +63,15 @@ function LoginPage() {
           <FormControl isRequired>
             <FormLabel>Password</FormLabel>
             <Input type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
+          </FormControl>
+          <FormControl>
+            <Checkbox 
+              isChecked={rememberMe} 
+              onChange={(e) => setRememberMe(e.target.checked)}
+              colorScheme='blue'
+            >
+              Remember me
+            </Checkbox>
           </FormControl>
           <Button type='submit' colorScheme='blue' isLoading={loading}>
             Login

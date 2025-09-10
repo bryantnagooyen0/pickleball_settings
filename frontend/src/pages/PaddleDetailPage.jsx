@@ -36,12 +36,25 @@ const PaddleDetailPage = () => {
         const foundPaddle = paddles.find(p => p._id === paddleId);
         if (foundPaddle) {
           setPaddle(foundPaddle);
-          // Find players using this paddle
-          const usingPaddle = players.filter(player => 
-            player.paddle === foundPaddle.name || 
-            (player.paddleBrand && player.paddleModel && 
-             `${player.paddleBrand} ${player.paddleModel}`.toLowerCase() === foundPaddle.name.toLowerCase())
-          );
+          // Find players using this paddle (matching name, shape, and thickness)
+          const usingPaddle = players.filter(player => {
+            // First check if paddle name matches
+            const nameMatches = player.paddle === foundPaddle.name || 
+              (player.paddleBrand && player.paddleModel && 
+               `${player.paddleBrand} ${player.paddleModel}`.toLowerCase() === foundPaddle.name.toLowerCase());
+            
+            if (!nameMatches) return false;
+            
+            // Then check if shape matches (if both have shape specified)
+            const shapeMatches = !foundPaddle.shape || !player.paddleShape || 
+              player.paddleShape.toLowerCase() === foundPaddle.shape.toLowerCase();
+            
+            // Then check if thickness matches (if both have thickness specified)
+            const thicknessMatches = !foundPaddle.thickness || !player.paddleThickness || 
+              player.paddleThickness.toLowerCase() === foundPaddle.thickness.toLowerCase();
+            
+            return shapeMatches && thicknessMatches;
+          });
           setPlayersUsingPaddle(usingPaddle);
         } else {
           toast({
@@ -262,11 +275,24 @@ const PaddleDetailPage = () => {
                     onPlayerDeleted={() => {
                       // Refresh the players list when a player is deleted
                       fetchPlayers().then(() => {
-                        const usingPaddle = players.filter(p => 
-                          p.paddle === paddle.name || 
-                          (p.paddleBrand && p.paddleModel && 
-                           `${p.paddleBrand} ${p.paddleModel}`.toLowerCase() === paddle.name.toLowerCase())
-                        );
+                        const usingPaddle = players.filter(p => {
+                          // First check if paddle name matches
+                          const nameMatches = p.paddle === paddle.name || 
+                            (p.paddleBrand && p.paddleModel && 
+                             `${p.paddleBrand} ${p.paddleModel}`.toLowerCase() === paddle.name.toLowerCase());
+                          
+                          if (!nameMatches) return false;
+                          
+                          // Then check if shape matches (if both have shape specified)
+                          const shapeMatches = !paddle.shape || !p.paddleShape || 
+                            p.paddleShape.toLowerCase() === paddle.shape.toLowerCase();
+                          
+                          // Then check if thickness matches (if both have thickness specified)
+                          const thicknessMatches = !paddle.thickness || !p.paddleThickness || 
+                            p.paddleThickness.toLowerCase() === paddle.thickness.toLowerCase();
+                          
+                          return shapeMatches && thicknessMatches;
+                        });
                         setPlayersUsingPaddle(usingPaddle);
                       });
                     }}

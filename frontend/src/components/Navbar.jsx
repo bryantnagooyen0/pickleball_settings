@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -17,53 +17,17 @@ import {
   AlertDialogFooter,
 } from '@chakra-ui/react';
 import { PlusSquareIcon, SettingsIcon } from '@chakra-ui/icons';
+import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
-  const [hasToken, setHasToken] = useState(!!localStorage.getItem('token'));
-  const [userRole, setUserRole] = useState(null);
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef();
 
-  // Helper function to decode JWT and get role
-  const getRoleFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role || null;
-    } catch {
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    const handleStorage = () => {
-      setHasToken(!!localStorage.getItem('token'));
-      setUserRole(getRoleFromToken());
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
-
-  useEffect(() => {
-    // Sync on mount in case token was set in this tab
-    setHasToken(!!localStorage.getItem('token'));
-    setUserRole(getRoleFromToken());
-  }, []);
-
-  useEffect(() => {
-    // Update when route changes (e.g., after login navigation)
-    setHasToken(!!localStorage.getItem('token'));
-    setUserRole(getRoleFromToken());
-  }, [location]);
-
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    setHasToken(false);
-    setUserRole(null);
+    logout();
     navigate('/');
   };
   return (
@@ -114,7 +78,7 @@ const Navbar = () => {
         </HStack>
 
         <HStack spacing={2} alignItems={'center'}>
-          {userRole === 'admin' && (
+          {user?.role === 'admin' && (
             <Link to={'/create'}>
               <Button>
                 <PlusSquareIcon fontSize={20} />
@@ -122,7 +86,7 @@ const Navbar = () => {
             </Link>
           )}
 
-          {hasToken ? (
+          {isAuthenticated ? (
             <>
               <Link to={'/account'}>
                 <Button variant={'outline'}>My Account</Button>
