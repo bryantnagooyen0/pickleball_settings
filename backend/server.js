@@ -12,9 +12,9 @@ dotenv.config({ path: path.resolve('./backend/.env') });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Simple CORS configuration
+// CORS configuration - allow all origins for now
 app.use(cors({
-  origin: ['https://pickleball-settings.vercel.app', 'http://localhost:5173'],
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
