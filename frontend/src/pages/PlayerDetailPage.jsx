@@ -17,6 +17,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import EquipmentModule from '../components/EquipmentModule';
 import { usePaddleStore } from '../store/paddle';
+import { api } from '../utils/api';
 
 // Helper function to decode JWT and get role
 const getRoleFromToken = () => {
@@ -41,11 +42,8 @@ const PlayerDetailPage = () => {
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
-        const response = await fetch(`/api/players/${playerId}`);
-        if (response.ok) {
-          const result = await response.json();
-          setPlayer(result.data);
-        } else {
+        const result = await api.get(`/api/players/${playerId}`);
+        setPlayer(result.data);
           toast({
             title: 'Error',
             description: 'Player not found',

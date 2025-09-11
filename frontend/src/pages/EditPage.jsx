@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '../store/player';
+import { api } from '../utils/api';
 import PaddleSelector from '../components/PaddleSelector';
 
 const EditPage = () => {
@@ -72,10 +73,8 @@ const EditPage = () => {
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
-        const response = await fetch(`/api/players/${playerId}`);
-        if (response.ok) {
-          const result = await response.json();
-          setPlayer(result.data);
+        const result = await api.get(`/api/players/${playerId}`);
+        setPlayer(result.data);
 
           // Set selected paddle if player has paddle data
           if (result.data.paddle) {

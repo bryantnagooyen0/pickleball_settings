@@ -28,6 +28,7 @@ import {
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../utils/api';
 
 // Helper function to decode JWT and get role
 const getRoleFromToken = () => {
@@ -75,18 +76,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
 
   const handleUpdate = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/players/${player._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(editPlayer),
-      });
-
-      if (response.ok) {
-        const updatedPlayer = await response.json();
+      const updatedPlayer = await api.put(`/api/players/${player._id}`, editPlayer);
         onClose();
         toast({
           title: 'Success',
@@ -117,15 +107,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/players/${player._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
+      await api.delete(`/api/players/${player._id}`);
         toast({
           title: 'Success',
           description: 'Player deleted successfully',

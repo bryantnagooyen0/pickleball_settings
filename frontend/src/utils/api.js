@@ -14,14 +14,6 @@ export const apiRequest = async (endpoint, options = {}) => {
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${endpoint}`;
   
-  // Debug logging
-  console.log('API Request:', {
-    endpoint,
-    baseUrl,
-    fullUrl: url,
-    env: import.meta.env.PROD ? 'production' : 'development',
-    viteApiUrl: import.meta.env.VITE_API_URL
-  });
   
   const defaultOptions = {
     headers: {

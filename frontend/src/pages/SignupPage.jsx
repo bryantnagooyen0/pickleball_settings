@@ -11,6 +11,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../utils/api';
 
 function SignupPage() {
   const [username, setUsername] = useState('');
@@ -28,16 +29,7 @@ function SignupPage() {
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/users/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.message || 'Signup failed');
-      }
+      const data = await api.post('/api/users/signup', { username, password });
 
       toast({ title: 'Account created', status: 'success', duration: 2000, isClosable: true });
       navigate('/login');
