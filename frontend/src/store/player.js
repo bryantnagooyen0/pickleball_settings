@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api } from '../utils/api';
 
 export const usePlayerStore = create(set => ({
   players: [],
@@ -6,11 +7,8 @@ export const usePlayerStore = create(set => ({
 
   fetchPlayers: async () => {
     try {
-      const res = await fetch('/api/players');
-      const data = await res.json();
-      if (res.ok) {
-        set({ players: data.data });
-      }
+      const data = await api.get('/api/players');
+      set({ players: data.data });
     } catch (error) {
       console.error('Error fetching players:', error);
     }
@@ -18,11 +16,8 @@ export const usePlayerStore = create(set => ({
 
   refreshPlayers: async () => {
     try {
-      const res = await fetch('/api/players');
-      const data = await res.json();
-      if (res.ok) {
-        set({ players: data.data });
-      }
+      const data = await api.get('/api/players');
+      set({ players: data.data });
     } catch (error) {
       console.error('Error refreshing players:', error);
     }
@@ -33,28 +28,12 @@ export const usePlayerStore = create(set => ({
       return { success: false, message: 'Please fill in all fields.' };
     }
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/players', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(newPlayer),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        set(state => ({ players: [...state.players, data.data] }));
-        return { success: true, message: 'Player created successfully' };
-      } else {
-        return {
-          success: false,
-          message: data.message || 'Failed to create player',
-        };
-      }
+      const data = await api.post('/api/players', newPlayer);
+      set(state => ({ players: [...state.players, data.data] }));
+      return { success: true, message: 'Player created successfully' };
     } catch (error) {
       console.error('Error creating player:', error);
-      return { success: false, message: 'Failed to create player' };
+      return { success: false, message: error.message || 'Failed to create player' };
     }
   },
 
@@ -63,50 +42,26 @@ export const usePlayerStore = create(set => ({
       return { success: false, message: 'Please fill in all required fields.' };
     }
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/players/${playerId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(updatedPlayer),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        set(state => ({
-          players: state.players.map(player =>
-            player._id === playerId ? data.data : player
-          ),
-        }));
-        return { success: true, message: 'Player updated successfully' };
-      } else {
-        return {
-          success: false,
-          message: data.message || 'Failed to update player',
-        };
-      }
+      const data = await api.put(`/api/players/${playerId}`, updatedPlayer);
+      set(state => ({
+        players: state.players.map(player =>
+          player._id === playerId ? data.data : player
+        ),
+      }));
+      return { success: true, message: 'Player updated successfully' };
     } catch (error) {
       console.error('Error updating player:', error);
-      return { success: false, message: 'Failed to update player' };
+      return { success: false, message: error.message || 'Failed to update player' };
     }
   },
 
   getPlayer: async playerId => {
     try {
-      const res = await fetch(`/api/players/${playerId}`);
-      const data = await res.json();
-      if (res.ok) {
-        return { success: true, data: data.data };
-      } else {
-        return {
-          success: false,
-          message: data.message || 'Failed to fetch player',
-        };
-      }
+      const data = await api.get(`/api/players/${playerId}`);
+      return { success: true, data: data.data };
     } catch (error) {
       console.error('Error fetching player:', error);
-      return { success: false, message: 'Failed to fetch player' };
+      return { success: false, message: error.message || 'Failed to fetch player' };
     }
   },
 }));

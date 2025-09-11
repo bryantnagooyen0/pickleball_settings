@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { api } from '../utils/api';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -27,16 +28,7 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, rememberMe }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.message || 'Login failed');
-      }
+      const data = await api.post('/api/users/login', { username, password, rememberMe });
 
       // Use the auth hook to handle login
       login(data.token, data.username, rememberMe);
