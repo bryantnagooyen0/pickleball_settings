@@ -3,7 +3,7 @@
 const getApiBaseUrl = () => {
   // In production, use the environment variable or fallback to a default
   if (import.meta.env.PROD) {
-    return import.meta.env.VITE_API_URL || 'https://your-backend-url.onrender.com';
+    return import.meta.env.VITE_API_URL || 'https://pickleball-settings.onrender.com';
   }
   
   // In development, use the proxy (relative URL)
@@ -13,6 +13,15 @@ const getApiBaseUrl = () => {
 export const apiRequest = async (endpoint, options = {}) => {
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${endpoint}`;
+  
+  // Debug logging
+  console.log('API Request:', {
+    endpoint,
+    baseUrl,
+    fullUrl: url,
+    env: import.meta.env.PROD ? 'production' : 'development',
+    viteApiUrl: import.meta.env.VITE_API_URL
+  });
   
   const defaultOptions = {
     headers: {
