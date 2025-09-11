@@ -52,7 +52,7 @@ function App() {
           <Route path='/create' element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
           <Route path='/edit/:playerId' element={<ProtectedRoute><EditPage /></ProtectedRoute>} />
           <Route path='/player/:playerId' element={<PlayerDetailPage />} />
-          <Route path='/paddles' element={<ProtectedRoute><PaddleManagementPage /></ProtectedRoute>} />
+          <Route path='/paddles' element={<PaddleManagementPage />} />
           <Route path='/paddle/:paddleId' element={<PaddleDetailPage />} />
           <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path='/signup' element={<PublicRoute><SignupPage /></PublicRoute>} />

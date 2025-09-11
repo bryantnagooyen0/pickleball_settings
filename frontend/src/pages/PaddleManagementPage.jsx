@@ -76,6 +76,7 @@ const PaddleManagementPage = () => {
     core: '',
     image: '',
     description: '',
+    priceLink: '',
   });
 
   useEffect(() => {
@@ -157,6 +158,7 @@ const PaddleManagementPage = () => {
       core: paddle.core || '',
       image: paddle.image || '',
       description: paddle.description || '',
+      priceLink: paddle.priceLink || '',
     });
     setIsEditing(true);
     onOpen();
@@ -200,6 +202,7 @@ const PaddleManagementPage = () => {
       core: '',
       image: '',
       description: '',
+      priceLink: '',
     });
     setSelectedPaddle(null);
     setIsEditing(false);
@@ -220,6 +223,7 @@ const PaddleManagementPage = () => {
       core: '',
       image: '',
       description: '',
+      priceLink: '',
     });
     onOpen();
   };
@@ -482,6 +486,13 @@ const PaddleManagementPage = () => {
                 value={paddleForm.image}
                 onChange={e =>
                   setPaddleForm({ ...paddleForm, image: e.target.value })
+                }
+              />
+              <Input
+                placeholder='Price Link (e.g., Amazon, manufacturer website)'
+                value={paddleForm.priceLink}
+                onChange={e =>
+                  setPaddleForm({ ...paddleForm, priceLink: e.target.value })
                 }
               />
               <Textarea

@@ -65,11 +65,10 @@ const PlayerDetailPage = () => {
 
   // Enhance player data with paddle template information when paddles are loaded
   useEffect(() => {
-    if (player && paddles.length > 0 && !player.paddleCore && player.paddle) {
-      // If player has a paddle but missing core details, try to find the paddle template
+    if (player && paddles.length > 0 && player.paddle && !player.paddlePriceLink) {
       const paddleTemplate = paddles.find(p => p.name === player.paddle);
-      if (paddleTemplate) {
-        // Merge paddle template data with player data
+      
+      if (paddleTemplate && paddleTemplate.priceLink) {
         const enhancedPlayerData = {
           ...player,
           paddleCore: player.paddleCore || paddleTemplate.core || '',
@@ -77,19 +76,18 @@ const PlayerDetailPage = () => {
           paddleBrand: player.paddleBrand || paddleTemplate.brand || '',
           paddleModel: player.paddleModel || paddleTemplate.model || '',
           paddleShape: player.paddleShape || paddleTemplate.shape || '',
-          paddleThickness:
-            player.paddleThickness || paddleTemplate.thickness || '',
-          paddleHandleLength:
-            player.paddleHandleLength || paddleTemplate.handleLength || '',
+          paddleThickness: player.paddleThickness || paddleTemplate.thickness || '',
+          paddleHandleLength: player.paddleHandleLength || paddleTemplate.handleLength || '',
           paddleLength: player.paddleLength || paddleTemplate.length || '',
           paddleWidth: player.paddleWidth || paddleTemplate.width || '',
           paddleColor: player.paddleColor || paddleTemplate.color || '',
           paddleImage: player.paddleImage || paddleTemplate.image || '',
+          paddlePriceLink: paddleTemplate.priceLink,
         };
         setPlayer(enhancedPlayerData);
       }
     }
-  }, [paddles.length, player?.paddle, player?.paddleCore]);
+  }, [paddles.length, player?.paddle, player?.paddlePriceLink]);
 
   if (loading) {
     return (

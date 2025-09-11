@@ -57,8 +57,16 @@ const EquipmentModule = ({
   hideProductDisplay = false,
 }) => {
   const handleCheckPrice = (item = null) => {
-    // TODO: Implement price checking functionality
-    console.log('Check price for:', item || nameField);
+    // Get the price link from the player data
+    const priceLink = player.paddlePriceLink;
+    
+    if (priceLink && priceLink.trim() !== '') {
+      // Open the price link in a new tab
+      window.open(priceLink, '_blank', 'noopener,noreferrer');
+    } else {
+      // If no price link is available, show a message
+      alert('No price link available for this paddle. Please add a price link when editing the paddle.');
+    }
   };
 
   const getIcon = () => {
