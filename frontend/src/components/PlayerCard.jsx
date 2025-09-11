@@ -77,21 +77,20 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   const handleUpdate = async () => {
     try {
       const updatedPlayer = await api.put(`/api/players/${player._id}`, editPlayer);
-        onClose();
-        toast({
-          title: 'Success',
-          description: 'Player updated successfully',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        // Update the local player data
-        Object.assign(player, updatedPlayer.data);
-        // Force a re-render by updating the component
-        setEditPlayer({ ...editPlayer, ...updatedPlayer.data });
-        // Refresh the page to show updated data
-        window.location.reload();
-      }
+      onClose();
+      toast({
+        title: 'Success',
+        description: 'Player updated successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      // Update the local player data
+      Object.assign(player, updatedPlayer.data);
+      // Force a re-render by updating the component
+      setEditPlayer({ ...editPlayer, ...updatedPlayer.data });
+      // Refresh the page to show updated data
+      window.location.reload();
     } catch (error) {
       console.error('Error updating player:', error);
       toast({
@@ -108,22 +107,19 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
     setIsDeleting(true);
     try {
       await api.delete(`/api/players/${player._id}`);
-        toast({
-          title: 'Success',
-          description: 'Player deleted successfully',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        setIsDeleteOpen(false);
-        // Call the callback to refresh the players list
-        if (onPlayerDeleted) {
-          onPlayerDeleted();
-        } else {
-          window.location.reload();
-        }
+      toast({
+        title: 'Success',
+        description: 'Player deleted successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsDeleteOpen(false);
+      // Call the callback to refresh the players list
+      if (onPlayerDeleted) {
+        onPlayerDeleted();
       } else {
-        throw new Error('Failed to delete player');
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error deleting player:', error);

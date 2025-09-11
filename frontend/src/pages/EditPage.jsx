@@ -76,32 +76,22 @@ const EditPage = () => {
         const result = await api.get(`/api/players/${playerId}`);
         setPlayer(result.data);
 
-          // Set selected paddle if player has paddle data
-          if (result.data.paddle) {
-            setSelectedPaddle({
-              name: result.data.paddle,
-              brand: result.data.paddleBrand || '',
-              model: result.data.paddleModel || '',
-              shape: result.data.paddleShape || '',
-              thickness: result.data.paddleThickness || '',
-              handleLength: result.data.paddleHandleLength || '',
-              length: result.data.paddleLength || '',
-              width: result.data.paddleWidth || '',
-              color: result.data.paddleColor || '',
-              image: result.data.paddleImage || '',
-              core: result.data.paddleCore || '',
-              weight: result.data.paddleWeight || '',
-            });
-          }
-        } else {
-          toast({
-            title: 'Error',
-            description: 'Player not found',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
+        // Set selected paddle if player has paddle data
+        if (result.data.paddle) {
+          setSelectedPaddle({
+            name: result.data.paddle,
+            brand: result.data.paddleBrand || '',
+            model: result.data.paddleModel || '',
+            shape: result.data.paddleShape || '',
+            thickness: result.data.paddleThickness || '',
+            handleLength: result.data.paddleHandleLength || '',
+            length: result.data.paddleLength || '',
+            width: result.data.paddleWidth || '',
+            color: result.data.paddleColor || '',
+            image: result.data.paddleImage || '',
+            core: result.data.paddleCore || '',
+            weight: result.data.paddleWeight || '',
           });
-          navigate('/');
         }
       } catch (error) {
         console.error('Error fetching player:', error);

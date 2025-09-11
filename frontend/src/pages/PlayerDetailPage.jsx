@@ -44,15 +44,6 @@ const PlayerDetailPage = () => {
       try {
         const result = await api.get(`/api/players/${playerId}`);
         setPlayer(result.data);
-          toast({
-            title: 'Error',
-            description: 'Player not found',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-          navigate('/');
-        }
       } catch (error) {
         console.error('Error fetching player:', error);
         toast({
