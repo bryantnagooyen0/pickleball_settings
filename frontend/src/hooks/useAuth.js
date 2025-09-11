@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { create } from 'zustand';
 
-export const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+// Shared auth store so all components subscribe to the same state
+const useAuthStoreInternal = create((set, get) => ({
+  isAuthenticated: false,
+  user: null,
+  loading: true,
 
-  // Helper function to decode JWT token
-  const decodeToken = (token) => {
+  decodeToken: (token) => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload;
@@ -14,48 +15,39 @@ export const useAuth = () => {
       console.error('Error decoding token:', error);
       return null;
     }
-  };
+  },
 
-  // Check if token is expired
-  const isTokenExpired = (token) => {
+  isTokenExpired: (token) => {
+    const { decodeToken } = get();
     const decoded = decodeToken(token);
     if (!decoded || !decoded.exp) return true;
-    
     const currentTime = Date.now() / 1000;
     return decoded.exp < currentTime;
-  };
+  },
 
-  // Initialize authentication state on app startup
-  useEffect(() => {
-    const initializeAuth = () => {
-      const token = localStorage.getItem('token');
-      const rememberMe = localStorage.getItem('rememberMe');
-      
-      if (token && !isTokenExpired(token)) {
-        const decoded = decodeToken(token);
-        if (decoded) {
-          setUser({
-            id: decoded.id,
-            username: decoded.username,
-            role: decoded.role
-          });
-          setIsAuthenticated(true);
-        }
-      } else if (token && isTokenExpired(token)) {
-        // Token is expired, clear it
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('rememberMe');
+  initializeAuth: () => {
+    const { isTokenExpired, decodeToken } = get();
+    const token = localStorage.getItem('token');
+    if (token && !isTokenExpired(token)) {
+      const decoded = decodeToken(token);
+      if (decoded) {
+        set({
+          user: { id: decoded.id, username: decoded.username, role: decoded.role },
+          isAuthenticated: true,
+          loading: false,
+        });
+        return;
       }
-      
-      setLoading(false);
-    };
+    } else if (token && isTokenExpired(token)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('rememberMe');
+    }
+    set({ loading: false, isAuthenticated: false, user: null });
+  },
 
-    initializeAuth();
-  }, []);
-
-  // Login function
-  const login = (token, username, rememberMe = false) => {
+  login: (token, username, rememberMe = false) => {
+    const { decodeToken } = get();
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     if (rememberMe) {
@@ -63,45 +55,41 @@ export const useAuth = () => {
     } else {
       localStorage.removeItem('rememberMe');
     }
-    
     const decoded = decodeToken(token);
     if (decoded) {
-      setUser({
-        id: decoded.id,
-        username: decoded.username,
-        role: decoded.role
+      set({
+        user: { id: decoded.id, username: decoded.username, role: decoded.role },
+        isAuthenticated: true,
       });
-      setIsAuthenticated(true);
     }
-  };
+  },
 
-  // Logout function
-  const logout = () => {
+  logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('rememberMe');
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+    set({ user: null, isAuthenticated: false });
+  },
 
-  // Check if user has specific role
-  const hasRole = (role) => {
+  hasRole: (role) => {
+    const { user } = get();
     return user && user.role === role;
-  };
+  },
 
-  // Get auth headers for API requests
-  const getAuthHeaders = () => {
+  getAuthHeaders: () => {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
-  };
+  },
+}));
 
-  return {
-    isAuthenticated,
-    user,
-    loading,
-    login,
-    logout,
-    hasRole,
-    getAuthHeaders
-  };
+// Public hook that initializes once per app load and subscribes to store state
+export const useAuth = () => {
+  const state = useAuthStoreInternal();
+
+  useEffect(() => {
+    state.initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return state;
 };

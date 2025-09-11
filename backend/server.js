@@ -7,7 +7,7 @@ import paddleRoutes from './routes/paddle.route.js';
 import userRoutes from './controllers/users_controller.mjs';
 import cors from 'cors';
 
-dotenv.config({ path: path.resolve('./backend/.env') });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
