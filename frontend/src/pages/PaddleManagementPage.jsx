@@ -114,6 +114,7 @@ const PaddleManagementPage = () => {
       return;
     }
 
+
     const result = isEditing
       ? await updatePaddle(selectedPaddle._id, paddleForm)
       : await createPaddle(paddleForm);

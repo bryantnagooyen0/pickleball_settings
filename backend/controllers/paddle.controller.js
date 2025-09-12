@@ -62,6 +62,7 @@ export const updatePaddle = async (req, res) => {
   const { id } = req.params;
   const paddleData = req.body;
 
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res
       .status(404)
@@ -102,6 +103,7 @@ export const updatePaddle = async (req, res) => {
           paddleWidth: paddleData.width || player.paddleWidth,
           paddleCore: paddleData.core || player.paddleCore,
           paddleImage: paddleData.image || player.paddleImage,
+          paddlePriceLink: paddleData.priceLink || player.paddlePriceLink,
         };
 
         return Player.findByIdAndUpdate(player._id, playerUpdate, {
@@ -110,9 +112,6 @@ export const updatePaddle = async (req, res) => {
       });
 
       await Promise.all(updatePromises);
-      console.log(
-        `Updated ${playersToUpdate.length} players using paddle: ${originalPaddle.name}`
-      );
     }
 
     res.status(200).json({
