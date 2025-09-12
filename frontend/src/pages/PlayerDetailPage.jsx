@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import EquipmentModule from '../components/EquipmentModule';
+import CommentSection from '../components/CommentSection';
 import { usePaddleStore } from '../store/paddle';
 import { api } from '../utils/api';
 
@@ -303,6 +304,22 @@ const PlayerDetailPage = () => {
                   Back to List
                 </Button>
               </HStack>
+
+              {/* Comments Section */}
+              <Box
+                w='full'
+                bg='white'
+                borderRadius='lg'
+                boxShadow='lg'
+                border='1px solid'
+                borderColor='gray.200'
+                overflow='hidden'
+                mt={6}
+              >
+                <Box p={8}>
+                  <CommentSection targetType="player" targetId={playerId} />
+                </Box>
+              </Box>
             </VStack>
           </Box>
         </Box>

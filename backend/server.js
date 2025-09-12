@@ -4,6 +4,7 @@ import path from 'path';
 import { connectDB } from './config/db.js';
 import playerRoutes from './routes/player.route.js';
 import paddleRoutes from './routes/paddle.route.js';
+import commentRoutes from './routes/comment.route.js';
 import userRoutes from './controllers/users_controller.mjs';
 import cors from 'cors';
 
@@ -34,6 +35,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/players', playerRoutes);
 app.use('/api/paddles', paddleRoutes);
+app.use('/api/comments', commentRoutes);
 app.use('/api/users', userRoutes);
 
 // Error handling middleware

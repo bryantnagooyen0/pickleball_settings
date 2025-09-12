@@ -18,6 +18,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import PlayerCard from '../components/PlayerCard';
+import CommentSection from '../components/CommentSection';
 
 const PaddleDetailPage = () => {
   const { paddleId } = useParams();
@@ -32,12 +33,17 @@ const PaddleDetailPage = () => {
   useEffect(() => {
     const loadPaddle = async () => {
       try {
-        await Promise.all([fetchPaddles(), fetchPlayers()]);
-        const foundPaddle = paddles.find(p => p._id === paddleId);
+        await Promise.all([fetchPaddles(true), fetchPlayers()]); // Force refresh paddles
+        
+        // Get fresh data from store after fetching
+        const { paddles: currentPaddles } = usePaddleStore.getState();
+        const { players: currentPlayerStore } = usePlayerStore.getState();
+        
+        const foundPaddle = currentPaddles.find(p => p._id === paddleId);
         if (foundPaddle) {
           setPaddle(foundPaddle);
           // Find players using this paddle (matching name, shape, and thickness)
-          const usingPaddle = players.filter(player => {
+          const usingPaddle = currentPlayerStore.filter(player => {
             // First check if paddle name matches
             const nameMatches = player.paddle === foundPaddle.name || 
               (player.paddleBrand && player.paddleModel && 
@@ -82,7 +88,7 @@ const PaddleDetailPage = () => {
     };
 
     loadPaddle();
-  }, [paddleId]); // Only depend on paddleId - other dependencies are stable
+  }, [paddleId]); // Only depend on paddleId
 
   if (loading) {
     return (
@@ -306,6 +312,22 @@ const PaddleDetailPage = () => {
                 </Text>
               </Box>
             )}
+
+            {/* Comments Section */}
+            <Box
+              w='full'
+              bg='white'
+              borderRadius='lg'
+              boxShadow='lg'
+              border='1px solid'
+              borderColor='gray.200'
+              overflow='hidden'
+              mt={6}
+            >
+              <Box p={8}>
+                <CommentSection targetType="paddle" targetId={paddleId} />
+              </Box>
+            </Box>
           </Box>
         </Box>
       </VStack>
