@@ -30,6 +30,31 @@ function AccountPage() {
           </VStack>
         </Box>
 
+        {/* My Setups Section */}
+        {token && (
+          <Box bg={'white'} p={6} rounded={'md'} shadow={'md'}>
+            <VStack align={'start'} spacing={4}>
+              <Heading size={'md'}>My Setups - Coming Soon</Heading>
+              <Text color={'gray.600'}>
+                This feature will allow you to view and manage your paddle setups. 
+                Stay tuned for updates!
+              </Text>
+              <Box 
+                bg={'gray.50'} 
+                p={4} 
+                rounded={'md'} 
+                w={'full'}
+                border={'1px dashed'}
+                borderColor={'gray.300'}
+              >
+                <Text fontSize={'sm'} color={'gray.500'} textAlign={'center'}>
+                   Setup management coming soon...
+                </Text>
+              </Box>
+            </VStack>
+          </Box>
+        )}
+
         {/* User Comments Section */}
         {token && (
           <Box

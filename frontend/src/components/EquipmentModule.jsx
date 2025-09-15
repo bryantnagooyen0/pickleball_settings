@@ -303,14 +303,16 @@ const EquipmentModule = ({
                     )}
                   </VStack>
                 </HStack>
-                <Button
-                  size='sm'
-                  colorScheme='blue'
-                  leftIcon={<FaShoppingBag />}
-                  onClick={() => handleCheckPrice(mod.field)}
-                >
-                  Check price
-                </Button>
+                {mod.field !== 'overgrips' && (
+                  <Button
+                    size='sm'
+                    colorScheme='blue'
+                    leftIcon={<FaShoppingBag />}
+                    onClick={() => handleCheckPrice(mod.field)}
+                  >
+                    Check price
+                  </Button>
+                )}
               </HStack>
             </Box>
           );
@@ -402,14 +404,16 @@ const EquipmentModule = ({
                   </HStack>
                 </VStack>
               </HStack>
-              <Button
-                size='sm'
-                colorScheme='blue'
-                leftIcon={<FaShoppingBag />}
-                onClick={() => handleCheckPrice()}
-              >
-                Check price
-              </Button>
+              {icon !== 'shoes' && (
+                <Button
+                  size='sm'
+                  colorScheme='blue'
+                  leftIcon={<FaShoppingBag />}
+                  onClick={() => handleCheckPrice()}
+                >
+                  Check price
+                </Button>
+              )}
             </HStack>
           </Box>
         )}
