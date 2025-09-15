@@ -130,6 +130,15 @@ const EquipmentModule = ({
           const imageField = mod.imageField || `${mod.field}Image`;
           const imageUrl = player[imageField];
           
+          // Skip overgrips if both text and image are not filled
+          if (mod.field === 'overgrips') {
+            const hasText = player[mod.field] && player[mod.field].trim() !== '';
+            const hasImage = imageUrl && imageUrl.trim() !== '';
+            if (!hasText && !hasImage) {
+              return null;
+            }
+          }
+          
           // Skip additional modification if both text and image are not filled
           if (mod.field === 'additionalModification') {
             const hasText = player[mod.field] && player[mod.field].trim() !== '';

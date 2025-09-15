@@ -67,7 +67,7 @@ const Navbar = () => {
           
           {/* Navigation Buttons */}
           <HStack spacing={2} alignItems={'center'}>
-            <Link to={'/'}>
+            <Link to={'/players'}>
               <Button variant={'outline'}>Players</Button>
             </Link>
             

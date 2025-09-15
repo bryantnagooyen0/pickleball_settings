@@ -2,6 +2,7 @@ import { Box, Spinner, Center } from '@chakra-ui/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
+import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import PlayerDetailPage from './pages/PlayerDetailPage';
 import PaddleManagementPage from './pages/PaddleManagementPage';
@@ -48,7 +49,8 @@ function App() {
       <Box minH={'100vh'} bg={'gray.100'}>
         <Navbar />
         <Routes>
-          <Route path='/' element={<HomePage />} />
+          <Route path='/' element={<LandingPage />} />
+          <Route path='/players' element={<HomePage />} />
           <Route path='/create' element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
           <Route path='/edit/:playerId' element={<ProtectedRoute><EditPage /></ProtectedRoute>} />
           <Route path='/player/:playerId' element={<PlayerDetailPage />} />

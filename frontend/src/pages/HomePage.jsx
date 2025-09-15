@@ -28,15 +28,21 @@ import {
 import React, { useState, useMemo } from 'react';
 import { usePlayerStore } from '../store/player';
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
 import { SearchIcon } from '@chakra-ui/icons';
 import { FaFilter } from 'react-icons/fa';
 
 const HomePage = () => {
   const { fetchPlayers, players } = usePlayerStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // Initialize search query from URL parameters
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const urlParams = new URLSearchParams(location.search);
+    return urlParams.get('search') || '';
+  });
 
   // Filter states - load from localStorage or use defaults
   const [filters, setFilters] = useState(() => {
@@ -88,6 +94,13 @@ const HomePage = () => {
   useEffect(() => {
     fetchPlayers();
   }, [fetchPlayers]);
+
+  // Update search query when URL changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchParam = urlParams.get('search') || '';
+    setSearchQuery(searchParam);
+  }, [location.search]);
 
   // Save filters to localStorage whenever they change
   useEffect(() => {
