@@ -1,5 +1,6 @@
 import { Box, Spinner, Center } from '@chakra-ui/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
 import LandingPage from './pages/LandingPage';
@@ -61,6 +62,7 @@ function App() {
           <Route path='/account' element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         </Routes>
       </Box>
+      <Analytics />
     </>
   );
 }
