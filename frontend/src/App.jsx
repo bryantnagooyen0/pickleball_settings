@@ -1,6 +1,7 @@
 import { Box, Spinner, Center } from '@chakra-ui/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { useEffect } from 'react';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
 import LandingPage from './pages/LandingPage';
@@ -13,6 +14,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AccountPage from './pages/AccountPage';
 import { useAuth } from './hooks/useAuth';
+import { keepAlive } from './utils/api';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -45,6 +47,17 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
+  // Keep backend alive - ping every 10 minutes
+  useEffect(() => {
+    // Initial ping
+    keepAlive();
+    
+    // Set up interval for keep-alive pings
+    const interval = setInterval(keepAlive, 10 * 60 * 1000); // 10 minutes
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <Box minH={'100vh'} bg={'gray.100'}>

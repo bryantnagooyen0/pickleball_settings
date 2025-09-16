@@ -23,13 +23,19 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check endpoint
+// Health check endpoint 
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     message: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
+});
+
+// Simple ping endpoint for faster checks
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
 });
 
 // API Routes
@@ -56,8 +62,16 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  connectDB();
+// Optimize for faster cold starts
+app.listen(PORT, async () => {
   console.log(`Server started on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Connect to database asynchronously to avoid blocking startup
+  try {
+    await connectDB();
+    console.log('Database connection established');
+  } catch (error) {
+    console.error('Database connection failed:', error.message);
+  }
 });

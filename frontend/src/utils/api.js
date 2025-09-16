@@ -51,6 +51,18 @@ export const apiRequest = async (endpoint, options = {}) => {
   }
 };
 
+// Keep-alive function to prevent Render from sleeping
+export const keepAlive = async () => {
+  try {
+    const baseUrl = getApiBaseUrl();
+    if (baseUrl) {
+      await fetch(`${baseUrl}/ping`, { method: 'GET' });
+    }
+  } catch (error) {
+    console.log('Keep-alive ping failed:', error.message);
+  }
+};
+
 // Convenience methods
 export const api = {
   get: (endpoint, options = {}) => apiRequest(endpoint, { ...options, method: 'GET' }),
