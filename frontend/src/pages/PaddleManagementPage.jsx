@@ -233,6 +233,18 @@ const PaddleManagementPage = () => {
     navigate(`/paddle/${paddle._id}`);
   };
 
+  const openInNewTab = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handlePaddleMouseDown = (e, paddle) => {
+    // Middle-click or Ctrl/Cmd + left-click opens in new tab
+    if (e.button === 1 || (e.button === 0 && (e.ctrlKey || e.metaKey))) {
+      e.preventDefault();
+      openInNewTab(`/paddle/${paddle._id}`);
+    }
+  };
+
   const handleButtonClick = (e, action, paddle) => {
     e.stopPropagation();
     if (action === 'edit') {
@@ -307,6 +319,7 @@ const PaddleManagementPage = () => {
               _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
               transition='all 0.2s'
               onClick={() => handlePaddleClick(paddle)}
+              onMouseDown={(e) => handlePaddleMouseDown(e, paddle)}
             >
               <VStack spacing={4} align='start'>
                 {paddle.image && (

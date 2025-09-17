@@ -19,6 +19,36 @@ import {
 import { PlusSquareIcon, SettingsIcon } from '@chakra-ui/icons';
 import { useAuth } from '../hooks/useAuth';
 
+// Custom Link component that handles middle-click properly
+const MiddleClickLink = ({ to, children, ...props }) => {
+  const handleClick = (e) => {
+    // If middle click (button 1) or Ctrl+click, open in new tab
+    if (e.button === 1 || (e.button === 0 && (e.ctrlKey || e.metaKey))) {
+      e.preventDefault();
+      window.open(to, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    // Handle middle click on mousedown
+    if (e.button === 1) {
+      e.preventDefault();
+      window.open(to, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  return (
+    <Link 
+      to={to} 
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+};
+
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
@@ -54,7 +84,7 @@ const Navbar = () => {
       >
         <HStack spacing={4} alignItems={'center'}>
           {/* Logo */}
-          <Link to={'/'}>
+          <MiddleClickLink to={'/'}>
             <Box>
                 <Image
                   src="/logo6.png" 
@@ -63,44 +93,44 @@ const Navbar = () => {
                 objectFit="contain"
               />
             </Box>
-          </Link>
+          </MiddleClickLink>
           
           {/* Navigation Buttons */}
           <HStack spacing={2} alignItems={'center'}>
-            <Link to={'/players'}>
+            <MiddleClickLink to={'/players'}>
               <Button variant={'outline'}>Players</Button>
-            </Link>
+            </MiddleClickLink>
             
-            <Link to={'/paddles'}>
+            <MiddleClickLink to={'/paddles'}>
               <Button variant={'outline'}>Paddles</Button>
-            </Link>
+            </MiddleClickLink>
           </HStack>
         </HStack>
 
         <HStack spacing={2} alignItems={'center'}>
           {user?.role === 'admin' && (
-            <Link to={'/create'}>
+            <MiddleClickLink to={'/create'}>
               <Button>
                 <PlusSquareIcon fontSize={20} />
               </Button>
-            </Link>
+            </MiddleClickLink>
           )}
 
           {isAuthenticated ? (
             <>
-              <Link to={'/account'}>
+              <MiddleClickLink to={'/account'}>
                 <Button variant={'outline'}>My Account</Button>
-              </Link>
+              </MiddleClickLink>
               <Button colorScheme={'red'} onClick={onOpen}>Log Out</Button>
             </>
           ) : (
             <>
-              <Link to={'/login'}>
+              <MiddleClickLink to={'/login'}>
                 <Button variant={'outline'}>Login</Button>
-              </Link>
-              <Link to={'/signup'}>
+              </MiddleClickLink>
+              <MiddleClickLink to={'/signup'}>
                 <Button colorScheme={'blue'}>Sign Up</Button>
-              </Link>
+              </MiddleClickLink>
             </>
           )}
         </HStack>

@@ -74,6 +74,10 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   const toast = useToast();
   const navigate = useNavigate();
 
+  const openInNewTab = url => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleUpdate = async () => {
     try {
       const updatedPlayer = await api.put(`/api/players/${player._id}`, editPlayer);
@@ -139,6 +143,14 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
     navigate(`/player/${player._id}`);
   };
 
+  const handleCardMouseDown = e => {
+    // Middle-click or Ctrl/Cmd + left-click opens in new tab
+    if (e.button === 1 || (e.button === 0 && (e.ctrlKey || e.metaKey))) {
+      e.preventDefault();
+      openInNewTab(`/player/${player._id}`);
+    }
+  };
+
   const handleButtonClick = (e, action) => {
     e.stopPropagation();
     if (action === 'edit') {
@@ -161,6 +173,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
         transition='all 0.2s'
         cursor='pointer'
         onClick={handleCardClick}
+        onMouseDown={handleCardMouseDown}
       >
         <Box p='6' display='flex' justifyContent='center' alignItems='center'>
           <Image
