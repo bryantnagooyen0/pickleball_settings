@@ -265,7 +265,7 @@ const PaddleManagementPage = () => {
           bgClip={'text'}
           textAlign={'center'}
         >
-          Paddle Management
+          Paddle List
         </Text>
 
         <HStack w='full' justify='space-between'>

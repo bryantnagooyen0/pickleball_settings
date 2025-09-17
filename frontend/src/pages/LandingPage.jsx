@@ -118,7 +118,7 @@ const LandingPage = () => {
                   <SearchIcon color="gray.400" />
                 </InputLeftElement>
                 <Input
-                  placeholder="Search players, paddles, or equipment..."
+                  placeholder="Search players by name or sponsor..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}

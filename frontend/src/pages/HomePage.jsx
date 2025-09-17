@@ -201,7 +201,7 @@ const HomePage = () => {
           bgClip={'text'}
           textAlign={'center'}
         >
-          Current Players
+          Player List
         </Text>
 
         {/* Search and Filter Bar */}
