@@ -7,6 +7,7 @@ import {
   getUserComments,
   getAllComments,
   adminDeleteComment,
+  voteComment,
 } from '../controllers/comment.controller.js';
 import { authMiddleware } from '../middleware/auth.js';
 
@@ -32,5 +33,8 @@ router.delete('/:id', authMiddleware, deleteComment);
 
 // Admin delete comment (hard delete) - protected route
 router.delete('/admin/:id', authMiddleware, adminDeleteComment);
+
+// Vote on a comment (protected route)
+router.post('/:id/vote', authMiddleware, voteComment);
 
 export default router;

@@ -29,7 +29,7 @@ export const getComments = async (req, res) => {
     })
       .populate('author', 'username role')
       .populate('parentComment', 'content author authorName')
-      .sort({ createdAt: 1 }); // Sort by creation time for proper threading
+      .sort({ createdAt: -1 }); // Sort by creation time descending (newest first)
 
     // Organize comments into a tree structure
     const commentMap = new Map();
@@ -131,14 +131,8 @@ export const createComment = async (req, res) => {
         });
       }
 
-      // Calculate depth (max 3 levels deep)
+      // Calculate depth (no limit since we display all replies at same level)
       depth = parentComment.depth + 1;
-      if (depth > 3) {
-        return res.status(400).json({
-          success: false,
-          message: 'Maximum reply depth exceeded',
-        });
-      }
     }
 
     const newComment = new Comment({
@@ -361,6 +355,97 @@ export const adminDeleteComment = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting comment:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+// Vote on a comment
+export const voteComment = async (req, res) => {
+  const { id } = req.params;
+  const { voteType } = req.body;
+  const userId = req.user.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid comment ID',
+    });
+  }
+
+  if (!['upvote', 'downvote'].includes(voteType)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid vote type. Must be "upvote" or "downvote"',
+    });
+  }
+
+  try {
+    const comment = await Comment.findById(id);
+
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    if (!comment.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot vote on deleted comment',
+      });
+    }
+
+    // Check if user already voted
+    const existingVote = comment.votes.find(vote => vote.user.toString() === userId);
+    
+    if (existingVote) {
+      // User already voted, check if it's the same vote type
+      if (existingVote.voteType === voteType) {
+        // Remove the vote (toggle off)
+        comment.votes = comment.votes.filter(vote => vote.user.toString() !== userId);
+        
+        // Update counters
+        if (voteType === 'upvote') {
+          comment.upvotes = Math.max(0, comment.upvotes - 1);
+        } else {
+          comment.downvotes = Math.max(0, comment.downvotes - 1);
+        }
+      } else {
+        // Change vote type
+        existingVote.voteType = voteType;
+        
+        // Update counters
+        if (voteType === 'upvote') {
+          comment.upvotes += 1;
+          comment.downvotes = Math.max(0, comment.downvotes - 1);
+        } else {
+          comment.downvotes += 1;
+          comment.upvotes = Math.max(0, comment.upvotes - 1);
+        }
+      }
+    } else {
+      // New vote
+      comment.votes.push({ user: userId, voteType });
+      
+      if (voteType === 'upvote') {
+        comment.upvotes += 1;
+      } else {
+        comment.downvotes += 1;
+      }
+    }
+
+    // Save without updating the updatedAt timestamp for votes
+    await comment.save({ timestamps: false });
+    await comment.populate('author', 'username role');
+
+    res.status(200).json({
+      success: true,
+      data: comment,
+      message: 'Vote updated successfully',
+    });
+  } catch (error) {
+    console.error('Error voting on comment:', error.message);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

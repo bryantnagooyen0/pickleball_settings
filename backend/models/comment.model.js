@@ -39,6 +39,26 @@ const commentSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    upvotes: {
+      type: Number,
+      default: 0,
+    },
+    downvotes: {
+      type: Number,
+      default: 0,
+    },
+    votes: [{
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+      },
+      voteType: {
+        type: String,
+        enum: ['upvote', 'downvote'],
+        required: true,
+      },
+    }],
   },
   {
     timestamps: true,
@@ -48,6 +68,7 @@ const commentSchema = new mongoose.Schema(
 // Index for efficient queries
 commentSchema.index({ targetType: 1, targetId: 1, createdAt: -1 });
 commentSchema.index({ parentComment: 1, createdAt: 1 });
+commentSchema.index({ 'votes.user': 1 });
 
 const Comment = mongoose.model('Comment', commentSchema);
 

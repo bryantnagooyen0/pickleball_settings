@@ -257,6 +257,48 @@ const useCommentStore = create((set, get) => ({
   // Clear admin error
   clearAdminError: () => {
     set({ adminError: null });
+  },
+
+  // Vote on a comment
+  voteComment: async (commentId, voteType) => {
+    set({ loading: true, error: null });
+    
+    try {
+      const response = await api.post(`/api/comments/${commentId}/vote`, { voteType });
+      
+      if (response.success) {
+        // Update the comment in all relevant comment arrays
+        set(state => {
+          const newComments = { ...state.comments };
+          
+          Object.keys(newComments).forEach(key => {
+            newComments[key] = newComments[key].map(comment => 
+              comment._id === commentId ? response.data : comment
+            );
+          });
+          
+          // Also update admin comments if they exist
+          const newAdminComments = state.adminComments.map(comment => 
+            comment._id === commentId ? response.data : comment
+          );
+          
+          return {
+            comments: newComments,
+            adminComments: newAdminComments,
+            loading: false
+          };
+        });
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Failed to vote on comment');
+      }
+    } catch (error) {
+      set({ 
+        error: error.message || 'Failed to vote on comment',
+        loading: false 
+      });
+      throw error;
+    }
   }
 }));
 

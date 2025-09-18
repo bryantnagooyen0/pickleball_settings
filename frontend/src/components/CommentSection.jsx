@@ -27,6 +27,7 @@ import { formatDistanceToNow } from 'date-fns';
 import useCommentStore from '../store/comment.js';
 import { useAuth } from '../hooks/useAuth.js';
 import ReplyButton from './ReplyButton.jsx';
+import VoteButtons from './VoteButtons.jsx';
 
 // Recursive CommentItem component for threaded comments
 const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) => {
@@ -127,7 +128,7 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
         borderColor="gray.200"
         borderRadius="md"
         bg="white"
-        ml={depth > 0 ? `${depth * 4}px` : '0'}
+        ml={depth > 0 ? '16px' : '0'}
         borderLeft={depth > 0 ? '3px solid' : 'none'}
         borderLeftColor={depth > 0 ? 'blue.200' : 'transparent'}
       >
@@ -223,33 +224,25 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
           </Text>
         )}
 
-        {/* Reply button and action buttons */}
-        {isAuthenticated && (
-          <HStack mt={3} spacing={2}>
+        {/* Vote buttons and reply button */}
+        <HStack mt={3} spacing={4} justify="space-between">
+          <VoteButtons 
+            comment={comment} 
+            targetType={targetType} 
+            targetId={targetId}
+          />
+          
+          {isAuthenticated && (
             <ReplyButton 
               comment={comment} 
               targetType={targetType} 
               targetId={targetId}
               onReply={onRefresh}
             />
-          </HStack>
-        )}
+          )}
+        </HStack>
 
-        {/* Render replies recursively */}
-        {comment.replies && comment.replies.length > 0 && (
-          <VStack align="stretch" spacing={2} mt={3}>
-            {comment.replies.map((reply) => (
-              <CommentItem
-                key={reply._id}
-                comment={reply}
-                targetType={targetType}
-                targetId={targetId}
-                depth={depth + 1}
-                onRefresh={onRefresh}
-              />
-            ))}
-          </VStack>
-        )}
+        {/* Don't render replies here - they'll be rendered at the same level */}
       </Box>
 
       {/* Delete Confirmation Dialog */}
@@ -305,6 +298,23 @@ const CommentSection = ({ targetType, targetId }) => {
   } = useCommentStore();
 
   const targetComments = getComments(targetType, targetId);
+
+  // Function to flatten all replies recursively
+  const flattenReplies = (comment, depth = 0) => {
+    const result = [];
+    result.push({ ...comment, depth });
+    
+    if (comment.replies && comment.replies.length > 0) {
+      comment.replies.forEach(reply => {
+        result.push(...flattenReplies(reply, 1)); // All replies are depth 1
+      });
+    }
+    
+    return result;
+  };
+
+  // Flatten all comments and their replies
+  const flattenedComments = targetComments.flatMap(comment => flattenReplies(comment));
 
   useEffect(() => {
     if (targetId) {
@@ -475,13 +485,13 @@ const CommentSection = ({ targetType, targetId }) => {
         </Box>
       ) : (
         <VStack align="stretch" spacing={4}>
-          {targetComments.map((comment) => (
+          {flattenedComments.map((comment) => (
             <CommentItem
               key={comment._id}
               comment={comment}
               targetType={targetType}
               targetId={targetId}
-              depth={0}
+              depth={comment.depth}
               onRefresh={() => fetchComments(targetType, targetId)}
             />
           ))}

@@ -67,7 +67,7 @@ const AdminCommentItem = ({ comment, onDelete, onRefresh, depth = 0 }) => {
       borderColor="gray.200"
       borderRadius="md"
       bg="white"
-      ml={depth > 0 ? `${depth * 4}px` : '0'}
+      ml={depth > 0 ? '16px' : '0'}
       borderLeft={depth > 0 ? '3px solid' : 'none'}
       borderLeftColor={depth > 0 ? 'blue.200' : 'transparent'}
     >
@@ -129,33 +129,37 @@ const AdminCommentItem = ({ comment, onDelete, onRefresh, depth = 0 }) => {
           {comment.content}
         </Text>
 
-        {/* Target Info */}
-        <HStack spacing={2} fontSize="xs" color="gray.600">
-          <Badge colorScheme="gray" variant="outline">
-            {comment.targetType}
-          </Badge>
-          <Text>ID: {comment.targetId}</Text>
-          {comment.parentComment && (
-            <Badge colorScheme="purple" variant="outline">
-              Reply to: {comment.parentComment.authorName || 'Unknown'}
+        {/* Target Info and Vote Counts */}
+        <HStack spacing={2} fontSize="xs" color="gray.600" justify="space-between">
+          <HStack spacing={2}>
+            <Badge colorScheme="gray" variant="outline">
+              {comment.targetType}
             </Badge>
-          )}
+            <Text>ID: {comment.targetId}</Text>
+            {comment.parentComment && (
+              <Badge colorScheme="purple" variant="outline">
+                Reply to: {comment.parentComment.authorName || 'Unknown'}
+              </Badge>
+            )}
+          </HStack>
+          
+          {/* Vote counts */}
+          <HStack spacing={3} fontSize="xs">
+            <HStack spacing={1}>
+              <Text color="green.600" fontWeight="medium">
+                ↑ {comment.upvotes || 0}
+              </Text>
+              <Text color="red.600" fontWeight="medium">
+                ↓ {comment.downvotes || 0}
+              </Text>
+            </HStack>
+            <Text color="blue.600" fontWeight="medium">
+              Score: {(comment.upvotes || 0) - (comment.downvotes || 0)}
+            </Text>
+          </HStack>
         </HStack>
 
-        {/* Render replies recursively */}
-        {comment.replies && comment.replies.length > 0 && (
-          <VStack align="stretch" spacing={2} mt={3}>
-            {comment.replies.map((reply) => (
-              <AdminCommentItem
-                key={reply._id}
-                comment={reply}
-                onDelete={onDelete}
-                onRefresh={onRefresh}
-                depth={depth + 1}
-              />
-            ))}
-          </VStack>
-        )}
+        {/* Don't render replies here - they'll be rendered at the same level */}
       </VStack>
     </Box>
   );
@@ -175,6 +179,23 @@ const AdminComments = () => {
     adminDeleteComment,
     clearAdminError
   } = useCommentStore();
+
+  // Function to flatten all replies recursively
+  const flattenReplies = (comment, depth = 0) => {
+    const result = [];
+    result.push({ ...comment, depth });
+    
+    if (comment.replies && comment.replies.length > 0) {
+      comment.replies.forEach(reply => {
+        result.push(...flattenReplies(reply, 1)); // All replies are depth 1
+      });
+    }
+    
+    return result;
+  };
+
+  // Flatten all comments and their replies
+  const flattenedComments = adminComments.flatMap(comment => flattenReplies(comment));
 
   useEffect(() => {
     fetchAllComments();
@@ -285,12 +306,13 @@ const AdminComments = () => {
         </Button>
       </HStack>
 
-      {adminComments.map((comment, index) => (
+      {flattenedComments.map((comment, index) => (
         <AdminCommentItem
           key={comment._id}
           comment={comment}
           onDelete={handleDeleteClick}
           onRefresh={fetchAllComments}
+          depth={comment.depth}
         />
       ))}
 

@@ -47,8 +47,23 @@ const UserComments = () => {
   } = useCommentStore();
 
   useEffect(() => {
+    const fetchUserComments = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const comments = await fetchUserCommentsFromStore();
+        setUserComments(comments);
+      } catch (error) {
+        console.error('Error fetching user comments:', error);
+        setUserComments([]);
+      }
+    };
+
     fetchUserComments();
-  }, [user]);
+  }, [user, fetchUserCommentsFromStore]);
 
   useEffect(() => {
     if (userComments.length > 0) {
@@ -93,7 +108,7 @@ const UserComments = () => {
       setEditingComment(null);
       setEditContent('');
       
-      // Refresh user comments
+      // Refresh user comments after successful update
       await fetchUserComments();
       
       toast({
@@ -124,7 +139,7 @@ const UserComments = () => {
       onClose();
       setCommentToDelete(null);
       
-      // Refresh user comments
+      // Refresh user comments after successful delete
       await fetchUserComments();
       
       toast({
