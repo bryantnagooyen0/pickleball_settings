@@ -1,6 +1,7 @@
 import { Box, Spinner, Center } from '@chakra-ui/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useEffect } from 'react';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
@@ -76,6 +77,7 @@ function App() {
         </Routes>
       </Box>
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }
