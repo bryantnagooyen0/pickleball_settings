@@ -167,37 +167,40 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {showMobileMenu && (
-          <Menu>
-            <MenuButton
-              as={IconButton}
-              aria-label="Options"
-              icon={<HamburgerIcon />}
-              variant="outline"
-            />
-            <MenuList 
-              placement="bottom-end"
-              minW="200px"
-              right={0}
-              left="auto"
-            >
-              {mobileMenuItems().map((item, index) => (
-                <MenuItem
-                  key={index}
-                  onClick={item.onClick}
-                  color={item.color}
-                  icon={item.icon}
-                >
-                  {item.to ? (
-                    <MiddleClickLink to={item.to}>
-                      {item.label}
-                    </MiddleClickLink>
-                  ) : (
-                    item.label
-                  )}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+          <Box position="relative" ml="auto">
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                aria-label="Options"
+                icon={<HamburgerIcon />}
+                variant="outline"
+              />
+              <MenuList 
+                placement="bottom-end"
+                minW="200px"
+                right={0}
+                left="auto"
+                transform="translateX(0)"
+              >
+                {mobileMenuItems().map((item, index) => (
+                  <MenuItem
+                    key={index}
+                    onClick={item.onClick}
+                    color={item.color}
+                    icon={item.icon}
+                  >
+                    {item.to ? (
+                      <MiddleClickLink to={item.to}>
+                        {item.label}
+                      </MiddleClickLink>
+                    ) : (
+                      item.label
+                    )}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          </Box>
         )}
       </Flex>
 
