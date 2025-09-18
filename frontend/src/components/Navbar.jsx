@@ -108,7 +108,6 @@ const Navbar = () => {
       <Flex
         h={16}
         alignItems={'center'}
-        justifyContent={'space-between'}
         w={'full'}
       >
         {/* Logo */}
@@ -126,7 +125,7 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         {!showMobileMenu && (
           <>
-            <HStack spacing={2} alignItems={'center'}>
+            <HStack spacing={2} alignItems={'center'} ml={8}>
               <MiddleClickLink to={'/players'}>
                 <Button variant={'outline'}>Players</Button>
               </MiddleClickLink>
@@ -136,7 +135,7 @@ const Navbar = () => {
               </MiddleClickLink>
             </HStack>
 
-            <HStack spacing={2} alignItems={'center'}>
+            <HStack spacing={2} alignItems={'center'} ml={'auto'}>
               {user?.role === 'admin' && (
                 <MiddleClickLink to={'/create'}>
                   <Button>
