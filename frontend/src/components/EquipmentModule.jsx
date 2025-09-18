@@ -72,13 +72,13 @@ const EquipmentModule = ({
   const getIcon = () => {
     switch (icon) {
       case 'paddle':
-        return PaddleIcon;
+        return '/paddleIcon2.png';
       case 'shoes':
         return TbShoe;
       case 'modifications':
         return ModificationsIcon;
       default:
-        return PaddleIcon;
+        return '/paddleIcon2.png';
     }
   };
 
@@ -194,7 +194,11 @@ const EquipmentModule = ({
                         alignItems='center'
                         justifyContent='center'
                       >
-                        <Icon as={getIcon()} w={8} h={8} color='gray.500' />
+                        {typeof getIcon() === 'string' ? (
+                          <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
+                        ) : (
+                          <Icon as={getIcon()} w={icon === 'paddle' ? 12 : 8} h={icon === 'paddle' ? 12 : 8} color='gray.500' />
+                        )}
                       </Box>
                     )}
                   </Box>
@@ -282,7 +286,11 @@ const EquipmentModule = ({
                       alignItems='center'
                       justifyContent='center'
                     >
-                      <Icon as={getIcon()} w={8} h={8} color='gray.500' />
+                      {typeof getIcon() === 'string' ? (
+                        <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
+                      ) : (
+                        <Icon as={getIcon()} w={icon === 'paddle' ? 12 : 8} h={icon === 'paddle' ? 12 : 8} color='gray.500' />
+                      )}
                     </Box>
                   )}
                   <VStack align='start' spacing={1}>
@@ -334,7 +342,11 @@ const EquipmentModule = ({
       {/* Module Header */}
       <Box p={6} borderBottom='1px solid' borderColor='gray.200'>
         <HStack align='center' spacing={3}>
-          <Icon as={getIcon()} w={10} h={10} color='gray.600' />
+          {typeof getIcon() === 'string' ? (
+            <Image src={getIcon()} w={icon === 'paddle' ? 10 : 10} h={icon === 'paddle' ? 10 : 10} alt="icon" />
+          ) : (
+            <Icon as={getIcon()} w={icon === 'paddle' ? 14 : 10} h={icon === 'paddle' ? 14 : 10} color='gray.600' />
+          )}
           <Text fontSize='xl' fontWeight='bold' color='gray.800'>
             {title}
           </Text>
@@ -375,7 +387,11 @@ const EquipmentModule = ({
                     alignItems='center'
                     justifyContent='center'
                   >
-                    <Icon as={getIcon()} w={8} h={8} color='gray.500' />
+                    {typeof getIcon() === 'string' ? (
+                      <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
+                    ) : (
+                      <Icon as={getIcon()} w={icon === 'paddle' ? 12 : 8} h={icon === 'paddle' ? 12 : 8} color='gray.500' />
+                    )}
                   </Box>
                 )}
                 <VStack align='start' spacing={1}>
