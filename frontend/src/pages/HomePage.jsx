@@ -244,7 +244,7 @@ const HomePage = () => {
           </HStack>
 
           {/* Active Filters Display */}
-          {activeFiltersCount > 0 && (
+          {(activeFiltersCount > 0 || searchQuery.trim()) && (
             <HStack w='full' flexWrap='wrap' spacing={2}>
               <Text fontSize='sm' color='gray.600' fontWeight='medium'>
                 Active filters:
@@ -257,9 +257,17 @@ const HomePage = () => {
                     </Badge>
                   )
               )}
+              {searchQuery.trim() && (
+                <Badge colorScheme='green' variant='subtle'>
+                  search: "{searchQuery}"
+                </Badge>
+              )}
               <Button size='xs' variant='ghost' onClick={clearFilters}>
                 Clear all
               </Button>
+              <Text fontSize='sm' color='gray.600' fontWeight='medium' ml={4}>
+                Showing {filteredPlayers.length} out of {players.length} players
+              </Text>
             </HStack>
           )}
         </VStack>
