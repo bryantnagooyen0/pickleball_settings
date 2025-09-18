@@ -219,9 +219,14 @@ const PlayerDetailPage = () => {
           {/* Equipment Section */}
           <Box p={8}>
             <VStack spacing={6} align='start'>
-              <Text fontSize='2xl' fontWeight='bold' color='gray.800' mb={4}>
-                Equipment
-              </Text>
+              <HStack justify="space-between" align="center" w="full" mb={4}>
+                <Text fontSize='2xl' fontWeight='bold' color='gray.800'>
+                  Equipment
+                </Text>
+                <Text fontSize='sm' color='gray.600' fontStyle='italic'>
+                  Any updates to player gear can be commented down below
+                </Text>
+              </HStack>
 
               {/* Paddle Module */}
               <EquipmentModule

@@ -14,6 +14,9 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AccountPage from './pages/AccountPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import LegalNoticePage from './pages/LegalNoticePage';
+import Footer from './components/Footer';
 import { useAuth } from './hooks/useAuth';
 import { keepAlive } from './utils/api';
 
@@ -74,7 +77,10 @@ function App() {
           <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path='/signup' element={<PublicRoute><SignupPage /></PublicRoute>} />
           <Route path='/account' element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
+          <Route path='/legal-notice' element={<LegalNoticePage />} />
         </Routes>
+        <Footer />
       </Box>
       <Analytics />
       <SpeedInsights />
