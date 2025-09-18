@@ -174,7 +174,12 @@ const Navbar = () => {
               icon={<HamburgerIcon />}
               variant="outline"
             />
-            <MenuList placement="bottom-end">
+            <MenuList 
+              placement="bottom-end"
+              minW="200px"
+              right={0}
+              left="auto"
+            >
               {mobileMenuItems().map((item, index) => (
                 <MenuItem
                   key={index}
