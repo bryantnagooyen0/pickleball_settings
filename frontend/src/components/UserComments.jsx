@@ -63,12 +63,10 @@ const UserComments = () => {
     };
 
     fetchUserComments();
-  }, [user, fetchUserCommentsFromStore]);
+  }, [user?.id]);
 
   useEffect(() => {
-    if (userComments.length > 0) {
-      setLoading(false);
-    }
+    setLoading(false);
   }, [userComments]);
 
   const fetchUserComments = async () => {
