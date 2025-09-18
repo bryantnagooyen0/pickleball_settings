@@ -322,17 +322,15 @@ const PaddleManagementPage = () => {
               onMouseDown={(e) => handlePaddleMouseDown(e, paddle)}
             >
               <VStack spacing={4} align='start'>
-                {paddle.image && (
-                  <Image
-                    src={paddle.image}
-                    alt={paddle.name}
-                    borderRadius='md'
-                    w='full'
-                    h='200px'
-                    objectFit='contain'
-                    bg='white'
-                  />
-                )}
+                <Image
+                  src={paddle.image || '/unknownPaddle.png'}
+                  alt={paddle.name}
+                  borderRadius='md'
+                  w='full'
+                  h='200px'
+                  objectFit='contain'
+                  bg='white'
+                />
 
                 <VStack spacing={2} align='start' w='full'>
                   <Text fontSize='xl' fontWeight='bold'>

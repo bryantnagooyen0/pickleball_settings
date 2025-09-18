@@ -15,8 +15,15 @@ import {
   AlertDialogHeader,
   AlertDialogBody,
   AlertDialogFooter,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  VStack,
+  useBreakpointValue,
 } from '@chakra-ui/react';
-import { PlusSquareIcon, SettingsIcon } from '@chakra-ui/icons';
+import { PlusSquareIcon, SettingsIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { useAuth } from '../hooks/useAuth';
 
 // Custom Link component that handles middle-click properly
@@ -56,10 +63,36 @@ const Navbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef();
 
+  // Check if we should show mobile menu
+  const showMobileMenu = useBreakpointValue({ base: true, md: false });
+
   const handleLogout = () => {
     logout();
     navigate('/');
   };
+
+  // Mobile menu items
+  const mobileMenuItems = () => {
+    const items = [
+      { to: '/players', label: 'Players' },
+      { to: '/paddles', label: 'Paddles' },
+    ];
+
+    if (user?.role === 'admin') {
+      items.push({ to: '/create', label: 'Create Player', icon: <PlusSquareIcon /> });
+    }
+
+    if (isAuthenticated) {
+      items.push({ to: '/account', label: 'My Account' });
+      items.push({ label: 'Log Out', onClick: onOpen, color: 'red' });
+    } else {
+      items.push({ to: '/login', label: 'Login' });
+      items.push({ to: '/signup', label: 'Sign Up', color: 'blue' });
+    }
+
+    return items;
+  };
+
   return (
     <Box
       position="sticky"
@@ -77,63 +110,91 @@ const Navbar = () => {
         alignItems={'center'}
         justifyContent={'space-between'}
         w={'full'}
-        flexDir={{
-          base: 'column',
-          sm: 'row',
-        }}
       >
-        <HStack spacing={4} alignItems={'center'}>
-          {/* Logo */}
-          <MiddleClickLink to={'/'}>
-            <Box>
-                <Image
-                  src="/logo6.png" 
-                  alt="Pickleball Settings Logo"
-                  height="60px"
-                objectFit="contain"
-              />
-            </Box>
-          </MiddleClickLink>
-          
-          {/* Navigation Buttons */}
-          <HStack spacing={2} alignItems={'center'}>
-            <MiddleClickLink to={'/players'}>
-              <Button variant={'outline'}>Players</Button>
-            </MiddleClickLink>
-            
-            <MiddleClickLink to={'/paddles'}>
-              <Button variant={'outline'}>Paddles</Button>
-            </MiddleClickLink>
-          </HStack>
-        </HStack>
+        {/* Logo */}
+        <MiddleClickLink to={'/'}>
+          <Box>
+            <Image
+              src="/logo6.png" 
+              alt="Pickleball Settings Logo"
+              height="60px"
+              objectFit="contain"
+            />
+          </Box>
+        </MiddleClickLink>
 
-        <HStack spacing={2} alignItems={'center'}>
-          {user?.role === 'admin' && (
-            <MiddleClickLink to={'/create'}>
-              <Button>
-                <PlusSquareIcon fontSize={20} />
-              </Button>
-            </MiddleClickLink>
-          )}
+        {/* Desktop Navigation */}
+        {!showMobileMenu && (
+          <>
+            <HStack spacing={2} alignItems={'center'}>
+              <MiddleClickLink to={'/players'}>
+                <Button variant={'outline'}>Players</Button>
+              </MiddleClickLink>
+              
+              <MiddleClickLink to={'/paddles'}>
+                <Button variant={'outline'}>Paddles</Button>
+              </MiddleClickLink>
+            </HStack>
 
-          {isAuthenticated ? (
-            <>
-              <MiddleClickLink to={'/account'}>
-                <Button variant={'outline'}>My Account</Button>
-              </MiddleClickLink>
-              <Button colorScheme={'red'} onClick={onOpen}>Log Out</Button>
-            </>
-          ) : (
-            <>
-              <MiddleClickLink to={'/login'}>
-                <Button variant={'outline'}>Login</Button>
-              </MiddleClickLink>
-              <MiddleClickLink to={'/signup'}>
-                <Button colorScheme={'blue'}>Sign Up</Button>
-              </MiddleClickLink>
-            </>
-          )}
-        </HStack>
+            <HStack spacing={2} alignItems={'center'}>
+              {user?.role === 'admin' && (
+                <MiddleClickLink to={'/create'}>
+                  <Button>
+                    <PlusSquareIcon fontSize={20} />
+                  </Button>
+                </MiddleClickLink>
+              )}
+
+              {isAuthenticated ? (
+                <>
+                  <MiddleClickLink to={'/account'}>
+                    <Button variant={'outline'}>My Account</Button>
+                  </MiddleClickLink>
+                  <Button colorScheme={'red'} onClick={onOpen}>Log Out</Button>
+                </>
+              ) : (
+                <>
+                  <MiddleClickLink to={'/login'}>
+                    <Button variant={'outline'}>Login</Button>
+                  </MiddleClickLink>
+                  <MiddleClickLink to={'/signup'}>
+                    <Button colorScheme={'blue'}>Sign Up</Button>
+                  </MiddleClickLink>
+                </>
+              )}
+            </HStack>
+          </>
+        )}
+
+        {/* Mobile Menu */}
+        {showMobileMenu && (
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              aria-label="Options"
+              icon={<HamburgerIcon />}
+              variant="outline"
+            />
+            <MenuList>
+              {mobileMenuItems().map((item, index) => (
+                <MenuItem
+                  key={index}
+                  onClick={item.onClick}
+                  color={item.color}
+                  icon={item.icon}
+                >
+                  {item.to ? (
+                    <MiddleClickLink to={item.to}>
+                      {item.label}
+                    </MiddleClickLink>
+                  ) : (
+                    item.label
+                  )}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
+        )}
       </Flex>
 
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
