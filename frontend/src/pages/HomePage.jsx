@@ -107,6 +107,7 @@ const HomePage = () => {
     localStorage.setItem('playerFilters', JSON.stringify(filters));
   }, [filters]);
 
+
   console.log('players', players);
 
   // Filter players based on search query and filters
@@ -164,6 +165,26 @@ const HomePage = () => {
 
     return filtered;
   }, [players, searchQuery, filters]);
+
+  // Scroll position restoration
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem('playerListScrollPosition');
+    if (savedScrollPosition && filteredPlayers.length > 0) {
+      // Use requestAnimationFrame to ensure the DOM is fully rendered
+      const restoreScroll = () => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        // Clear the saved position after restoring
+        sessionStorage.removeItem('playerListScrollPosition');
+      };
+      
+      // Double requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(restoreScroll);
+      });
+    }
+  }, [filteredPlayers]); // Restore when filtered players change
+
+  // Don't automatically save scroll position - only save when clicking on a player
 
   const handlePlayerDeleted = () => {
     fetchPlayers(); // Refresh the players list after deletion

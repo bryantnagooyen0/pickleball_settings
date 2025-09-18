@@ -102,6 +102,24 @@ const PaddleManagementPage = () => {
     );
   }, [paddles, searchQuery]);
 
+  // Scroll position restoration
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem('paddleListScrollPosition');
+    if (savedScrollPosition && filteredPaddles.length > 0) {
+      // Use requestAnimationFrame to ensure the DOM is fully rendered
+      const restoreScroll = () => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        // Clear the saved position after restoring
+        sessionStorage.removeItem('paddleListScrollPosition');
+      };
+      
+      // Double requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(restoreScroll);
+      });
+    }
+  }, [filteredPaddles]); // Restore when filtered paddles change
+
   const handleSubmit = async () => {
     if (!paddleForm.name || !paddleForm.brand) {
       toast({
@@ -230,6 +248,9 @@ const PaddleManagementPage = () => {
   };
 
   const handlePaddleClick = (paddle) => {
+    // Save current scroll position before navigating
+    sessionStorage.setItem('paddleListScrollPosition', window.pageYOffset.toString());
+    
     navigate(`/paddle/${paddle._id}`);
   };
 

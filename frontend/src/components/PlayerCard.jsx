@@ -140,6 +140,9 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   };
 
   const handleCardClick = () => {
+    // Save current scroll position before navigating
+    sessionStorage.setItem('playerListScrollPosition', window.pageYOffset.toString());
+    
     navigate(`/player/${player._id}`);
   };
 

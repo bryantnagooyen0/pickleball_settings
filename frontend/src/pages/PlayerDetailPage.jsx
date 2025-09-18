@@ -108,7 +108,7 @@ const PlayerDetailPage = () => {
     <Container maxW='container.xl' py={8}>
       <VStack spacing={6}>
         <Button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/players')}
           colorScheme='blue'
           variant='outline'
           alignSelf='flex-start'
@@ -298,7 +298,7 @@ const PlayerDetailPage = () => {
                 <Button
                   colorScheme='red'
                   variant='outline'
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/players')}
                   flex={1}
                 >
                   Back to List
