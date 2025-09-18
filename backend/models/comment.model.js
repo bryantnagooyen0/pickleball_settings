@@ -30,6 +30,15 @@ const commentSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    parentComment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment',
+      default: null,
+    },
+    depth: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
@@ -38,6 +47,7 @@ const commentSchema = new mongoose.Schema(
 
 // Index for efficient queries
 commentSchema.index({ targetType: 1, targetId: 1, createdAt: -1 });
+commentSchema.index({ parentComment: 1, createdAt: 1 });
 
 const Comment = mongoose.model('Comment', commentSchema);
 

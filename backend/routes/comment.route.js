@@ -5,6 +5,8 @@ import {
   updateComment,
   deleteComment,
   getUserComments,
+  getAllComments,
+  adminDeleteComment,
 } from '../controllers/comment.controller.js';
 import { authMiddleware } from '../middleware/auth.js';
 
@@ -12,6 +14,9 @@ const router = express.Router();
 
 // Get comments by the authenticated user (protected route) - MUST come before parameterized route
 router.get('/user/my-comments', authMiddleware, getUserComments);
+
+// Get all comments for admin users (protected route) - MUST come before parameterized route
+router.get('/admin/all', authMiddleware, getAllComments);
 
 // Get comments for a specific target (public route)
 router.get('/:targetType/:targetId', getComments);
@@ -24,5 +29,8 @@ router.put('/:id', authMiddleware, updateComment);
 
 // Delete a comment (protected route)
 router.delete('/:id', authMiddleware, deleteComment);
+
+// Admin delete comment (hard delete) - protected route
+router.delete('/admin/:id', authMiddleware, adminDeleteComment);
 
 export default router;

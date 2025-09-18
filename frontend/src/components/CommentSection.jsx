@@ -26,9 +26,10 @@ import { EditIcon, DeleteIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { formatDistanceToNow } from 'date-fns';
 import useCommentStore from '../store/comment.js';
 import { useAuth } from '../hooks/useAuth.js';
+import ReplyButton from './ReplyButton.jsx';
 
-const CommentSection = ({ targetType, targetId }) => {
-  const [newComment, setNewComment] = useState('');
+// Recursive CommentItem component for threaded comments
+const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) => {
   const [editingComment, setEditingComment] = useState(null);
   const [editContent, setEditContent] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -37,14 +38,268 @@ const CommentSection = ({ targetType, targetId }) => {
   const toast = useToast();
   
   const { isAuthenticated, user } = useAuth();
+  const { updateComment, deleteComment, loading } = useCommentStore();
+
+  const handleEditComment = (comment) => {
+    setEditingComment(comment._id);
+    setEditContent(comment.content);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editContent.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Comment cannot be empty',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      await updateComment(editingComment, editContent.trim());
+      setEditingComment(null);
+      setEditContent('');
+      toast({
+        title: 'Success',
+        description: 'Comment updated successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      // Error is handled by the store
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setEditContent('');
+  };
+
+  const handleDeleteClick = (comment) => {
+    setCommentToDelete(comment);
+    onOpen();
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteComment(commentToDelete._id);
+      onClose();
+      setCommentToDelete(null);
+      toast({
+        title: 'Success',
+        description: 'Comment deleted successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      // Error is handled by the store
+    }
+  };
+
+  const formatDate = (dateString) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (error) {
+      return 'Unknown time';
+    }
+  };
+
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <>
+      <Box
+        id={`comment-${comment._id}`}
+        p={4}
+        border="1px"
+        borderColor="gray.200"
+        borderRadius="md"
+        bg="white"
+        ml={depth > 0 ? `${depth * 4}px` : '0'}
+        borderLeft={depth > 0 ? '3px solid' : 'none'}
+        borderLeftColor={depth > 0 ? 'blue.200' : 'transparent'}
+      >
+        <HStack justify="space-between" align="flex-start" mb={2}>
+          <HStack spacing={3}>
+            <Avatar
+              size="sm"
+              name={comment.authorName}
+              bg="blue.500"
+              color="white"
+            />
+            <VStack align="flex-start" spacing={0}>
+              <Text fontWeight="semibold" fontSize="sm">
+                {comment.authorName}
+              </Text>
+              <Text fontSize="xs" color="gray.500">
+                {formatDate(comment.createdAt)}
+                {comment.updatedAt !== comment.createdAt && (
+                  <Badge ml={2} size="sm" colorScheme="gray">
+                    edited
+                  </Badge>
+                )}
+              </Text>
+            </VStack>
+          </HStack>
+
+          {isAuthenticated && user?.id === comment.author?._id && (
+            <HStack spacing={1}>
+              {editingComment === comment._id ? (
+                <>
+                  <Tooltip label="Save">
+                    <IconButton
+                      icon={<CheckIcon />}
+                      size="sm"
+                      colorScheme="green"
+                      variant="ghost"
+                      onClick={handleSaveEdit}
+                      isLoading={loading}
+                    />
+                  </Tooltip>
+                  <Tooltip label="Cancel">
+                    <IconButton
+                      icon={<CloseIcon />}
+                      size="sm"
+                      colorScheme="gray"
+                      variant="ghost"
+                      onClick={handleCancelEdit}
+                    />
+                  </Tooltip>
+                </>
+              ) : (
+                <>
+                  <Tooltip label="Edit">
+                    <IconButton
+                      icon={<EditIcon />}
+                      size="sm"
+                      colorScheme="blue"
+                      variant="ghost"
+                      onClick={() => handleEditComment(comment)}
+                    />
+                  </Tooltip>
+                  <Tooltip label="Delete">
+                    <IconButton
+                      icon={<DeleteIcon />}
+                      size="sm"
+                      colorScheme="red"
+                      variant="ghost"
+                      onClick={() => handleDeleteClick(comment)}
+                    />
+                  </Tooltip>
+                </>
+              )}
+            </HStack>
+          )}
+        </HStack>
+
+        {editingComment === comment._id ? (
+          <VStack align="stretch" spacing={2}>
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              rows={3}
+              resize="vertical"
+              maxLength={1000}
+            />
+            <Text fontSize="sm" color="gray.500">
+              {editContent.length}/1000 characters
+            </Text>
+          </VStack>
+        ) : (
+          <Text whiteSpace="pre-wrap" fontSize="sm">
+            {comment.content}
+          </Text>
+        )}
+
+        {/* Reply button and action buttons */}
+        {isAuthenticated && (
+          <HStack mt={3} spacing={2}>
+            <ReplyButton 
+              comment={comment} 
+              targetType={targetType} 
+              targetId={targetId}
+              onReply={onRefresh}
+            />
+          </HStack>
+        )}
+
+        {/* Render replies recursively */}
+        {comment.replies && comment.replies.length > 0 && (
+          <VStack align="stretch" spacing={2} mt={3}>
+            {comment.replies.map((reply) => (
+              <CommentItem
+                key={reply._id}
+                comment={reply}
+                targetType={targetType}
+                targetId={targetId}
+                depth={depth + 1}
+                onRefresh={onRefresh}
+              />
+            ))}
+          </VStack>
+        )}
+      </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete Comment
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure you want to delete this comment? This action cannot be undone.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleConfirmDelete}
+                ml={3}
+                isLoading={loading}
+                loadingText="Deleting..."
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+    </>
+  );
+};
+
+const CommentSection = ({ targetType, targetId }) => {
+  const [newComment, setNewComment] = useState('');
+  const toast = useToast();
+  
+  const { isAuthenticated } = useAuth();
   const {
     comments,
     loading,
     error,
     fetchComments,
     createComment,
-    updateComment,
-    deleteComment,
     getComments,
     clearError,
   } = useCommentStore();
@@ -145,65 +400,6 @@ const CommentSection = ({ targetType, targetId }) => {
     }
   };
 
-  const handleEditComment = (comment) => {
-    setEditingComment(comment._id);
-    setEditContent(comment.content);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editContent.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Comment cannot be empty',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    try {
-      await updateComment(editingComment, editContent.trim());
-      setEditingComment(null);
-      setEditContent('');
-      toast({
-        title: 'Success',
-        description: 'Comment updated successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      // Error is handled by the store and useEffect
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingComment(null);
-    setEditContent('');
-  };
-
-  const handleDeleteClick = (comment) => {
-    setCommentToDelete(comment);
-    onOpen();
-  };
-
-  const handleConfirmDelete = async () => {
-    try {
-      await deleteComment(commentToDelete._id);
-      onClose();
-      setCommentToDelete(null);
-      toast({
-        title: 'Success',
-        description: 'Comment deleted successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      // Error is handled by the store and useEffect
-    }
-  };
 
   const formatDate = (dateString) => {
     try {
@@ -280,144 +476,17 @@ const CommentSection = ({ targetType, targetId }) => {
       ) : (
         <VStack align="stretch" spacing={4}>
           {targetComments.map((comment) => (
-            <Box
+            <CommentItem
               key={comment._id}
-              id={`comment-${comment._id}`}
-              p={4}
-              border="1px"
-              borderColor="gray.200"
-              borderRadius="md"
-              bg="white"
-            >
-              <HStack justify="space-between" align="flex-start" mb={2}>
-                <HStack spacing={3}>
-                  <Avatar
-                    size="sm"
-                    name={comment.authorName}
-                    bg="blue.500"
-                    color="white"
-                  />
-                  <VStack align="flex-start" spacing={0}>
-                    <Text fontWeight="semibold" fontSize="sm">
-                      {comment.authorName}
-                    </Text>
-                    <Text fontSize="xs" color="gray.500">
-                      {formatDate(comment.createdAt)}
-                      {comment.updatedAt !== comment.createdAt && (
-                        <Badge ml={2} size="sm" colorScheme="gray">
-                          edited
-                        </Badge>
-                      )}
-                    </Text>
-                  </VStack>
-                </HStack>
-
-                {isAuthenticated && user?.id === comment.author?._id && (
-                  <HStack spacing={1}>
-                    {editingComment === comment._id ? (
-                      <>
-                        <Tooltip label="Save">
-                          <IconButton
-                            icon={<CheckIcon />}
-                            size="sm"
-                            colorScheme="green"
-                            variant="ghost"
-                            onClick={handleSaveEdit}
-                            isLoading={loading}
-                          />
-                        </Tooltip>
-                        <Tooltip label="Cancel">
-                          <IconButton
-                            icon={<CloseIcon />}
-                            size="sm"
-                            colorScheme="gray"
-                            variant="ghost"
-                            onClick={handleCancelEdit}
-                          />
-                        </Tooltip>
-                      </>
-                    ) : (
-                      <>
-                        <Tooltip label="Edit">
-                          <IconButton
-                            icon={<EditIcon />}
-                            size="sm"
-                            colorScheme="blue"
-                            variant="ghost"
-                            onClick={() => handleEditComment(comment)}
-                          />
-                        </Tooltip>
-                        <Tooltip label="Delete">
-                          <IconButton
-                            icon={<DeleteIcon />}
-                            size="sm"
-                            colorScheme="red"
-                            variant="ghost"
-                            onClick={() => handleDeleteClick(comment)}
-                          />
-                        </Tooltip>
-                      </>
-                    )}
-                  </HStack>
-                )}
-              </HStack>
-
-              {editingComment === comment._id ? (
-                <VStack align="stretch" spacing={2}>
-                  <Textarea
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    rows={3}
-                    resize="vertical"
-                    maxLength={1000}
-                  />
-                  <Text fontSize="sm" color="gray.500">
-                    {editContent.length}/1000 characters
-                  </Text>
-                </VStack>
-              ) : (
-                <Text whiteSpace="pre-wrap" fontSize="sm">
-                  {comment.content}
-                </Text>
-              )}
-            </Box>
+              comment={comment}
+              targetType={targetType}
+              targetId={targetId}
+              depth={0}
+              onRefresh={() => fetchComments(targetType, targetId)}
+            />
           ))}
         </VStack>
       )}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Comment
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              Are you sure you want to delete this comment? This action cannot be undone.
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                colorScheme="red"
-                onClick={handleConfirmDelete}
-                ml={3}
-                isLoading={loading}
-                loadingText="Deleting..."
-              >
-                Delete
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
     </Box>
   );
 };

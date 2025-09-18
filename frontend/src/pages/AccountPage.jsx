@@ -1,8 +1,12 @@
 import React from 'react';
 import { Box, Container, Heading, Text, VStack, Divider } from '@chakra-ui/react';
 import UserComments from '../components/UserComments';
+import AdminComments from '../components/AdminComments';
+import { useAuth } from '../hooks/useAuth';
 
 function AccountPage() {
+  const { user, isAuthenticated, loading } = useAuth();
+  
   let token;
   let username;
   try {
@@ -12,6 +16,7 @@ function AccountPage() {
     token = null;
     username = null;
   }
+
 
   return (
     <Container maxW={'720px'} py={10}>
@@ -52,6 +57,31 @@ function AccountPage() {
                 </Text>
               </Box>
             </VStack>
+          </Box>
+        )}
+
+        {/* Admin Comments Section */}
+        {token && !loading && user?.role === 'admin' && (
+          <Box
+            w='full'
+            bg='white'
+            borderRadius='lg'
+            boxShadow='lg'
+            border='1px solid'
+            borderColor='gray.200'
+            overflow='hidden'
+          >
+            <Box p={8}>
+              <VStack align="stretch" spacing={4}>
+                <Heading size="md" color="red.600">
+                  Admin Panel - Comment Management
+                </Heading>
+                <Text color="gray.600" fontSize="sm">
+                  Manage all comments across the platform. You can view, delete, and moderate comments.
+                </Text>
+                <AdminComments />
+              </VStack>
+            </Box>
           </Box>
         )}
 

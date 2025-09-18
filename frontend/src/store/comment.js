@@ -37,25 +37,35 @@ const useCommentStore = create((set, get) => ({
   },
 
   // Create a new comment
-  createComment: async (content, targetType, targetId) => {
+  createComment: async (content, targetType, targetId, parentCommentId = null) => {
     set({ loading: true, error: null });
     
     try {
       const response = await api.post('/api/comments', {
         content,
         targetType,
-        targetId
+        targetId,
+        parentCommentId
       });
       
       if (response.success) {
         const key = `${targetType}-${targetId}`;
-        set(state => ({
-          comments: {
-            ...state.comments,
-            [key]: [response.data, ...(state.comments[key] || [])]
-          },
-          loading: false
-        }));
+        
+        // If this is a reply, we need to refresh the comments to get the updated tree structure
+        if (parentCommentId) {
+          // Refresh the comments to get the updated tree structure
+          const { fetchComments } = get();
+          await fetchComments(targetType, targetId);
+        } else {
+          // For top-level comments, add to the beginning
+          set(state => ({
+            comments: {
+              ...state.comments,
+              [key]: [response.data, ...(state.comments[key] || [])]
+            },
+            loading: false
+          }));
+        }
         return response.data;
       } else {
         throw new Error(response.message || 'Failed to create comment');
@@ -187,6 +197,66 @@ const useCommentStore = create((set, get) => ({
   // Clear error
   clearError: () => {
     set({ error: null });
+  },
+
+  // Admin functions
+  adminComments: [],
+  adminLoading: false,
+  adminError: null,
+
+  // Fetch all comments for admin
+  fetchAllComments: async () => {
+    set({ adminLoading: true, adminError: null });
+    
+    try {
+      const response = await api.get('/api/comments/admin/all');
+      
+      if (response.success) {
+        set({
+          adminComments: response.data,
+          adminLoading: false
+        });
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Failed to fetch all comments');
+      }
+    } catch (error) {
+      set({ 
+        adminError: error.message || 'Failed to fetch all comments',
+        adminLoading: false 
+      });
+      throw error;
+    }
+  },
+
+  // Admin delete comment (hard delete)
+  adminDeleteComment: async (commentId) => {
+    set({ adminLoading: true, adminError: null });
+    
+    try {
+      const response = await api.delete(`/api/comments/admin/${commentId}`);
+      
+      if (response.success) {
+        set(state => ({
+          adminComments: state.adminComments.filter(comment => comment._id !== commentId),
+          adminLoading: false
+        }));
+        return true;
+      } else {
+        throw new Error(response.message || 'Failed to delete comment');
+      }
+    } catch (error) {
+      set({ 
+        adminError: error.message || 'Failed to delete comment',
+        adminLoading: false 
+      });
+      throw error;
+    }
+  },
+
+  // Clear admin error
+  clearAdminError: () => {
+    set({ adminError: null });
   }
 }));
 
