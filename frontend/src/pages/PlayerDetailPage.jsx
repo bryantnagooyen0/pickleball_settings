@@ -13,6 +13,8 @@ import {
   Center,
   SimpleGrid,
   Icon,
+  Stack,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import EquipmentModule from '../components/EquipmentModule';
@@ -39,6 +41,15 @@ const PlayerDetailPage = () => {
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const { paddles, fetchPaddles } = usePaddleStore();
+
+  // Responsive values for mobile optimization - MUST be called before any early returns
+  const containerMaxW = useBreakpointValue({ base: 'container.sm', md: 'container.lg', lg: 'container.xl' });
+  const padding = useBreakpointValue({ base: 4, md: 6, lg: 8 });
+  const titleFontSize = useBreakpointValue({ base: '2xl', md: '3xl', lg: '4xl' });
+  const sectionFontSize = useBreakpointValue({ base: 'xl', md: '2xl' });
+  const imageSize = useBreakpointValue({ base: '80px', md: '100px', lg: '120px' });
+  const gridColumns = useBreakpointValue({ base: 1, sm: 2 });
+  const verticalSpacing = useBreakpointValue({ base: 4, md: 6 });
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -92,7 +103,7 @@ const PlayerDetailPage = () => {
 
   if (loading) {
     return (
-      <Container maxW='container.xl' py={12}>
+      <Container maxW={containerMaxW} py={12}>
         <Center>
           <Spinner size='xl' />
         </Center>
@@ -105,13 +116,14 @@ const PlayerDetailPage = () => {
   }
 
   return (
-    <Container maxW='container.xl' py={8}>
-      <VStack spacing={6}>
+    <Container maxW={containerMaxW} py={4}>
+      <VStack spacing={verticalSpacing}>
         <Button
           onClick={() => navigate('/players')}
           colorScheme='blue'
           variant='outline'
           alignSelf='flex-start'
+          size={{ base: 'sm', md: 'md' }}
         >
           ← Back to Players
         </Button>
@@ -126,29 +138,34 @@ const PlayerDetailPage = () => {
         >
           {/* Header with Image and Basic Info */}
           <Box
-            p={8}
+            p={padding}
             bg='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
             color='white'
           >
-            <Box display='flex' alignItems='flex-start' gap={8}>
+            {/* Mobile: Stack vertically, Desktop: Side by side */}
+            <Stack 
+              direction={{ base: 'column', lg: 'row' }} 
+              spacing={{ base: 4, lg: 8 }}
+              align={{ base: 'center', lg: 'flex-start' }}
+            >
               <Image
                 src={player.image}
                 alt={player.name}
                 borderRadius='full'
-                width='120px'
-                height='120px'
+                width={imageSize}
+                height={imageSize}
                 objectFit='cover'
                 border='4px solid white'
                 boxShadow='lg'
                 flexShrink={0}
               />
-              <Box flex={1}>
-                <Text fontSize='4xl' fontWeight='bold' mb={4}>
+              <Box flex={1} w={{ base: 'full', lg: 'auto' }}>
+                <Text fontSize={titleFontSize} fontWeight='bold' mb={4} textAlign={{ base: 'center', lg: 'left' }}>
                   {player.name}
                 </Text>
 
                 {/* Player Info Grid */}
-                <SimpleGrid columns={2} spacing={4} mb={4}>
+                <SimpleGrid columns={gridColumns} spacing={4} mb={4}>
                   {player.age && (
                     <Box>
                       <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
@@ -213,20 +230,27 @@ const PlayerDetailPage = () => {
                   </Box>
                 )}
               </Box>
-            </Box>
+            </Stack>
           </Box>
 
           {/* Equipment Section */}
-          <Box p={8}>
-            <VStack spacing={6} align='start'>
-              <HStack justify="space-between" align="center" w="full" mb={4}>
-                <Text fontSize='2xl' fontWeight='bold' color='gray.800'>
+          <Box p={padding}>
+            <VStack spacing={verticalSpacing} align='start'>
+              <Stack 
+                direction={{ base: 'column', md: 'row' }}
+                justify="space-between" 
+                align={{ base: 'start', md: 'center' }} 
+                w="full" 
+                mb={4}
+                spacing={{ base: 2, md: 4 }}
+              >
+                <Text fontSize={sectionFontSize} fontWeight='bold' color='gray.800'>
                   Equipment
                 </Text>
-                <Text fontSize='sm' color='gray.600' fontStyle='italic'>
+                <Text fontSize='sm' color='gray.600' fontStyle='italic' textAlign={{ base: 'left', md: 'right' }}>
                   Any updates to player gear can be commented down below
                 </Text>
-              </HStack>
+              </Stack>
 
               {/* Paddle Module */}
               <EquipmentModule
@@ -290,12 +314,18 @@ const PlayerDetailPage = () => {
                 ]}
               />
 
-              <HStack spacing={4} w='full' pt={4}>
+              <Stack 
+                direction={{ base: 'column', sm: 'row' }}
+                spacing={4} 
+                w='full' 
+                pt={4}
+              >
                 {getRoleFromToken() === 'admin' && (
                   <Button
                     colorScheme='blue'
                     onClick={() => navigate(`/edit/${playerId}`)}
                     flex={1}
+                    size={{ base: 'sm', md: 'md' }}
                   >
                     Edit Player
                   </Button>
@@ -305,10 +335,11 @@ const PlayerDetailPage = () => {
                   variant='outline'
                   onClick={() => navigate('/players')}
                   flex={1}
+                  size={{ base: 'sm', md: 'md' }}
                 >
                   Back to List
                 </Button>
-              </HStack>
+              </Stack>
 
               {/* Comments Section */}
               <Box
@@ -321,7 +352,7 @@ const PlayerDetailPage = () => {
                 overflow='hidden'
                 mt={6}
               >
-                <Box p={8}>
+                <Box p={padding}>
                   <CommentSection targetType="player" targetId={playerId} />
                 </Box>
               </Box>
