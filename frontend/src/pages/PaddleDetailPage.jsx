@@ -13,6 +13,8 @@ import {
   Center,
   useToast,
   Divider,
+  Stack,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePaddleStore } from '../store/paddle';
@@ -29,6 +31,15 @@ const PaddleDetailPage = () => {
   const [playersUsingPaddle, setPlayersUsingPaddle] = useState([]);
   const { paddles, fetchPaddles } = usePaddleStore();
   const { players, fetchPlayers } = usePlayerStore();
+
+  // Responsive values for mobile optimization - MUST be called before any early returns
+  const containerMaxW = useBreakpointValue({ base: 'container.sm', md: 'container.lg', lg: 'container.xl' });
+  const imageSize = useBreakpointValue({ base: '200px', md: '250px', lg: '300px' });
+  const padding = useBreakpointValue({ base: 4, md: 6, lg: 8 });
+  const titleFontSize = useBreakpointValue({ base: '2xl', md: '3xl', lg: '4xl' });
+  const brandFontSize = useBreakpointValue({ base: 'md', md: 'lg' });
+  const modelFontSize = useBreakpointValue({ base: 'lg', md: 'xl' });
+  const gridColumns = useBreakpointValue({ base: 1, sm: 2 });
 
   useEffect(() => {
     const loadPaddle = async () => {
@@ -105,13 +116,14 @@ const PaddleDetailPage = () => {
   }
 
   return (
-    <Container maxW='container.xl' py={8}>
-      <VStack spacing={6}>
+    <Container maxW={containerMaxW} py={4}>
+      <VStack spacing={4}>
         <Button
           onClick={() => navigate('/paddles')}
           colorScheme='blue'
           variant='outline'
           alignSelf='flex-start'
+          size={{ base: 'sm', md: 'md' }}
         >
           ← Back to Paddles
         </Button>
@@ -125,15 +137,20 @@ const PaddleDetailPage = () => {
           overflow='hidden'
         >
           {/* Header with Image and Basic Info */}
-          <Box p={8}>
-            <Box display='flex' alignItems='flex-start' gap={8}>
+          <Box p={padding}>
+            {/* Mobile: Stack vertically, Desktop: Side by side */}
+            <Stack 
+              direction={{ base: 'column', lg: 'row' }} 
+              spacing={{ base: 4, lg: 8 }}
+              align={{ base: 'center', lg: 'flex-start' }}
+            >
               {paddle.image && (
                 <Image
                   src={paddle.image}
                   alt={paddle.name}
                   borderRadius='lg'
-                  width='300px'
-                  height='300px'
+                  width={imageSize}
+                  height={imageSize}
                   objectFit='contain'
                   bg='white'
                   border='1px solid'
@@ -141,26 +158,31 @@ const PaddleDetailPage = () => {
                   flexShrink={0}
                 />
               )}
-              <Box flex={1}>
-                <Text fontSize='4xl' fontWeight='bold' mb={4}>
+              <Box flex={1} w={{ base: 'full', lg: 'auto' }}>
+                <Text fontSize={titleFontSize} fontWeight='bold' mb={4} textAlign={{ base: 'center', lg: 'left' }}>
                   {paddle.name}
                 </Text>
 
-                <HStack spacing={4} mb={6}>
+                <HStack 
+                  spacing={4} 
+                  mb={6} 
+                  justify={{ base: 'center', lg: 'flex-start' }}
+                  wrap='wrap'
+                >
                   {paddle.brand && (
-                    <Badge colorScheme='red' variant='subtle' fontSize='lg' px={3} py={1}>
+                    <Badge colorScheme='red' variant='subtle' fontSize={brandFontSize} px={3} py={1}>
                       {paddle.brand}
                     </Badge>
                   )}
                   {paddle.model && (
-                    <Text fontSize='xl' color='gray.600'>
+                    <Text fontSize={modelFontSize} color='gray.600'>
                       {paddle.model}
                     </Text>
                   )}
                 </HStack>
 
                 {/* Paddle Specifications Grid */}
-                <SimpleGrid columns={2} spacing={4} mb={6}>
+                <SimpleGrid columns={gridColumns} spacing={4} mb={6}>
                   {paddle.shape && (
                     <Box>
                       <Text fontSize='sm' color='gray.600' mb={1}>
@@ -247,7 +269,7 @@ const PaddleDetailPage = () => {
                   </Box>
                 )}
               </Box>
-            </Box>
+            </Stack>
           </Box>
         </Box>
 
@@ -259,8 +281,8 @@ const PaddleDetailPage = () => {
           boxShadow='lg'
           overflow='hidden'
         >
-          <Box p={8}>
-            <Text fontSize='2xl' fontWeight='bold' color='gray.800' mb={6}>
+          <Box p={padding}>
+            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight='bold' color='gray.800' mb={6}>
               Used By
             </Text>
             
@@ -268,10 +290,11 @@ const PaddleDetailPage = () => {
               <SimpleGrid
                 columns={{
                   base: 1,
+                  sm: 2,
                   md: 2,
                   lg: 3,
                 }}
-                spacing={6}
+                spacing={{ base: 4, md: 6 }}
                 w='full'
               >
                 {playersUsingPaddle.map(player => (
@@ -306,8 +329,8 @@ const PaddleDetailPage = () => {
                 ))}
               </SimpleGrid>
             ) : (
-              <Box textAlign='center' py={8}>
-                <Text fontSize='lg' color='gray.500'>
+              <Box textAlign='center' py={{ base: 6, md: 8 }}>
+                <Text fontSize={{ base: 'md', md: 'lg' }} color='gray.500'>
                   No players are currently using this paddle
                 </Text>
               </Box>
@@ -324,7 +347,7 @@ const PaddleDetailPage = () => {
               overflow='hidden'
               mt={6}
             >
-              <Box p={8}>
+              <Box p={padding}>
                 <CommentSection targetType="paddle" targetId={paddleId} />
               </Box>
             </Box>
