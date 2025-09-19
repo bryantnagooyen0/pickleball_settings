@@ -7,21 +7,32 @@ import paddleRoutes from './routes/paddle.route.js';
 import commentRoutes from './routes/comment.route.js';
 import userRoutes from './controllers/users_controller.mjs';
 import cors from 'cors';
+import { securityMiddleware, additionalSecurity } from './middleware/security.js';
+import { generalLimiter, authLimiter, commentLimiter } from './middleware/rateLimiter.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration - allow all origins for now
+// Security middleware
+app.use(securityMiddleware);
+app.use(additionalSecurity);
+
+// Rate limiting
+app.use(generalLimiter);
+
+// CORS configuration - PRODUCTION: Replace with your actual domain
 app.use(cors({
-  origin: true,
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://pickleballsettings.com', 'https://www.pickleballsettings.com'] // Replace with your actual domain
+    : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Add size limit
 
 // Health check endpoint 
 app.get('/health', (req, res) => {

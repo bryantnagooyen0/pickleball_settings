@@ -10,6 +10,8 @@ import {
   voteComment,
 } from '../controllers/comment.controller.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { validateComment } from '../middleware/validation.js';
+import { commentLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -23,10 +25,10 @@ router.get('/admin/all', authMiddleware, getAllComments);
 router.get('/:targetType/:targetId', getComments);
 
 // Create a new comment (protected route)
-router.post('/', authMiddleware, createComment);
+router.post('/', authMiddleware, commentLimiter, validateComment, createComment);
 
 // Update a comment (protected route)
-router.put('/:id', authMiddleware, updateComment);
+router.put('/:id', authMiddleware, validateComment, updateComment);
 
 // Delete a comment (protected route)
 router.delete('/:id', authMiddleware, deleteComment);

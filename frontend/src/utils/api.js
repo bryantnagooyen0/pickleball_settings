@@ -38,7 +38,36 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
+    
+    // Handle different response types
+    if (response.status === 401) {
+      // Unauthorized - clear token and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      throw new Error('Session expired. Please log in again.');
+    }
+    
+    if (response.status === 429) {
+      throw new Error('Too many requests. Please slow down.');
+    }
+    
+    // Check if response has content before trying to parse JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error(`Server returned non-JSON response. Status: ${response.status}`);
+    }
+    
+    const text = await response.text();
+    if (!text) {
+      throw new Error(`Server returned empty response. Status: ${response.status}`);
+    }
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
+    }
     
     if (!response.ok) {
       throw new Error(data.message || `HTTP error! status: ${response.status}`);
