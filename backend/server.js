@@ -28,7 +28,8 @@ app.use(cors({
     ? [
         'https://www.pickleballsettings.com',  // Your main domain
         'https://pickleballsettings.com',      // Without www
-        'https://pickleball-settings.vercel.app' // Your Vercel deployment
+        /^https:\/\/pickleball-settings.*\.vercel\.app$/, // All Vercel deployments
+        'https://pickleball-settings-9r150quvd-bryantnagooyen0s-projects.vercel.app' // Your actual Vercel URL
       ]
     : true, // Allow all origins in development
   credentials: true,
