@@ -22,10 +22,14 @@ app.use(additionalSecurity);
 // Rate limiting
 app.use(generalLimiter);
 
-// CORS configuration - PRODUCTION: Replace with your actual domain
+// CORS configuration - PRODUCTION: Configured for your domain
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://pickleballsettings.com', 'https://www.pickleballsettings.com'] // Replace with your actual domain
+    ? [
+        'https://www.pickleballsettings.com',  // Your main domain
+        'https://pickleballsettings.com',      // Without www
+        'https://pickleball-settings.vercel.app' // Your Vercel deployment
+      ]
     : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
