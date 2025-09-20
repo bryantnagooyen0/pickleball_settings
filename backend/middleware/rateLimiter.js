@@ -3,13 +3,17 @@ import rateLimit from 'express-rate-limit';
 // General API rate limiting
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // Increased limit to 1000 requests per windowMs for production
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for health checks and ping
+    return req.path === '/health' || req.path === '/ping';
+  }
 });
 
 // Strict rate limiting for auth endpoints

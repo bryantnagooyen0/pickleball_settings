@@ -22,38 +22,15 @@ app.use(additionalSecurity);
 // Rate limiting
 app.use(generalLimiter);
 
-// CORS configuration - Enhanced for better compatibility
-const allowedOrigins = [
-  'https://www.pickleballsettings.com',
-  'https://pickleballsettings.com',
-  'http://localhost:3000',
-  'http://localhost:5173',
-  /^https:\/\/pickleball-settings.*\.vercel\.app$/,
-  'https://pickleball-settings-9r150quvd-bryantnagooyen0s-projects.vercel.app'
-];
-
+// CORS configuration - Simplified and more permissive for production
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Check if origin is in allowed list
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (typeof allowedOrigin === 'string') {
-        return allowedOrigin === origin;
-      } else if (allowedOrigin instanceof RegExp) {
-        return allowedOrigin.test(origin);
-      }
-      return false;
-    });
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'https://www.pickleballsettings.com',
+    'https://pickleballsettings.com',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    /^https:\/\/pickleball-settings.*\.vercel\.app$/
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
@@ -61,11 +38,30 @@ app.use(cors({
     'Authorization', 
     'X-Requested-With',
     'Accept',
-    'Origin'
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
   ],
   exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 }));
+
+// Additional CORS headers for all responses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
 
 app.use(express.json({ limit: '10mb' })); // Add size limit
 
