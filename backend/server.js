@@ -22,19 +22,49 @@ app.use(additionalSecurity);
 // Rate limiting
 app.use(generalLimiter);
 
-// CORS configuration - PRODUCTION: Configured for your domain
+// CORS configuration - Enhanced for better compatibility
+const allowedOrigins = [
+  'https://www.pickleballsettings.com',
+  'https://pickleballsettings.com',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  /^https:\/\/pickleball-settings.*\.vercel\.app$/,
+  'https://pickleball-settings-9r150quvd-bryantnagooyen0s-projects.vercel.app'
+];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        'https://www.pickleballsettings.com',  // Your main domain
-        'https://pickleballsettings.com',      // Without www
-        /^https:\/\/pickleball-settings.*\.vercel\.app$/, // All Vercel deployments
-        'https://pickleball-settings-9r150quvd-bryantnagooyen0s-projects.vercel.app' // Your actual Vercel URL
-      ]
-    : true, // Allow all origins in development
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      } else if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }));
 
 app.use(express.json({ limit: '10mb' })); // Add size limit
