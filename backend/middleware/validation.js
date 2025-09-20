@@ -62,7 +62,7 @@ export const validateComment = (req, res, next) => {
     content: Joi.string().trim().min(1).max(1000).required(),
     targetType: Joi.string().valid('player', 'paddle').required(),
     targetId: Joi.string().required(),
-    parentCommentId: Joi.string().optional()
+    parentCommentId: Joi.string().allow(null).optional()
   });
 
   const { error } = schema.validate(req.body);

@@ -60,7 +60,6 @@ const HomePage = () => {
       paddleShape: '',
       shoeModel: '',
       mlpTeam: '',
-      currentLocation: '',
       ageRange: '',
       overgrips: '',
       totalWeight: '',
@@ -81,9 +80,6 @@ const HomePage = () => {
       ],
       shoeModel: [...new Set(players.map(p => p.shoeModel).filter(Boolean))],
       mlpTeam: [...new Set(players.map(p => p.mlpTeam).filter(Boolean))],
-      currentLocation: [
-        ...new Set(players.map(p => p.currentLocation).filter(Boolean)),
-      ],
       overgrips: [...new Set(players.map(p => p.overgrips).filter(Boolean))],
       totalWeight: [...new Set(players.map(p => p.totalWeight).filter(Boolean))],
       sponsor: [...new Set(players.map(p => p.sponsor).filter(Boolean))],
@@ -197,7 +193,6 @@ const HomePage = () => {
       paddleShape: '',
       shoeModel: '',
       mlpTeam: '',
-      currentLocation: '',
       ageRange: '',
       overgrips: '',
       totalWeight: '',
@@ -476,25 +471,6 @@ const HomePage = () => {
                 </Select>
               </Box>
 
-              {/* Location Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Location
-                </Text>
-                <Select
-                  placeholder='All locations'
-                  value={filters.currentLocation}
-                  onChange={e =>
-                    setFilters({ ...filters, currentLocation: e.target.value })
-                  }
-                >
-                  {filterOptions.currentLocation.map(location => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
 
               <Divider />
 
