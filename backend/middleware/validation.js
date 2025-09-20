@@ -7,7 +7,13 @@ export const validatePlayer = (req, res, next) => {
     name: Joi.string().trim().min(1).max(100).required(),
     paddle: Joi.string().trim().max(100).required(),
     image: Joi.string().uri().required(),
-    age: Joi.number().integer().min(1).max(120).optional(),
+    age: Joi.number().integer().min(1).max(120).allow('', null).optional().custom((value, helpers) => {
+      // Convert empty string to null
+      if (value === '') {
+        return null;
+      }
+      return value;
+    }),
     height: Joi.string().max(20).allow('').optional(),
     mlpTeam: Joi.string().max(100).allow('').optional(),
     currentLocation: Joi.string().max(100).allow('').optional(),
