@@ -209,7 +209,7 @@ const EquipmentModule = ({
                   </Box>
                   
                   {/* Weight details - Below image on mobile, Right side on desktop */}
-                  <VStack align={{ base: 'center', md: 'start' }} spacing={3} flex={1} w={{ base: 'full', md: 'auto' }}>
+                  <VStack align='start' spacing={3} flex={1} w={{ base: 'full', md: 'auto' }}>
                     <Box>
                       <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
                         Total Weight
