@@ -369,8 +369,18 @@ const EquipmentModule = ({
             border='1px solid'
             borderColor='gray.200'
           >
-            <HStack justify='space-between' align='center'>
-              <HStack spacing={4}>
+            <Stack 
+              direction={{ base: 'column', md: 'row' }} 
+              justify={{ base: 'center', md: 'space-between' }} 
+              align={{ base: 'center', md: 'center' }}
+              spacing={{ base: 4, md: 0 }}
+            >
+              <Stack 
+                direction={{ base: 'column', md: 'row' }} 
+                align={{ base: 'center', md: 'center' }} 
+                spacing={{ base: 3, md: 4 }}
+                w={{ base: 'full', md: 'auto' }}
+              >
                 {getImage() ? (
                   <Image
                     src={getImage()}
@@ -381,6 +391,7 @@ const EquipmentModule = ({
                     objectFit='cover'
                     border='1px solid'
                     borderColor='gray.300'
+                    flexShrink={0}
                   />
                 ) : (
                   <Box
@@ -391,6 +402,7 @@ const EquipmentModule = ({
                     display='flex'
                     alignItems='center'
                     justifyContent='center'
+                    flexShrink={0}
                   >
                     {typeof getIcon() === 'string' ? (
                       <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
@@ -399,11 +411,18 @@ const EquipmentModule = ({
                     )}
                   </Box>
                 )}
-                <VStack align='start' spacing={1}>
-                  <Text fontSize='lg' fontWeight='bold' color='gray.800'>
+                <VStack align={{ base: 'center', md: 'start' }} spacing={1} w={{ base: 'full', md: 'auto' }}>
+                  <Text 
+                    fontSize={{ base: 'md', md: 'lg' }} 
+                    fontWeight='bold' 
+                    color='gray.800'
+                    textAlign={{ base: 'center', md: 'left' }}
+                    wordBreak='break-word'
+                    w='full'
+                  >
                     {getName()}
                   </Text>
-                  <HStack spacing={2}>
+                  <HStack spacing={2} flexWrap='wrap' justify={{ base: 'center', md: 'flex-start' }}>
                     {getBrand() && (
                       <Badge
                         colorScheme={badgeColor}
@@ -424,7 +443,7 @@ const EquipmentModule = ({
                     )}
                   </HStack>
                 </VStack>
-              </HStack>
+              </Stack>
               {icon !== 'shoes' && (
                 <Button
                   size='sm'
@@ -435,7 +454,7 @@ const EquipmentModule = ({
                   Check price
                 </Button>
               )}
-            </HStack>
+            </Stack>
           </Box>
         )}
 
