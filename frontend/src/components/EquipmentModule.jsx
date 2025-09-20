@@ -6,6 +6,7 @@ import {
   Button,
   HStack,
   VStack,
+  Stack,
   SimpleGrid,
   Icon,
   Badge,
@@ -171,23 +172,27 @@ const EquipmentModule = ({
                   Weight Setup
                 </Text>
                 
-                <HStack align='flex-start' spacing={6}>
-                  {/* Left side - Image */}
-                  <Box>
+                <Stack 
+                  direction={{ base: 'column', md: 'row' }} 
+                  align={{ base: 'center', md: 'flex-start' }} 
+                  spacing={{ base: 4, md: 6 }}
+                >
+                  {/* Image - Top on mobile, Left on desktop */}
+                  <Box align={{ base: 'center', md: 'flex-start' }}>
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
                         alt={mod.label}
-                        w={64}
-                        h={64}
+                        w={{ base: 48, md: 64 }}
+                        h={{ base: 48, md: 64 }}
                         borderRadius='md'
                         objectFit='contain'
                         border='none'
                       />
                     ) : (
                       <Box
-                        w={16}
-                        h={16}
+                        w={{ base: 12, md: 16 }}
+                        h={{ base: 12, md: 16 }}
                         bg='gray.300'
                         borderRadius='md'
                         display='flex'
@@ -203,8 +208,8 @@ const EquipmentModule = ({
                     )}
                   </Box>
                   
-                  {/* Right side - Weight details */}
-                  <VStack align='start' spacing={3} flex={1}>
+                  {/* Weight details - Below image on mobile, Right side on desktop */}
+                  <VStack align={{ base: 'center', md: 'start' }} spacing={3} flex={1} w={{ base: 'full', md: 'auto' }}>
                     <Box>
                       <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
                         Total Weight
@@ -247,7 +252,7 @@ const EquipmentModule = ({
                       </Badge>
                     )}
                   </VStack>
-                </HStack>
+                </Stack>
               </Box>
             );
           }
