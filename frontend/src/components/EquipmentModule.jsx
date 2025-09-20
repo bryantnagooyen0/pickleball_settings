@@ -316,7 +316,7 @@ const EquipmentModule = ({
                     )}
                   </VStack>
                 </HStack>
-                {mod.field !== 'overgrips' && (
+                {mod.field !== 'overgrips' && mod.field !== 'additionalModification' && (
                   <Button
                     size='sm'
                     colorScheme='blue'

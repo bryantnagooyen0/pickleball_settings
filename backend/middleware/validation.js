@@ -3,12 +3,47 @@ import Joi from 'joi';
 // Player validation schema
 export const validatePlayer = (req, res, next) => {
   const schema = Joi.object({
+    _id: Joi.string().optional(),
     name: Joi.string().trim().min(1).max(100).required(),
     paddle: Joi.string().trim().max(100).required(),
     image: Joi.string().uri().required(),
     age: Joi.number().integer().min(1).max(120).optional(),
-    height: Joi.string().max(20).optional(),
-    // Add other fields as needed
+    height: Joi.string().max(20).allow('').optional(),
+    mlpTeam: Joi.string().max(100).allow('').optional(),
+    currentLocation: Joi.string().max(100).allow('').optional(),
+    about: Joi.string().max(1000).allow('').optional(),
+    sponsor: Joi.string().max(100).allow('').optional(),
+    // Paddle fields
+    paddleShape: Joi.string().max(100).allow('').optional(),
+    paddleThickness: Joi.string().max(100).allow('').optional(),
+    paddleHandleLength: Joi.string().max(100).allow('').optional(),
+    paddleLength: Joi.string().max(100).allow('').optional(),
+    paddleWidth: Joi.string().max(100).allow('').optional(),
+    paddleColor: Joi.string().max(100).allow('').optional(),
+    paddleImage: Joi.string().uri().allow('').optional(),
+    paddleCore: Joi.string().max(100).allow('').optional(),
+    paddleWeight: Joi.string().max(100).allow('').optional(),
+    paddleBrand: Joi.string().max(100).allow('').optional(),
+    paddleModel: Joi.string().max(100).allow('').optional(),
+    // Shoe fields
+    shoes: Joi.string().max(100).allow('').optional(),
+    shoeImage: Joi.string().uri().allow('').optional(),
+    shoeModel: Joi.string().max(100).allow('').optional(),
+    // Modification fields
+    overgrips: Joi.string().max(500).allow('').optional(),
+    overgripImage: Joi.string().uri().allow('').optional(),
+    weight: Joi.string().max(500).allow('').optional(),
+    weightImage: Joi.string().uri().allow('').optional(),
+    totalWeight: Joi.string().max(100).allow('').optional(),
+    weightLocation: Joi.string().max(100).allow('').optional(),
+    tapeDetails: Joi.string().max(1000).allow('').optional(),
+    additionalModification: Joi.string().max(500).allow('').optional(),
+    additionalModificationImage: Joi.string().uri().allow('').optional(),
+    // MongoDB/Mongoose fields
+    __v: Joi.number().optional(),
+    // Timestamps
+    createdAt: Joi.date().optional(),
+    updatedAt: Joi.date().optional(),
   });
 
   const { error } = schema.validate(req.body);
