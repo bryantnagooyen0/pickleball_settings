@@ -27,7 +27,7 @@ import {
   FormLabel,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../utils/api';
 
 // Helper function to decode JWT and get role
@@ -73,6 +73,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   const cancelRef = useRef();
   const toast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const openInNewTab = url => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -140,9 +141,11 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   };
 
   const handleCardClick = () => {
-    // Save current scroll position before navigating
-    sessionStorage.setItem('playerListScrollPosition', window.pageYOffset.toString());
-    
+    // Only save and mark for restore when coming from the players list page
+    if (location.pathname === '/players') {
+      sessionStorage.setItem('playerListScrollPosition', window.pageYOffset.toString());
+      sessionStorage.setItem('restorePlayerListScroll', 'true');
+    }
     navigate(`/player/${player._id}`);
   };
 
@@ -172,52 +175,52 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
         overflow='hidden'
         boxShadow='md'
         bg='white'
-        _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
+        _hover={{ boxShadow: { base: 'md', md: 'lg' }, transform: { base: 'none', md: 'translateY(-2px)' } }}
         transition='all 0.2s'
         cursor='pointer'
         onClick={handleCardClick}
         onMouseDown={handleCardMouseDown}
       >
-        <Box p='6' display='flex' justifyContent='center' alignItems='center'>
+        <Box p={{ base: 4, md: 6 }} display='flex' justifyContent='center' alignItems='center'>
           <Image
             src={player.image}
             alt={player.name}
             borderRadius='full'
-            width='160px'
-            height='160px'
+            width={{ base: '120px', md: '160px' }}
+            height={{ base: '120px', md: '160px' }}
             objectFit='cover'
             border='4px solid white'
             boxShadow='lg'
           />
         </Box>
 
-        <Box p='6'>
-          <VStack spacing={3} align='start'>
-            <Text fontSize='xl' fontWeight='bold' color='gray.800'>
+        <Box p={{ base: 4, md: 6 }}>
+          <VStack spacing={{ base: 2, md: 3 }} align='start'>
+            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight='bold' color='gray.800'>
               {player.name}
             </Text>
 
             <HStack
-              spacing={4}
+              spacing={{ base: 3, md: 4 }}
               w='full'
               align='start'
               justifyContent='space-between'
             >
               <Box>
-                <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                <Text fontSize={{ base: 'xs', md: 'sm' }} color='gray.600' fontWeight='medium'>
                   Paddle:
                 </Text>
-                <Badge colorScheme='blue' variant='subtle' fontSize='sm'>
+                <Badge colorScheme='blue' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }}>
                   {player.paddle}
                 </Badge>
               </Box>
 
               {player.sponsor && (
                 <Box>
-                  <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                  <Text fontSize={{ base: 'xs', md: 'sm' }} color='gray.600' fontWeight='medium'>
                     Sponsor:
                   </Text>
-                  <Badge colorScheme='purple' variant='subtle' fontSize='sm'>
+                  <Badge colorScheme='purple' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }}>
                     {player.sponsor}
                   </Badge>
                 </Box>
@@ -226,10 +229,10 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
 
             {player.shoes && (
               <Box>
-                <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                <Text fontSize={{ base: 'xs', md: 'sm' }} color='gray.600' fontWeight='medium'>
                   Shoes:
                 </Text>
-                <Badge colorScheme='green' variant='subtle' fontSize='sm'>
+                <Badge colorScheme='green' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }}>
                   {player.shoes}
                 </Badge>
               </Box>
@@ -238,7 +241,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
             {getRoleFromToken() === 'admin' && (
               <HStack spacing={2} w='full'>
                 <Button
-                  size='sm'
+                  size={{ base: 'xs', md: 'sm' }}
                   colorScheme='blue'
                   onClick={e => handleButtonClick(e, 'edit')}
                   flex={1}
@@ -246,7 +249,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
                   Edit
                 </Button>
                 <Button
-                  size='sm'
+                  size={{ base: 'xs', md: 'sm' }}
                   colorScheme='red'
                   onClick={e => handleButtonClick(e, 'delete')}
                   flex={1}

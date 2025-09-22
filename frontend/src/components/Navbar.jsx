@@ -102,11 +102,11 @@ const Navbar = () => {
       borderBottom="1px"
       borderColor="gray.200"
       boxShadow="sm"
-      w="100vw"
-      px={6}
+      w="full"
+      px={{ base: 4, md: 6 }}
     >
       <Flex
-        h={16}
+        h={{ base: 14, md: 16 }}
         alignItems={'center'}
         w={'full'}
       >
@@ -116,7 +116,7 @@ const Navbar = () => {
             <Image
               src="/logo6.png" 
               alt="Pickleball Settings Logo"
-              height="60px"
+              height={{ base: '40px', md: '60px' }}
               objectFit="contain"
             />
           </Box>

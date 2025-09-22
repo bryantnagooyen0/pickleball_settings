@@ -5,10 +5,10 @@ import { Link as RouterLink } from 'react-router-dom';
 const Footer = () => {
   return (
     <Box bg="gray.50" borderTop="1px" borderColor="gray.200" mt="auto">
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={6}>
+      <Container maxW="container.xl" py={{ base: 6, md: 8 }}>
+        <VStack spacing={{ base: 4, md: 6 }}>
           {/* Footer Links */}
-          <HStack spacing={8} wrap="wrap" justify="center">
+          <HStack spacing={{ base: 4, md: 8 }} wrap="wrap" justify="center">
             <Link as={RouterLink} to="/privacy-policy" color="blue.500" _hover={{ textDecoration: 'underline' }}>
               Privacy Policy
             </Link>
@@ -20,7 +20,7 @@ const Footer = () => {
           <Divider />
           
           {/* Copyright */}
-          <Text fontSize="sm" color="gray.600" textAlign="center">
+          <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.600" textAlign="center">
             © {new Date().getFullYear()} Pickleball Settings. All rights reserved.
           </Text>
         </VStack>

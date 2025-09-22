@@ -91,6 +91,20 @@ const HomePage = () => {
     fetchPlayers();
   }, [fetchPlayers]);
 
+  // When landing on players list, ensure paddle scroll flags never affect this page
+  useEffect(() => {
+    sessionStorage.removeItem('restorePaddleListScroll');
+    sessionStorage.removeItem('paddleListScrollPosition');
+  }, []);
+
+  // If not restoring from player detail, always start at top on initial mount
+  useEffect(() => {
+    const shouldRestore = sessionStorage.getItem('restorePlayerListScroll') === 'true';
+    if (!shouldRestore) {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   // Update search query when URL changes
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -162,23 +176,24 @@ const HomePage = () => {
     return filtered;
   }, [players, searchQuery, filters]);
 
-  // Scroll position restoration
+  // Scroll position restoration (only when flagged as coming from the players list)
   useEffect(() => {
+    const shouldRestore = sessionStorage.getItem('restorePlayerListScroll') === 'true';
     const savedScrollPosition = sessionStorage.getItem('playerListScrollPosition');
-    if (savedScrollPosition && filteredPlayers.length > 0) {
-      // Use requestAnimationFrame to ensure the DOM is fully rendered
+    if (shouldRestore && savedScrollPosition && filteredPlayers.length > 0) {
       const restoreScroll = () => {
         window.scrollTo(0, parseInt(savedScrollPosition));
-        // Clear the saved position after restoring
         sessionStorage.removeItem('playerListScrollPosition');
+        sessionStorage.removeItem('restorePlayerListScroll');
       };
-      
-      // Double requestAnimationFrame to ensure layout is complete
       requestAnimationFrame(() => {
         requestAnimationFrame(restoreScroll);
       });
+    } else if (!shouldRestore) {
+      // If not restoring, ensure we clear stale flags/positions
+      sessionStorage.removeItem('restorePlayerListScroll');
     }
-  }, [filteredPlayers]); // Restore when filtered players change
+  }, [filteredPlayers]);
 
   // Don't automatically save scroll position - only save when clicking on a player
 
@@ -208,8 +223,8 @@ const HomePage = () => {
   ).length;
 
   return (
-    <Container maxW='container.xl' py={12}>
-      <VStack spacing={8}>
+    <Container maxW='container.xl' py={{ base: 6, md: 12 }}>
+      <VStack spacing={{ base: 6, md: 8 }}>
         <Text
           fontSize={'30'}
           fontWeight={'bold'}
@@ -221,8 +236,8 @@ const HomePage = () => {
         </Text>
 
         {/* Search and Filter Bar */}
-        <VStack w='full' spacing={4}>
-          <HStack w='full' spacing={4}>
+        <VStack w='full' spacing={{ base: 3, md: 4 }}>
+          <HStack w='full' spacing={{ base: 2, md: 4 }} align="stretch">
             <Box flex={1}>
               <InputGroup>
                 <InputLeftElement pointerEvents='none'>
@@ -232,7 +247,7 @@ const HomePage = () => {
                   placeholder='Search players by name or sponsor...'
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  size='lg'
+                  size={{ base: 'md', md: 'lg' }}
                   bg='white'
                   border='2px'
                   borderColor='gray.200'
@@ -251,7 +266,7 @@ const HomePage = () => {
               <IconButton
                 icon={<FaFilter />}
                 onClick={onOpen}
-                size='lg'
+                size={{ base: 'md', md: 'lg' }}
                 colorScheme={activeFiltersCount > 0 ? 'blue' : 'gray'}
                 aria-label='Filter players'
                 position='relative'
@@ -281,7 +296,7 @@ const HomePage = () => {
               <Button size='xs' variant='ghost' onClick={clearFilters}>
                 Clear all
               </Button>
-              <Text fontSize='sm' color='gray.600' fontWeight='medium' ml={4}>
+              <Text fontSize='sm' color='gray.600' fontWeight='medium' ml={{ base: 0, md: 4 }}>
                 Showing {filteredPlayers.length} out of {players.length} players
               </Text>
             </HStack>
@@ -289,12 +304,8 @@ const HomePage = () => {
         </VStack>
 
         <SimpleGrid
-          columns={{
-            base: 1,
-            md: 2,
-            lg: 3,
-          }}
-          spacing={10}
+          columns={{ base: 1, md: 2, lg: 3 }}
+          spacing={{ base: 6, md: 10 }}
           w={'full'}
         >
           {filteredPlayers.map(player => (

@@ -64,7 +64,7 @@ function App() {
 
   return (
     <>
-      <Box minH={'100vh'} bg={'gray.100'}>
+      <Box minH={'100vh'} bg={'gray.100'} overflowX={{ base: 'hidden', md: 'visible' }}>
         <Navbar />
         <Routes>
           <Route path='/' element={<LandingPage />} />

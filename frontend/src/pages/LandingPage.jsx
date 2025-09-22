@@ -48,6 +48,15 @@ const LandingPage = () => {
     fetchPlayers();
   }, [fetchPlayers]);
 
+  // Always start at top on landing page and clear any list restore flags
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    sessionStorage.removeItem('restorePlayerListScroll');
+    sessionStorage.removeItem('playerListScrollPosition');
+    sessionStorage.removeItem('restorePaddleListScroll');
+    sessionStorage.removeItem('paddleListScrollPosition');
+  }, []);
+
   // Get featured players (first 6 players)
   const featuredPlayers = useMemo(() => {
     return players.slice(0, 6);
@@ -133,14 +142,31 @@ const LandingPage = () => {
               </InputGroup>
             </Box>
 
-            <HStack spacing={4}>
+            <HStack
+              spacing={{ base: 3, md: 4 }}
+              w="full"
+              flexWrap="wrap"
+              justify="center"
+            >
               <Link to="/players">
-                <Button size="lg" colorScheme="white" variant="outline" rightIcon={<ArrowForwardIcon />}>
+                <Button
+                  size={{ base: 'md', md: 'lg' }}
+                  colorScheme="white"
+                  variant="outline"
+                  rightIcon={<ArrowForwardIcon />}
+                  w={{ base: 'full', md: 'auto' }}
+                >
                   Browse Players
                 </Button>
               </Link>
               <Link to="/paddles">
-                <Button size="lg" colorScheme="white" variant="outline" rightIcon={<ArrowForwardIcon />}>
+                <Button
+                  size={{ base: 'md', md: 'lg' }}
+                  colorScheme="white"
+                  variant="outline"
+                  rightIcon={<ArrowForwardIcon />}
+                  w={{ base: 'full', md: 'auto' }}
+                >
                   Explore Paddles
                 </Button>
               </Link>
@@ -389,14 +415,28 @@ const LandingPage = () => {
                 Browse through professional player configurations to find the equipment 
                 that matches your playing style and preferences.
               </Text>
-              <HStack spacing={4}>
+              <HStack spacing={{ base: 3, md: 4 }} flexWrap="wrap" justify="center">
                 <Link to="/players">
-                  <Button size="lg" colorScheme="blue" rightIcon={<ArrowForwardIcon />}>
+                  <Button
+                    size={{ base: 'md', md: 'lg' }}
+                    px={{ base: 4, md: 6 }}
+                    maxW={{ base: '280px', md: 'none' }}
+                    w={{ base: 'full', md: 'auto' }}
+                    colorScheme="blue"
+                    rightIcon={<ArrowForwardIcon />}
+                  >
                     Start Browsing
                   </Button>
                 </Link>
                 <Link to="/paddles">
-                  <Button size="lg" variant="outline" rightIcon={<ArrowForwardIcon />}>
+                  <Button
+                    size={{ base: 'md', md: 'lg' }}
+                    px={{ base: 4, md: 6 }}
+                    maxW={{ base: '280px', md: 'none' }}
+                    w={{ base: 'full', md: 'auto' }}
+                    variant="outline"
+                    rightIcon={<ArrowForwardIcon />}
+                  >
                     Explore Paddles
                   </Button>
                 </Link>

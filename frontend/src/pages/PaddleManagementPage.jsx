@@ -88,6 +88,20 @@ const PaddleManagementPage = () => {
     loadPaddles();
   }, []); // Empty dependency array - only run once on mount
 
+  // When landing on paddles list, ensure player scroll flags never affect this page
+  useEffect(() => {
+    sessionStorage.removeItem('restorePlayerListScroll');
+    sessionStorage.removeItem('playerListScrollPosition');
+  }, []);
+
+  // If not restoring from paddle detail, always start at top on initial mount
+  useEffect(() => {
+    const shouldRestore = sessionStorage.getItem('restorePaddleListScroll') === 'true';
+    if (!shouldRestore) {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const filteredPaddles = useMemo(() => {
     if (!searchQuery.trim()) {
       return paddles;
@@ -102,23 +116,23 @@ const PaddleManagementPage = () => {
     );
   }, [paddles, searchQuery]);
 
-  // Scroll position restoration
+  // Scroll position restoration (only when flagged as coming from the paddles list)
   useEffect(() => {
+    const shouldRestore = sessionStorage.getItem('restorePaddleListScroll') === 'true';
     const savedScrollPosition = sessionStorage.getItem('paddleListScrollPosition');
-    if (savedScrollPosition && filteredPaddles.length > 0) {
-      // Use requestAnimationFrame to ensure the DOM is fully rendered
+    if (shouldRestore && savedScrollPosition && filteredPaddles.length > 0) {
       const restoreScroll = () => {
         window.scrollTo(0, parseInt(savedScrollPosition));
-        // Clear the saved position after restoring
         sessionStorage.removeItem('paddleListScrollPosition');
+        sessionStorage.removeItem('restorePaddleListScroll');
       };
-      
-      // Double requestAnimationFrame to ensure layout is complete
       requestAnimationFrame(() => {
         requestAnimationFrame(restoreScroll);
       });
+    } else if (!shouldRestore) {
+      sessionStorage.removeItem('restorePaddleListScroll');
     }
-  }, [filteredPaddles]); // Restore when filtered paddles change
+  }, [filteredPaddles]);
 
   const handleSubmit = async () => {
     if (!paddleForm.name || !paddleForm.brand) {
@@ -248,9 +262,9 @@ const PaddleManagementPage = () => {
   };
 
   const handlePaddleClick = (paddle) => {
-    // Save current scroll position before navigating
+    // Only save and mark for restore when coming from the paddles list page
     sessionStorage.setItem('paddleListScrollPosition', window.pageYOffset.toString());
-    
+    sessionStorage.setItem('restorePaddleListScroll', 'true');
     navigate(`/paddle/${paddle._id}`);
   };
 
