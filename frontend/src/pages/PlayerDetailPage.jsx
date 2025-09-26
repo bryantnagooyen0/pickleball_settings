@@ -248,7 +248,7 @@ const PlayerDetailPage = () => {
                   Equipment
                 </Text>
                 <Text fontSize='sm' color='gray.600' fontStyle='italic' textAlign={{ base: 'left', md: 'right' }}>
-                  It is possible for gear to be outdated, please feel free to comment down below with any updates!
+                  It is possible for gear to be outdated, please feel free to comment down below with any updates
                 </Text>
               </Stack>
 
