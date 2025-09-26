@@ -158,6 +158,25 @@ const PlayerDetailPage = () => {
                 border='4px solid white'
                 boxShadow='lg'
                 flexShrink={0}
+                loading='lazy'
+                fallback={
+                  <Box
+                    width={imageSize}
+                    height={imageSize}
+                    borderRadius='full'
+                    bg='gray.200'
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='center'
+                    border='4px solid white'
+                    boxShadow='lg'
+                    flexShrink={0}
+                  >
+                    <Text fontSize='4xl' color='gray.500'>
+                      {player.name.charAt(0)}
+                    </Text>
+                  </Box>
+                }
               />
               <Box flex={1} w={{ base: 'full', lg: 'auto' }}>
                 <Text fontSize={titleFontSize} fontWeight='bold' mb={4} textAlign={{ base: 'center', lg: 'left' }}>

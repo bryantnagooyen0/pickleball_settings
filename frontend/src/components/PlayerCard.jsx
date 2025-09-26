@@ -191,6 +191,24 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
             objectFit='cover'
             border='4px solid white'
             boxShadow='lg'
+            loading='lazy'
+            fallback={
+              <Box
+                width={{ base: '120px', md: '160px' }}
+                height={{ base: '120px', md: '160px' }}
+                borderRadius='full'
+                bg='gray.200'
+                display='flex'
+                alignItems='center'
+                justifyContent='center'
+                border='4px solid white'
+                boxShadow='lg'
+              >
+                <Text fontSize='2xl' color='gray.500'>
+                  {player.name.charAt(0)}
+                </Text>
+              </Box>
+            }
           />
         </Box>
 

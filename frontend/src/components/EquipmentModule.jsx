@@ -179,17 +179,35 @@ const EquipmentModule = ({
                 >
                   {/* Image - Top on mobile, Left on desktop */}
                   <Box align={{ base: 'center', md: 'flex-start' }}>
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={mod.label}
-                        w={{ base: 48, md: 64 }}
-                        h={{ base: 48, md: 64 }}
-                        borderRadius='md'
-                        objectFit='contain'
-                        border='none'
-                      />
-                    ) : (
+                  {imageUrl ? (
+                    <Image
+                      src={imageUrl}
+                      alt={mod.label}
+                      w={{ base: 48, md: 64 }}
+                      h={{ base: 48, md: 64 }}
+                      borderRadius='md'
+                      objectFit='contain'
+                      border='none'
+                      loading='lazy'
+                      fallback={
+                        <Box
+                          w={{ base: 48, md: 64 }}
+                          h={{ base: 48, md: 64 }}
+                          bg='gray.300'
+                          borderRadius='md'
+                          display='flex'
+                          alignItems='center'
+                          justifyContent='center'
+                        >
+                          {typeof getIcon() === 'string' ? (
+                            <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
+                          ) : (
+                            <Icon as={getIcon()} w={icon === 'paddle' ? 12 : 8} h={icon === 'paddle' ? 12 : 8} color='gray.500' />
+                          )}
+                        </Box>
+                      }
+                    />
+                  ) : (
                       <Box
                         w={{ base: 12, md: 16 }}
                         h={{ base: 12, md: 16 }}
@@ -280,6 +298,24 @@ const EquipmentModule = ({
                       objectFit='cover'
                       border='1px solid'
                       borderColor='gray.300'
+                      loading='lazy'
+                      fallback={
+                        <Box
+                          w={16}
+                          h={16}
+                          bg='gray.300'
+                          borderRadius='md'
+                          display='flex'
+                          alignItems='center'
+                          justifyContent='center'
+                        >
+                          {typeof getIcon() === 'string' ? (
+                            <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
+                          ) : (
+                            <Icon as={getIcon()} w={icon === 'paddle' ? 12 : 8} h={icon === 'paddle' ? 12 : 8} color='gray.500' />
+                          )}
+                        </Box>
+                      }
                     />
                   ) : (
                     <Box
@@ -392,6 +428,25 @@ const EquipmentModule = ({
                     border='1px solid'
                     borderColor='gray.300'
                     flexShrink={0}
+                    loading='lazy'
+                    fallback={
+                      <Box
+                        w={16}
+                        h={16}
+                        bg='gray.300'
+                        borderRadius='md'
+                        display='flex'
+                        alignItems='center'
+                        justifyContent='center'
+                        flexShrink={0}
+                      >
+                        {typeof getIcon() === 'string' ? (
+                          <Image src={getIcon()} w={icon === 'paddle' ? 8 : 8} h={icon === 'paddle' ? 8 : 8} alt="icon" />
+                        ) : (
+                          <Icon as={getIcon()} w={icon === 'paddle' ? 12 : 8} h={icon === 'paddle' ? 12 : 8} color='gray.500' />
+                        )}
+                      </Box>
+                    }
                   />
                 ) : (
                   <Box

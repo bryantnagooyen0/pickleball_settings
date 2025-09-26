@@ -156,6 +156,25 @@ const PaddleDetailPage = () => {
                   border='1px solid'
                   borderColor='gray.200'
                   flexShrink={0}
+                  loading='lazy'
+                  fallback={
+                    <Box
+                      width={imageSize}
+                      height={imageSize}
+                      borderRadius='lg'
+                      bg='gray.200'
+                      display='flex'
+                      alignItems='center'
+                      justifyContent='center'
+                      border='1px solid'
+                      borderColor='gray.200'
+                      flexShrink={0}
+                    >
+                      <Text fontSize='2xl' color='gray.500'>
+                        {paddle.name.charAt(0)}
+                      </Text>
+                    </Box>
+                  }
                 />
               )}
               <Box flex={1} w={{ base: 'full', lg: 'auto' }}>

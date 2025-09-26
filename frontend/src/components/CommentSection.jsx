@@ -476,9 +476,29 @@ const CommentSection = ({ targetType, targetId }) => {
 
       {/* Comments List */}
       {loading && targetComments.length === 0 ? (
-        <Flex justify="center" py={8}>
-          <Spinner size="lg" />
-        </Flex>
+        <VStack align="stretch" spacing={4}>
+          {[1, 2, 3].map((i) => (
+            <Box
+              key={i}
+              p={4}
+              border="1px"
+              borderColor="gray.200"
+              borderRadius="md"
+              bg="white"
+            >
+              <HStack justify="space-between" align="flex-start" mb={2}>
+                <HStack spacing={3}>
+                  <Box w="32px" h="32px" bg="gray.200" borderRadius="full" />
+                  <VStack align="flex-start" spacing={1}>
+                    <Box w="100px" h="16px" bg="gray.200" borderRadius="sm" />
+                    <Box w="80px" h="12px" bg="gray.200" borderRadius="sm" />
+                  </VStack>
+                </HStack>
+              </HStack>
+              <Box w="full" h="60px" bg="gray.200" borderRadius="sm" />
+            </Box>
+          ))}
+        </VStack>
       ) : targetComments.length === 0 ? (
         <Box textAlign="center" py={8} color="gray.500">
           <Text>No comments yet. Be the first to comment!</Text>

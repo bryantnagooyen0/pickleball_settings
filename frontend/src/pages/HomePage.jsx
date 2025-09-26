@@ -308,13 +308,53 @@ const HomePage = () => {
           spacing={{ base: 6, md: 10 }}
           w={'full'}
         >
-          {filteredPlayers.map(player => (
-            <PlayerCard
-              key={player._id}
-              player={player}
-              onPlayerDeleted={handlePlayerDeleted}
-            />
-          ))}
+          {players.length === 0 ? (
+            // Show skeleton cards while loading
+            [1, 2, 3, 4, 5, 6].map((i) => (
+              <Box
+                key={i}
+                maxW='sm'
+                borderWidth='1px'
+                borderRadius='lg'
+                overflow='hidden'
+                boxShadow='md'
+                bg='white'
+              >
+                <Box p={{ base: 4, md: 6 }} display='flex' justifyContent='center' alignItems='center'>
+                  <Box
+                    width={{ base: '120px', md: '160px' }}
+                    height={{ base: '120px', md: '160px' }}
+                    borderRadius='full'
+                    bg='gray.200'
+                  />
+                </Box>
+                <Box p={{ base: 4, md: 6 }}>
+                  <VStack spacing={{ base: 2, md: 3 }} align='start'>
+                    <Box w="150px" h="24px" bg="gray.200" borderRadius="sm" />
+                    <HStack spacing={{ base: 3, md: 4 }} w='full' align='start' justifyContent='space-between'>
+                      <Box>
+                        <Box w="60px" h="12px" bg="gray.200" borderRadius="sm" mb={1} />
+                        <Box w="80px" h="20px" bg="gray.200" borderRadius="sm" />
+                      </Box>
+                      <Box>
+                        <Box w="70px" h="12px" bg="gray.200" borderRadius="sm" mb={1} />
+                        <Box w="90px" h="20px" bg="gray.200" borderRadius="sm" />
+                      </Box>
+                    </HStack>
+                    <Box w="100px" h="20px" bg="gray.200" borderRadius="sm" />
+                  </VStack>
+                </Box>
+              </Box>
+            ))
+          ) : (
+            filteredPlayers.map(player => (
+              <PlayerCard
+                key={player._id}
+                player={player}
+                onPlayerDeleted={handlePlayerDeleted}
+              />
+            ))
+          )}
         </SimpleGrid>
 
         {filteredPlayers.length === 0 && (
