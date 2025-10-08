@@ -45,12 +45,15 @@ export const validatePlayer = (req, res, next) => {
     tapeDetails: Joi.string().max(1000).allow('').optional(),
     additionalModification: Joi.string().max(500).allow('').optional(),
     additionalModificationImage: Joi.string().uri().allow('').optional(),
+    // Additional fields that might be present
+    slug: Joi.string().allow('').optional(),
+    paddlePriceLink: Joi.string().uri().allow('').optional(),
     // MongoDB/Mongoose fields
     __v: Joi.number().optional(),
     // Timestamps
     createdAt: Joi.date().optional(),
     updatedAt: Joi.date().optional(),
-  });
+  }).unknown(true); // Allow unknown fields to pass through
 
   const { error } = schema.validate(req.body);
   if (error) {
