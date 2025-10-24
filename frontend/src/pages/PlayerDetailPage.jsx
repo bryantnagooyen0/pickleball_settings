@@ -75,6 +75,49 @@ const PlayerDetailPage = () => {
     fetchPaddles();
   }, [playerId, navigate, toast, fetchPaddles]);
 
+  // Set dynamic meta tags for social media previews
+  useEffect(() => {
+    if (player) {
+      const baseUrl = 'https://pickleball-settings.vercel.app';
+      const playerUrl = `${baseUrl}/player/${playerId}`;
+      const playerImage = player.image || `${baseUrl}/logo_preview_card.png`;
+      
+      // Update document title
+      document.title = `${player.name} | Pickleball Profile`;
+      
+      // Update or create meta tags
+      const updateMetaTag = (property, content) => {
+        let meta = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          if (property.startsWith('og:')) {
+            meta.setAttribute('property', property);
+          } else {
+            meta.setAttribute('name', property);
+          }
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      // Open Graph meta tags
+      updateMetaTag('og:title', `${player.name} | Pickleball Profile`);
+      updateMetaTag('og:description', `View detailed stats and equipment for ${player.name}.`);
+      updateMetaTag('og:image', playerImage);
+      updateMetaTag('og:image:width', '1608');
+      updateMetaTag('og:image:height', '630');
+      updateMetaTag('og:type', 'website');
+      updateMetaTag('og:url', playerUrl);
+      
+      // Twitter Card meta tags
+      updateMetaTag('twitter:card', 'summary_large_image');
+      updateMetaTag('twitter:title', `${player.name} | Pickleball Profile`);
+      updateMetaTag('twitter:description', `View detailed stats and equipment for ${player.name}.`);
+      updateMetaTag('twitter:image', playerImage);
+    }
+  }, [player, playerId]);
+
   // Enhance player data with paddle template information when paddles are loaded
   useEffect(() => {
     if (player && paddles.length > 0 && player.paddle && !player.paddlePriceLink) {
