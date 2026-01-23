@@ -22,6 +22,7 @@ import {
   MenuItem,
   VStack,
   useBreakpointValue,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { PlusSquareIcon, SettingsIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { useAuth } from '../hooks/useAuth';
@@ -62,6 +63,8 @@ const Navbar = () => {
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef();
+  const buttonColor = useColorModeValue('#AE573E');
+  const buttonHoverColor = useColorModeValue('#353535');
 
   // Check if we should show mobile menu
   const showMobileMenu = useBreakpointValue({ base: true, md: false });
@@ -98,7 +101,7 @@ const Navbar = () => {
       position="sticky"
       top={0}
       zIndex={1000}
-      bg="white"
+      bg="#FAF7ED"
       borderBottom="1px"
       borderColor="gray.200"
       boxShadow="sm"
@@ -157,7 +160,7 @@ const Navbar = () => {
                     <Button variant={'outline'}>Login</Button>
                   </MiddleClickLink>
                   <MiddleClickLink to={'/signup'}>
-                    <Button colorScheme={'blue'}>Sign Up</Button>
+                    <Button bg= {buttonColor} color="white" _hover={{ bg: buttonHoverColor }}>Sign Up</Button>
                   </MiddleClickLink>
                 </>
               )}

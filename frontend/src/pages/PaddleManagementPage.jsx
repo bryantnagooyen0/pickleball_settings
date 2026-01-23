@@ -31,12 +31,18 @@ import {
   InputLeftElement,
   Center,
   Spinner,
+  Heading,
+  Divider,
 } from '@chakra-ui/react';
 import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import { SearchIcon, EditIcon, DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion(Box);
+const MotionVStack = motion(VStack);
 
 // Helper function to decode JWT and get role
 const getRoleFromToken = () => {
@@ -64,6 +70,15 @@ const PaddleManagementPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const cancelRef = useRef();
 
+  // Editorial color palette - matching landing page
+  const bgColor = '#FAF7ED';
+  const primaryColor = '#AE573E';
+  const primaryDark = '#8B4532';
+  const textPrimary = '#161412';
+  const textSecondary = '#6B7280';
+  const accentBg = '#F5F1E3';
+  const borderColor = '#E5E7EB';
+
   const [paddleForm, setPaddleForm] = useState({
     name: '',
     brand: '',
@@ -86,7 +101,7 @@ const PaddleManagementPage = () => {
       setIsLoading(false);
     };
     loadPaddles();
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
   // When landing on paddles list, ensure player scroll flags never affect this page
   useEffect(() => {
@@ -145,7 +160,6 @@ const PaddleManagementPage = () => {
       });
       return;
     }
-
 
     const result = isEditing
       ? await updatePaddle(selectedPaddle._id, paddleForm)
@@ -290,169 +304,413 @@ const PaddleManagementPage = () => {
     }
   };
 
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
+
   return (
-    <Container maxW='container.xl' py={8}>
-      <VStack spacing={6}>
-        <Text
-          fontSize={'30'}
-          fontWeight={'bold'}
-          bgGradient={'linear(to-r, cyan.400, blue.500)'}
-          bgClip={'text'}
-          textAlign={'center'}
+    <Box bg={bgColor} minH="100vh" py={{ base: 8, md: 12 }}>
+      <Container maxW='container.xl'>
+        <MotionVStack
+          spacing={{ base: 8, md: 12 }}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
         >
-          Paddle List
-        </Text>
-
-        <HStack w='full' justify='space-between'>
-          <Box flex={1} maxW='md'>
-            <InputGroup>
-              <InputLeftElement pointerEvents='none'>
-                <SearchIcon color='gray.400' />
-              </InputLeftElement>
-              <Input
-                placeholder='Search paddles...'
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                bg='white'
-                border='2px'
-                borderColor='gray.200'
-                _focus={{
-                  borderColor: 'blue.500',
-                  boxShadow: '0 0 0 1px blue.500',
-                }}
-              />
-            </InputGroup>
-          </Box>
-
-          {getRoleFromToken() === 'admin' && (
-            <Button
-              leftIcon={<AddIcon />}
-              colorScheme='blue'
-              onClick={handleAddNew}
+          {/* Header Section - Editorial Style */}
+          <MotionBox variants={fadeInUp} w="full">
+            <HStack spacing={4} mb={6}>
+              <Box w="60px" h="3px" bg={primaryColor} />
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                color={primaryColor}
+                letterSpacing="0.2em"
+                textTransform="uppercase"
+              >
+                All Paddles
+              </Text>
+            </HStack>
+            <Heading
+              as="h1"
+              fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
+              color={textPrimary}
+              fontWeight="900"
+              letterSpacing="-0.04em"
+              lineHeight="1"
             >
-              Add New Paddle
-            </Button>
-          )}
-        </HStack>
+              Paddle
+              <Box as="span" display="block" color={primaryColor} mt={2}>
+                Collection
+              </Box>
+            </Heading>
+          </MotionBox>
 
-        {isLoading ? (
-          <Center py={12}>
-            <Spinner size='xl' />
-          </Center>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w='full'>
-            {filteredPaddles.map(paddle => (
-            <Box
-              key={paddle._id}
-              bg={'white'}
-              p={6}
-              rounded='lg'
-              shadow='md'
-              border='1px'
-              borderColor='gray.200'
-              cursor='pointer'
-              _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
-              transition='all 0.2s'
-              onClick={() => handlePaddleClick(paddle)}
-              onMouseDown={(e) => handlePaddleMouseDown(e, paddle)}
-            >
-              <VStack spacing={4} align='start'>
-                <Image
-                  src={paddle.image || '/unknownPaddle.png'}
-                  alt={paddle.name}
-                  borderRadius='md'
-                  w='full'
-                  h='200px'
-                  objectFit='contain'
-                  bg='white'
-                />
+          {/* Search and Add Button - Editorial Style */}
+          <MotionBox variants={fadeInUp} w='full'>
+            <HStack w='full' justify='space-between' spacing={4}>
+              <Box flex={1} maxW='md'>
+                <InputGroup size="lg">
+                  <InputLeftElement pointerEvents='none' h="full" pl={6}>
+                    <SearchIcon color={textSecondary} boxSize={5} />
+                  </InputLeftElement>
+                  <Input
+                    placeholder='Search paddles...'
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    bg="white"
+                    color={textPrimary}
+                    h="64px"
+                    pl={14}
+                    fontSize="lg"
+                    border="2px solid"
+                    borderColor={borderColor}
+                    borderRadius="none"
+                    _placeholder={{ color: textSecondary, fontStyle: "italic" }}
+                    _focus={{
+                      borderColor: primaryColor,
+                      borderWidth: "3px",
+                      boxShadow: "none",
+                      bg: "white",
+                    }}
+                    _hover={{
+                      borderColor: primaryColor,
+                    }}
+                    transition="all 0.2s"
+                  />
+                </InputGroup>
+              </Box>
 
-                <VStack spacing={2} align='start' w='full'>
-                  <Text fontSize='xl' fontWeight='bold'>
-                    {paddle.name}
-                  </Text>
-                  <Text fontSize='md' color='gray.600'>
-                    {paddle.model}
-                  </Text>
+              {getRoleFromToken() === 'admin' && (
+                <Button
+                  leftIcon={<AddIcon />}
+                  bg={primaryColor}
+                  color="white"
+                  onClick={handleAddNew}
+                  h="64px"
+                  px={8}
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={primaryColor}
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                  fontSize="md"
+                  _hover={{
+                    bg: primaryDark,
+                    transform: "translateX(2px)",
+                  }}
+                  _active={{
+                    transform: "translateX(0)",
+                  }}
+                  transition="all 0.2s"
+                >
+                  Add New Paddle
+                </Button>
+              )}
+            </HStack>
+          </MotionBox>
 
-                  <HStack spacing={2} flexWrap='wrap' justify='space-between' w='full'>
-                    <HStack spacing={2} flexWrap='wrap'>
-                      {paddle.shape && (
-                        <Badge colorScheme='blue' variant='subtle'>
-                          {paddle.shape}
-                        </Badge>
-                      )}
-                      {paddle.thickness && (
-                        <Badge colorScheme='green' variant='subtle'>
-                          {paddle.thickness}
-                        </Badge>
-                      )}
-                      {paddle.weight && (
-                        <Badge colorScheme='purple' variant='subtle'>
-                          {paddle.weight}
-                        </Badge>
-                      )}
-                    </HStack>
-                    {paddle.brand && (
-                      <Badge colorScheme='red' variant='subtle'>
-                        {paddle.brand}
-                      </Badge>
-                    )}
-                  </HStack>
-
-                  {paddle.description && (
-                    <Text fontSize='sm' color='gray.500' noOfLines={2}>
-                      {paddle.description}
-                    </Text>
-                  )}
-                </VStack>
-
-                {getRoleFromToken() === 'admin' && (
-                  <HStack spacing={2} w='full'>
-                    <Tooltip label='Edit Paddle'>
-                      <IconButton
-                        icon={<EditIcon />}
-                        size='sm'
-                        colorScheme='blue'
-                        variant='outline'
-                        onClick={(e) => handleButtonClick(e, 'edit', paddle)}
-                      />
-                    </Tooltip>
-                    <Tooltip label='Delete Paddle'>
-                      <IconButton
-                        icon={<DeleteIcon />}
-                        size='sm'
-                        colorScheme='red'
-                        variant='outline'
-                        onClick={(e) => handleButtonClick(e, 'delete', paddle)}
-                      />
-                    </Tooltip>
-                  </HStack>
-                )}
-              </VStack>
+          {/* Editorial Divider */}
+          {!isLoading && filteredPaddles.length > 0 && (
+            <Box w="full" py={2}>
+              <HStack spacing={4}>
+                <Box flex="1" h="2px" bg={primaryColor} />
+                <Text
+                  fontSize="xs"
+                  fontWeight="700"
+                  color={primaryColor}
+                  letterSpacing="0.2em"
+                  textTransform="uppercase"
+                  px={4}
+                >
+                  Results
+                </Text>
+                <Box flex="1" h="2px" bg={primaryColor} />
+              </HStack>
             </Box>
-          ))}
-          </SimpleGrid>
-        )}
+          )}
 
-        {!isLoading && filteredPaddles.length === 0 && (
-          <Text fontSize='xl' textAlign='center' color='gray.500'>
-            {searchQuery
-              ? 'No paddles found matching your search'
-              : 'No paddles found'}
-          </Text>
-        )}
-      </VStack>
+          {/* Paddles Grid */}
+          {isLoading ? (
+            <Center py={12}>
+              <Spinner size='xl' color={primaryColor} thickness="4px" />
+            </Center>
+          ) : (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w='full'>
+              {filteredPaddles.map((paddle, index) => (
+                <MotionBox
+                  key={paddle._id}
+                  variants={fadeInUp}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Box
+                    bg={accentBg}
+                    p={6}
+                    borderRadius="none"
+                    borderWidth="2px"
+                    borderColor={borderColor}
+                    cursor='pointer'
+                    _hover={{
+                      borderColor: primaryColor,
+                      transform: "translateY(-4px)",
+                    }}
+                    transition='all 0.3s'
+                    onClick={() => handlePaddleClick(paddle)}
+                    onMouseDown={(e) => handlePaddleMouseDown(e, paddle)}
+                    position="relative"
+                    overflow="hidden"
+                  >
+                    <Box
+                      position="absolute"
+                      top={0}
+                      left={0}
+                      w="4px"
+                      h="full"
+                      bg={primaryColor}
+                      opacity={0}
+                      _groupHover={{ opacity: 1 }}
+                    />
+                    <VStack spacing={4} align='start'>
+                      <Image
+                        src={paddle.image || '/unknownPaddle.png'}
+                        alt={paddle.name}
+                        borderRadius="none"
+                        w='full'
+                        h='200px'
+                        objectFit='contain'
+                        bg='white'
+                        borderWidth="1px"
+                        borderColor={borderColor}
+                      />
 
-      {/* Add/Edit Modal */}
+                      <VStack spacing={3} align='start' w='full'>
+                        <Heading
+                          fontSize='xl'
+                          fontWeight='900'
+                          color={textPrimary}
+                          letterSpacing="-0.02em"
+                        >
+                          {paddle.name}
+                        </Heading>
+                        <Text
+                          fontSize='md'
+                          color={textSecondary}
+                          fontWeight="600"
+                        >
+                          {paddle.model}
+                        </Text>
+
+                        <HStack spacing={2} flexWrap='wrap' justify='space-between' w='full'>
+                          <HStack spacing={2} flexWrap='wrap'>
+                            {paddle.shape && (
+                              <Badge
+                                px={3}
+                                py={1}
+                                borderRadius="none"
+                                bg={primaryColor}
+                                color="white"
+                                fontSize="xs"
+                                fontWeight="700"
+                                textTransform="uppercase"
+                                letterSpacing="0.05em"
+                              >
+                                {paddle.shape}
+                              </Badge>
+                            )}
+                            {paddle.thickness && (
+                              <Badge
+                                px={3}
+                                py={1}
+                                borderRadius="none"
+                                bg={textPrimary}
+                                color="white"
+                                fontSize="xs"
+                                fontWeight="700"
+                                textTransform="uppercase"
+                                letterSpacing="0.05em"
+                              >
+                                {paddle.thickness}
+                              </Badge>
+                            )}
+                            {paddle.weight && (
+                              <Badge
+                                px={3}
+                                py={1}
+                                borderRadius="none"
+                                bg={textSecondary}
+                                color="white"
+                                fontSize="xs"
+                                fontWeight="700"
+                                textTransform="uppercase"
+                                letterSpacing="0.05em"
+                              >
+                                {paddle.weight}
+                              </Badge>
+                            )}
+                          </HStack>
+                          {paddle.brand && (
+                            <Badge
+                              px={3}
+                              py={1}
+                              borderRadius="none"
+                              bg={primaryColor}
+                              color="white"
+                              fontSize="xs"
+                              fontWeight="700"
+                              textTransform="uppercase"
+                              letterSpacing="0.05em"
+                            >
+                              {paddle.brand}
+                            </Badge>
+                          )}
+                        </HStack>
+
+                        {paddle.description && (
+                          <Text
+                            fontSize='sm'
+                            color={textSecondary}
+                            noOfLines={2}
+                            lineHeight="1.6"
+                          >
+                            {paddle.description}
+                          </Text>
+                        )}
+                      </VStack>
+
+                      {getRoleFromToken() === 'admin' && (
+                        <HStack spacing={2} w='full' pt={2} borderTopWidth="1px" borderColor={borderColor}>
+                          <Tooltip label='Edit Paddle'>
+                            <IconButton
+                              icon={<EditIcon />}
+                              size='sm'
+                              bg={primaryColor}
+                              color="white"
+                              variant='solid'
+                              borderRadius="none"
+                              borderWidth="2px"
+                              borderColor={primaryColor}
+                              _hover={{
+                                bg: primaryDark,
+                              }}
+                              onClick={(e) => handleButtonClick(e, 'edit', paddle)}
+                            />
+                          </Tooltip>
+                          <Tooltip label='Delete Paddle'>
+                            <IconButton
+                              icon={<DeleteIcon />}
+                              size='sm'
+                              bg={textPrimary}
+                              color="white"
+                              variant='solid'
+                              borderRadius="none"
+                              borderWidth="2px"
+                              borderColor={textPrimary}
+                              _hover={{
+                                bg: textSecondary,
+                              }}
+                              onClick={(e) => handleButtonClick(e, 'delete', paddle)}
+                            />
+                          </Tooltip>
+                        </HStack>
+                      )}
+                    </VStack>
+                  </Box>
+                </MotionBox>
+              ))}
+            </SimpleGrid>
+          )}
+
+          {/* Empty State - Editorial Style */}
+          {!isLoading && filteredPaddles.length === 0 && (
+            <MotionBox variants={fadeInUp} textAlign="center" py={16}>
+              <Box
+                p={12}
+                bg={accentBg}
+                borderWidth="2px"
+                borderColor={borderColor}
+                borderRadius="none"
+                maxW="2xl"
+                mx="auto"
+              >
+                <VStack spacing={6}>
+                  <Heading
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    color={textPrimary}
+                    fontWeight="900"
+                    letterSpacing="-0.02em"
+                  >
+                    No Paddles Found
+                  </Heading>
+                  <Text
+                    fontSize={{ base: "md", md: "lg" }}
+                    color={textSecondary}
+                    lineHeight="1.7"
+                    fontStyle="italic"
+                  >
+                    {searchQuery
+                      ? 'No paddles match your search criteria. Try adjusting your search terms.'
+                      : 'No paddles in the database yet.'}
+                  </Text>
+                </VStack>
+              </Box>
+            </MotionBox>
+          )}
+        </MotionVStack>
+      </Container>
+
+      {/* Add/Edit Modal - Editorial Style */}
       <Modal isOpen={isOpen} onClose={handleClose} size='xl'>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            {isEditing ? 'Edit Paddle' : 'Add New Paddle'}
+        <ModalContent bg={bgColor} borderRadius="none">
+          <ModalHeader
+            borderBottomWidth="2px"
+            borderColor={primaryColor}
+            bg={accentBg}
+            py={6}
+          >
+            <HStack spacing={3}>
+              <Box w="40px" h="2px" bg={primaryColor} />
+              <Text
+                fontSize="lg"
+                fontWeight="900"
+                color={textPrimary}
+                letterSpacing="-0.02em"
+                textTransform="uppercase"
+              >
+                {isEditing ? 'Edit Paddle' : 'Add New Paddle'}
+              </Text>
+            </HStack>
           </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
+          <ModalCloseButton
+            size="lg"
+            borderRadius="none"
+            borderWidth="2px"
+            borderColor={textPrimary}
+            color={textPrimary}
+            _hover={{
+              bg: textPrimary,
+              color: "white",
+            }}
+          />
+          <ModalBody pb={8} pt={6}>
             <VStack spacing={4}>
               <Input
                 placeholder='Paddle Name'
@@ -460,6 +718,16 @@ const PaddleManagementPage = () => {
                 onChange={e =>
                   setPaddleForm({ ...paddleForm, name: e.target.value })
                 }
+                borderRadius="none"
+                borderWidth="2px"
+                borderColor={borderColor}
+                _focus={{
+                  borderColor: primaryColor,
+                  borderWidth: "3px",
+                }}
+                _hover={{
+                  borderColor: primaryColor,
+                }}
               />
               <HStack spacing={4} w='full'>
                 <Input
@@ -468,6 +736,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, brand: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
                 <Input
                   placeholder='Model'
@@ -475,6 +753,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, model: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
               </HStack>
               <HStack spacing={4} w='full'>
@@ -484,6 +772,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, shape: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
                 <Input
                   placeholder='Thickness'
@@ -491,6 +789,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, thickness: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
               </HStack>
               <HStack spacing={4} w='full'>
@@ -503,6 +811,16 @@ const PaddleManagementPage = () => {
                       handleLength: e.target.value,
                     })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
                 <Input
                   placeholder='Paddle Length'
@@ -510,6 +828,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, length: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
               </HStack>
               <HStack spacing={4} w='full'>
@@ -519,6 +847,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, width: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
                 <Input
                   placeholder='Core'
@@ -526,6 +864,16 @@ const PaddleManagementPage = () => {
                   onChange={e =>
                     setPaddleForm({ ...paddleForm, core: e.target.value })
                   }
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={borderColor}
+                  _focus={{
+                    borderColor: primaryColor,
+                    borderWidth: "3px",
+                  }}
+                  _hover={{
+                    borderColor: primaryColor,
+                  }}
                 />
               </HStack>
               <Input
@@ -534,6 +882,16 @@ const PaddleManagementPage = () => {
                 onChange={e =>
                   setPaddleForm({ ...paddleForm, image: e.target.value })
                 }
+                borderRadius="none"
+                borderWidth="2px"
+                borderColor={borderColor}
+                _focus={{
+                  borderColor: primaryColor,
+                  borderWidth: "3px",
+                }}
+                _hover={{
+                  borderColor: primaryColor,
+                }}
               />
               <Input
                 placeholder='Price Link (e.g., Amazon, manufacturer website)'
@@ -541,6 +899,16 @@ const PaddleManagementPage = () => {
                 onChange={e =>
                   setPaddleForm({ ...paddleForm, priceLink: e.target.value })
                 }
+                borderRadius="none"
+                borderWidth="2px"
+                borderColor={borderColor}
+                _focus={{
+                  borderColor: primaryColor,
+                  borderWidth: "3px",
+                }}
+                _hover={{
+                  borderColor: primaryColor,
+                }}
               />
               <Textarea
                 placeholder='Description'
@@ -549,12 +917,51 @@ const PaddleManagementPage = () => {
                   setPaddleForm({ ...paddleForm, description: e.target.value })
                 }
                 rows={3}
+                borderRadius="none"
+                borderWidth="2px"
+                borderColor={borderColor}
+                _focus={{
+                  borderColor: primaryColor,
+                  borderWidth: "3px",
+                }}
+                _hover={{
+                  borderColor: primaryColor,
+                }}
               />
-              <HStack spacing={4} w='full'>
-                <Button colorScheme='blue' onClick={handleSubmit} flex={1}>
+              <HStack spacing={4} w='full' pt={2}>
+                <Button
+                  bg={primaryColor}
+                  color="white"
+                  onClick={handleSubmit}
+                  flex={1}
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={primaryColor}
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                  _hover={{
+                    bg: primaryDark,
+                  }}
+                >
                   {isEditing ? 'Update' : 'Create'} Paddle
                 </Button>
-                <Button onClick={handleClose} flex={1}>
+                <Button
+                  onClick={handleClose}
+                  flex={1}
+                  variant="outline"
+                  borderRadius="none"
+                  borderWidth="2px"
+                  borderColor={textPrimary}
+                  color={textPrimary}
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                  _hover={{
+                    bg: textPrimary,
+                    color: "white",
+                  }}
+                >
                   Cancel
                 </Button>
               </HStack>
@@ -563,33 +970,71 @@ const PaddleManagementPage = () => {
         </ModalContent>
       </Modal>
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation - Editorial Style */}
       <AlertDialog
         isOpen={isDeleteOpen}
         leastDestructiveRef={cancelRef}
         onClose={() => setIsDeleteOpen(false)}
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+          <AlertDialogContent bg={bgColor} borderRadius="none">
+            <AlertDialogHeader
+              fontSize='lg'
+              fontWeight='900'
+              color={textPrimary}
+              borderBottomWidth="2px"
+              borderColor={primaryColor}
+              py={4}
+            >
               Delete Paddle
             </AlertDialogHeader>
-            <AlertDialogBody>
-              Are you sure you want to delete "{selectedPaddle?.name}"? This
-              action cannot be undone.
+            <AlertDialogBody py={6}>
+              <Text color={textSecondary} lineHeight="1.7">
+                Are you sure you want to delete "{selectedPaddle?.name}"? This
+                action cannot be undone.
+              </Text>
             </AlertDialogBody>
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={() => setIsDeleteOpen(false)}>
+            <AlertDialogFooter borderTopWidth="1px" borderColor={borderColor} pt={4}>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsDeleteOpen(false)}
+                variant="outline"
+                borderRadius="none"
+                borderWidth="2px"
+                borderColor={textPrimary}
+                color={textPrimary}
+                fontWeight="700"
+                letterSpacing="0.05em"
+                textTransform="uppercase"
+                _hover={{
+                  bg: textPrimary,
+                  color: "white",
+                }}
+              >
                 Cancel
               </Button>
-              <Button colorScheme='red' onClick={handleDelete} ml={3}>
+              <Button
+                bg={textPrimary}
+                color="white"
+                onClick={handleDelete}
+                ml={3}
+                borderRadius="none"
+                borderWidth="2px"
+                borderColor={textPrimary}
+                fontWeight="700"
+                letterSpacing="0.05em"
+                textTransform="uppercase"
+                _hover={{
+                  bg: textSecondary,
+                }}
+              >
                 Delete
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
-    </Container>
+    </Box>
   );
 };
 

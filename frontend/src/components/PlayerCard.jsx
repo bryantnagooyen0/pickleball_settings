@@ -25,6 +25,7 @@ import {
   AlertDialogOverlay,
   FormControl,
   FormLabel,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -44,6 +45,8 @@ const getRoleFromToken = () => {
 
 const PlayerCard = ({ player, onPlayerDeleted }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const buttonColor = useColorModeValue('#AE573E');
+  const badgeColor = useColorModeValue('#504E4C');
   const [editPlayer, setEditPlayer] = useState({
     ...player,
     paddleShape: player.paddleShape || '',
@@ -174,7 +177,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
         borderRadius='lg'
         overflow='hidden'
         boxShadow='md'
-        bg='white'
+        bg='#FAF7ED'
         _hover={{ boxShadow: { base: 'md', md: 'lg' }, transform: { base: 'none', md: 'translateY(-2px)' } }}
         transition='all 0.2s'
         cursor='pointer'
@@ -189,8 +192,6 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
             width={{ base: '120px', md: '160px' }}
             height={{ base: '120px', md: '160px' }}
             objectFit='cover'
-            border='4px solid white'
-            boxShadow='lg'
             loading='lazy'
             fallback={
               <Box
@@ -214,7 +215,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
 
         <Box p={{ base: 4, md: 6 }}>
           <VStack spacing={{ base: 2, md: 3 }} align='start'>
-            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight='bold' color='gray.800'>
+            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight='bold' color='gray.800' textAlign='center' w='full'>
               {player.name}
             </Text>
 
@@ -225,20 +226,14 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
               justifyContent='space-between'
             >
               <Box>
-                <Text fontSize={{ base: 'xs', md: 'sm' }} color='gray.600' fontWeight='medium'>
-                  Paddle:
-                </Text>
-                <Badge colorScheme='blue' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }}>
+                <Badge bg={buttonColor} color="#FAF7ED" variant='subtle' fontSize={{ base: 'xs', md: 'sm' }} borderRadius='full' px={3} py={1}>
                   {player.paddle}
                 </Badge>
               </Box>
 
               {player.sponsor && (
                 <Box>
-                  <Text fontSize={{ base: 'xs', md: 'sm' }} color='gray.600' fontWeight='medium'>
-                    Sponsor:
-                  </Text>
-                  <Badge colorScheme='purple' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }}>
+                  <Badge bg={badgeColor} color="#FAF7ED" variant='subtle' fontSize={{ base: 'xs', md: 'sm' }} borderRadius='full' px={3} py={1}>
                     {player.sponsor}
                   </Badge>
                 </Box>
@@ -250,7 +245,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
                 <Text fontSize={{ base: 'xs', md: 'sm' }} color='gray.600' fontWeight='medium'>
                   Shoes:
                 </Text>
-                <Badge colorScheme='green' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }}>
+                <Badge colorScheme='green' variant='subtle' fontSize={{ base: 'xs', md: 'sm' }} borderRadius='full' px={3} py={1}>
                   {player.shoes}
                 </Badge>
               </Box>
