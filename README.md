@@ -50,7 +50,7 @@ pickleball_settings/
 │   │   │   ├── PlayerCard.jsx    # Player display card
 │   │   │   └── ui/               # UI components
 │   │   ├── pages/
-│   │   │   ├── HomePage.jsx      # Main page with player list
+│   │   │   ├── Players.jsx       # Main page with player list
 │   │   │   └── CreatePage.jsx    # Add new player form
 │   │   ├── store/
 │   │   │   └── player.js         # Zustand store
@@ -130,7 +130,7 @@ pickleball_settings/
 
 ### Viewing Players
 
-- The home page displays all registered players
+- The players page displays all registered players
 - Each player card shows their name, paddle, and image
 - Players are displayed in a responsive grid layout
 

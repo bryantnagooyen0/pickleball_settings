@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
 import LandingPage from './pages/LandingPage';
-import HomePage from './pages/HomePage';
+import Players from './pages/Players';
 import PlayerDetailPage from './pages/PlayerDetailPage';
 import PaddleManagementPage from './pages/PaddleManagementPage';
 import PaddleDetailPage from './pages/PaddleDetailPage';
@@ -68,7 +68,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path='/' element={<LandingPage />} />
-          <Route path='/players' element={<HomePage />} />
+          <Route path='/players' element={<Players />} />
           <Route path='/create' element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
           <Route path='/edit/:playerId' element={<ProtectedRoute><EditPage /></ProtectedRoute>} />
           <Route path='/player/:playerId' element={<PlayerDetailPage />} />

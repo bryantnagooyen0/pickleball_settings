@@ -33,7 +33,7 @@ import PlayerCard from '../components/PlayerCard';
 import { SearchIcon } from '@chakra-ui/icons';
 import { FaFilter } from 'react-icons/fa';
 
-const HomePage = () => {
+const Players = () => {
   const { fetchPlayers, players } = usePlayerStore();
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -618,4 +618,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Players;
