@@ -21,6 +21,7 @@ import {
   Divider,
   Flex,
   Tooltip,
+  Heading,
 } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { formatDistanceToNow } from 'date-fns';
@@ -123,35 +124,65 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
     <>
       <Box
         id={`comment-${comment._id}`}
-        p={4}
-        border="1px"
-        borderColor="gray.200"
-        borderRadius="md"
+        p={5}
+        border="none"
+        borderRadius={0}
         bg="white"
-        ml={depth > 0 ? '16px' : '0'}
+        boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
+        ml={depth > 0 ? '24px' : '0'}
         borderLeft={depth > 0 ? '3px solid' : 'none'}
-        borderLeftColor={depth > 0 ? 'blue.200' : 'transparent'}
+        borderLeftColor={depth > 0 ? 'var(--color-primary)' : 'transparent'}
+        sx={{
+          '--color-primary': '#2C5F7C',
+          '--color-accent': '#FF6B6B',
+          '--font-display': '"Merriweather", serif',
+          '--font-body': '"Inter", sans-serif',
+          '--color-text-primary': '#1A1A1A',
+          '--color-text-secondary': '#666666',
+        }}
       >
-        <HStack justify="space-between" align="flex-start" mb={2}>
+        <HStack justify="space-between" align="flex-start" mb={3}>
           <HStack spacing={3}>
             <Avatar
               size="sm"
               name={comment.authorName}
-              bg="blue.500"
+              bg="var(--color-primary)"
               color="white"
+              fontFamily="var(--font-body)"
+              fontWeight={600}
             />
             <VStack align="flex-start" spacing={0}>
-              <Text fontWeight="semibold" fontSize="sm">
+              <Text 
+                fontWeight={600} 
+                fontSize="sm"
+                fontFamily="var(--font-body)"
+                color="var(--color-text-primary)"
+              >
                 {comment.authorName}
               </Text>
-              <Text fontSize="xs" color="gray.500">
-                {formatDate(comment.createdAt)}
+              <HStack spacing={2}>
+                <Text 
+                  fontSize="xs" 
+                  color="var(--color-text-secondary)"
+                  fontFamily="var(--font-body)"
+                >
+                  {formatDate(comment.createdAt)}
+                </Text>
                 {comment.updatedAt !== comment.createdAt && (
-                  <Badge ml={2} size="sm" colorScheme="gray">
+                  <Badge 
+                    px={2} 
+                    py={0.5} 
+                    borderRadius="full"
+                    bg="var(--color-bg)"
+                    color="var(--color-text-secondary)"
+                    fontSize="2xs"
+                    fontFamily="var(--font-body)"
+                    fontWeight={500}
+                  >
                     edited
                   </Badge>
                 )}
-              </Text>
+              </HStack>
             </VStack>
           </HStack>
 
@@ -163,19 +194,31 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
                     <IconButton
                       icon={<CheckIcon />}
                       size="sm"
-                      colorScheme="green"
+                      bg="transparent"
+                      color="var(--color-primary)"
                       variant="ghost"
                       onClick={handleSaveEdit}
                       isLoading={loading}
+                      _hover={{
+                        bg: "var(--color-bg)",
+                        color: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
                     />
                   </Tooltip>
                   <Tooltip label="Cancel">
                     <IconButton
                       icon={<CloseIcon />}
                       size="sm"
-                      colorScheme="gray"
+                      bg="transparent"
+                      color="var(--color-text-secondary)"
                       variant="ghost"
                       onClick={handleCancelEdit}
+                      _hover={{
+                        bg: "var(--color-bg)",
+                        color: "var(--color-text-primary)",
+                      }}
+                      transition="all 0.3s ease"
                     />
                   </Tooltip>
                 </>
@@ -185,18 +228,30 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
                     <IconButton
                       icon={<EditIcon />}
                       size="sm"
-                      colorScheme="blue"
+                      bg="transparent"
+                      color="var(--color-primary)"
                       variant="ghost"
                       onClick={() => handleEditComment(comment)}
+                      _hover={{
+                        bg: "var(--color-bg)",
+                        color: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
                     />
                   </Tooltip>
                   <Tooltip label="Delete">
                     <IconButton
                       icon={<DeleteIcon />}
                       size="sm"
-                      colorScheme="red"
+                      bg="transparent"
+                      color="var(--color-accent)"
                       variant="ghost"
                       onClick={() => handleDeleteClick(comment)}
+                      _hover={{
+                        bg: "var(--color-bg)",
+                        opacity: 0.8,
+                      }}
+                      transition="all 0.3s ease"
                     />
                   </Tooltip>
                 </>
@@ -213,19 +268,40 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
               rows={3}
               resize="vertical"
               maxLength={1000}
+              bg="white"
+              border="1px solid"
+              borderColor="rgba(0, 0, 0, 0.1)"
+              borderRadius={0}
+              fontFamily="var(--font-body)"
+              color="var(--color-text-primary)"
+              _focus={{
+                borderColor: "var(--color-primary)",
+                boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                outline: "none",
+              }}
             />
-            <Text fontSize="sm" color="gray.500">
+            <Text 
+              fontSize="xs" 
+              color="var(--color-text-secondary)"
+              fontFamily="var(--font-body)"
+            >
               {editContent.length}/1000 characters
             </Text>
           </VStack>
         ) : (
-          <Text whiteSpace="pre-wrap" fontSize="sm">
+          <Text 
+            whiteSpace="pre-wrap" 
+            fontSize="sm"
+            fontFamily="var(--font-body)"
+            color="var(--color-text-primary)"
+            lineHeight="1.6"
+          >
             {comment.content}
           </Text>
         )}
 
         {/* Vote buttons and reply button */}
-        <HStack mt={3} spacing={4} justify="space-between">
+        <HStack mt={4} spacing={4} justify="space-between">
           <VoteButtons 
             comment={comment} 
             targetType={targetType} 
@@ -252,25 +328,62 @@ const CommentItem = ({ comment, targetType, targetId, depth = 0, onRefresh }) =>
         onClose={onClose}
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+          <AlertDialogContent
+            sx={{
+              '--font-display': '"Merriweather", serif',
+              '--font-body': '"Inter", sans-serif',
+              '--color-primary': '#2C5F7C',
+              '--color-accent': '#FF6B6B',
+            }}
+            borderRadius={0}
+            border="1px solid"
+            borderColor="rgba(0, 0, 0, 0.1)"
+          >
+            <AlertDialogHeader 
+              fontSize="lg" 
+              fontWeight={700}
+              fontFamily="var(--font-display)"
+            >
               Delete Comment
             </AlertDialogHeader>
 
-            <AlertDialogBody>
+            <AlertDialogBody
+              fontFamily="var(--font-body)"
+            >
               Are you sure you want to delete this comment? This action cannot be undone.
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
+              <Button 
+                ref={cancelRef} 
+                onClick={onClose}
+                variant="outline"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                borderRadius="full"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                _hover={{
+                  bg: "var(--color-bg)",
+                }}
+                transition="all 0.3s ease"
+              >
                 Cancel
               </Button>
               <Button
-                colorScheme="red"
+                bg="var(--color-accent)"
+                color="white"
                 onClick={handleConfirmDelete}
                 ml={3}
                 isLoading={loading}
                 loadingText="Deleting..."
+                borderRadius="full"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                _hover={{
+                  bg: "var(--color-primary)",
+                }}
+                transition="all 0.3s ease"
               >
                 Delete
               </Button>
@@ -410,7 +523,6 @@ const CommentSection = ({ targetType, targetId }) => {
     }
   };
 
-
   const formatDate = (dateString) => {
     try {
       return formatDistanceToNow(new Date(dateString), { addSuffix: true });
@@ -429,33 +541,78 @@ const CommentSection = ({ targetType, targetId }) => {
   };
 
   return (
-    <Box>
-      <Text fontSize="xl" fontWeight="bold" mb={4}>
+    <Box
+      sx={{
+        '--color-primary': '#2C5F7C',
+        '--color-accent': '#FF6B6B',
+        '--color-bg': '#FAF9F6',
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+        '--color-text-primary': '#1A1A1A',
+        '--color-text-secondary': '#666666',
+      }}
+    >
+      <Heading
+        as="h3"
+        fontSize={{ base: 'xl', md: '2xl' }}
+        fontFamily="var(--font-display)"
+        fontWeight={700}
+        color="var(--color-text-primary)"
+        mb={6}
+      >
         Comments ({targetComments.length})
-      </Text>
+      </Heading>
 
       {/* Add Comment Form */}
       {isAuthenticated && (
-        <Box mb={6}>
-          <VStack align="stretch" spacing={3}>
+        <Box mb={8}>
+          <VStack align="stretch" spacing={4}>
             <Textarea
               placeholder="Write a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              rows={3}
+              rows={4}
               resize="vertical"
               maxLength={1000}
+              bg="white"
+              border="1px solid"
+              borderColor="rgba(0, 0, 0, 0.1)"
+              borderRadius={0}
+              fontFamily="var(--font-body)"
+              color="var(--color-text-primary)"
+              _placeholder={{
+                color: "var(--color-text-secondary)",
+                opacity: 0.5,
+              }}
+              _focus={{
+                borderColor: "var(--color-primary)",
+                boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                outline: "none",
+              }}
             />
             <HStack justify="space-between">
-              <Text fontSize="sm" color="gray.500">
+              <Text 
+                fontSize="xs" 
+                color="var(--color-text-secondary)"
+                fontFamily="var(--font-body)"
+              >
                 {newComment.length}/1000 characters
               </Text>
               <Button
-                colorScheme="blue"
+                bg="var(--color-primary)"
+                color="white"
                 onClick={handleSubmitComment}
                 isLoading={loading}
                 loadingText="Posting..."
-                size="sm"
+                size="md"
+                px={6}
+                borderRadius="full"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                _hover={{
+                  bg: "var(--color-accent)",
+                }}
+                transition="all 0.3s ease"
               >
                 Post Comment
               </Button>
@@ -465,14 +622,27 @@ const CommentSection = ({ targetType, targetId }) => {
       )}
 
       {!isAuthenticated && (
-        <Box mb={6} p={4} bg="gray.50" borderRadius="md">
-          <Text color="gray.600">
+        <Box 
+          mb={8} 
+          p={5} 
+          bg="var(--color-bg)" 
+          borderRadius={0}
+          border="1px solid"
+          borderColor="rgba(0, 0, 0, 0.05)"
+        >
+          <Text 
+            color="var(--color-text-secondary)"
+            fontFamily="var(--font-body)"
+          >
             Please log in to leave a comment.
           </Text>
         </Box>
       )}
 
-      <Divider mb={4} />
+      <Divider 
+        mb={6} 
+        borderColor="rgba(0, 0, 0, 0.08)"
+      />
 
       {/* Comments List */}
       {loading && targetComments.length === 0 ? (
@@ -480,28 +650,37 @@ const CommentSection = ({ targetType, targetId }) => {
           {[1, 2, 3].map((i) => (
             <Box
               key={i}
-              p={4}
-              border="1px"
-              borderColor="gray.200"
-              borderRadius="md"
+              p={5}
+              border="none"
+              borderRadius={0}
               bg="white"
+              boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
             >
               <HStack justify="space-between" align="flex-start" mb={2}>
                 <HStack spacing={3}>
-                  <Box w="32px" h="32px" bg="gray.200" borderRadius="full" />
+                  <Box w="32px" h="32px" bg="var(--color-bg)" borderRadius="full" />
                   <VStack align="flex-start" spacing={1}>
-                    <Box w="100px" h="16px" bg="gray.200" borderRadius="sm" />
-                    <Box w="80px" h="12px" bg="gray.200" borderRadius="sm" />
+                    <Box w="100px" h="16px" bg="var(--color-bg)" borderRadius="sm" />
+                    <Box w="80px" h="12px" bg="var(--color-bg)" borderRadius="sm" />
                   </VStack>
                 </HStack>
               </HStack>
-              <Box w="full" h="60px" bg="gray.200" borderRadius="sm" />
+              <Box w="full" h="60px" bg="var(--color-bg)" borderRadius="sm" />
             </Box>
           ))}
         </VStack>
       ) : targetComments.length === 0 ? (
-        <Box textAlign="center" py={8} color="gray.500">
-          <Text>No comments yet. Be the first to comment!</Text>
+        <Box 
+          textAlign="center" 
+          py={12} 
+          color="var(--color-text-secondary)"
+        >
+          <Text
+            fontFamily="var(--font-body)"
+            fontSize="md"
+          >
+            No comments yet. Be the first to comment!
+          </Text>
         </Box>
       ) : (
         <VStack align="stretch" spacing={4}>

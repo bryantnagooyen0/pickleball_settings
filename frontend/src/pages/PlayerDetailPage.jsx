@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   VStack,
@@ -12,15 +12,21 @@ import {
   Spinner,
   Center,
   SimpleGrid,
-  Icon,
   Stack,
-  useBreakpointValue,
+  Heading,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
 import EquipmentModule from '../components/EquipmentModule';
 import CommentSection from '../components/CommentSection';
 import { usePaddleStore } from '../store/paddle';
 import { api } from '../utils/api';
+
+const MotionBox = motion(Box);
+const MotionVStack = motion(VStack);
+const MotionHStack = motion(HStack);
+const MotionText = motion(Text);
+const MotionHeading = motion(Heading);
 
 // Helper function to decode JWT and get role
 const getRoleFromToken = () => {
@@ -41,15 +47,12 @@ const PlayerDetailPage = () => {
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const { paddles, fetchPaddles } = usePaddleStore();
-
-  // Responsive values for mobile optimization - MUST be called before any early returns
-  const containerMaxW = useBreakpointValue({ base: 'container.sm', md: 'container.lg', lg: 'container.xl' });
-  const padding = useBreakpointValue({ base: 4, md: 6, lg: 8 });
-  const titleFontSize = useBreakpointValue({ base: '2xl', md: '3xl', lg: '4xl' });
-  const sectionFontSize = useBreakpointValue({ base: 'xl', md: '2xl' });
-  const imageSize = useBreakpointValue({ base: '80px', md: '100px', lg: '120px' });
-  const gridColumns = useBreakpointValue({ base: 1, sm: 2 });
-  const verticalSpacing = useBreakpointValue({ base: 4, md: 6 });
+  const headerRef = useRef(null);
+  const infoRef = useRef(null);
+  const equipmentRef = useRef(null);
+  const headerInView = useInView(headerRef, { once: true, amount: 0 });
+  const infoInView = useInView(infoRef, { once: true, amount: 0 });
+  const equipmentInView = useInView(equipmentRef, { once: true, amount: 0 });
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -146,11 +149,19 @@ const PlayerDetailPage = () => {
 
   if (loading) {
     return (
-      <Container maxW={containerMaxW} py={12}>
-        <Center>
-          <Spinner size='xl' />
-        </Center>
-      </Container>
+      <Box
+        minH="100vh"
+        bg="var(--color-bg)"
+        sx={{
+          background: 'radial-gradient(circle at 20% 50%, rgba(44, 95, 124, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.03) 0%, transparent 50%), var(--color-bg)',
+        }}
+      >
+        <Container maxW='container.xl' py={12}>
+          <Center>
+            <Spinner size='xl' color="var(--color-primary)" />
+          </Center>
+        </Container>
+      </Box>
     );
   }
 
@@ -159,270 +170,442 @@ const PlayerDetailPage = () => {
   }
 
   return (
-    <Container maxW={containerMaxW} py={4}>
-      <VStack spacing={verticalSpacing}>
-        <Button
-          onClick={() => navigate('/players')}
-          colorScheme='blue'
-          variant='outline'
-          alignSelf='flex-start'
-          size={{ base: 'sm', md: 'md' }}
-        >
-          ← Back to Players
-        </Button>
-
-        {/* Player Info Section - Top */}
-        <Box
-          w='full'
-          bg='white'
-          borderRadius='lg'
-          boxShadow='lg'
-          overflow='hidden'
-        >
-          {/* Header with Image and Basic Info */}
-          <Box
-            p={padding}
-            bg='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-            color='white'
+    <Box
+      minH="100vh"
+      bg="var(--color-bg)"
+      sx={{
+        background: 'radial-gradient(circle at 20% 50%, rgba(44, 95, 124, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.03) 0%, transparent 50%), var(--color-bg)',
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+        '--color-primary': '#2C5F7C',
+        '--color-secondary': '#6B8E9F',
+        '--color-accent': '#FF6B6B',
+        '--color-bg': '#FAF9F6',
+        '--color-text-primary': '#1A1A1A',
+        '--color-text-secondary': '#666666',
+      }}
+    >
+      <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
+        <VStack spacing={{ base: 6, md: 8 }}>
+          {/* Back Button */}
+          <MotionBox
+            alignSelf="flex-start"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Mobile: Stack vertically, Desktop: Side by side */}
-            <Stack 
-              direction={{ base: 'column', lg: 'row' }} 
-              spacing={{ base: 4, lg: 8 }}
-              align={{ base: 'center', lg: 'flex-start' }}
+            <Button
+              onClick={() => navigate('/players')}
+              variant="ghost"
+              color="var(--color-text-primary)"
+              fontFamily="var(--font-body)"
+              fontWeight={600}
+              fontSize={{ base: 'sm', md: 'md' }}
+              _hover={{
+                bg: "var(--color-bg)",
+                color: "var(--color-accent)",
+              }}
+              transition="all 0.3s ease"
+            >
+              ← Back to Players
+            </Button>
+          </MotionBox>
+
+          {/* Player Header */}
+          <MotionVStack
+            ref={headerRef}
+            spacing={6}
+            w="full"
+            align="center"
+            initial={{ opacity: 1, y: 0 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Box
+              position="relative"
+              w={{ base: '200px', md: '280px' }}
+              h={{ base: '200px', md: '280px' }}
+              borderRadius="full"
+              overflow="hidden"
+              border="4px solid white"
+              boxShadow="0 8px 32px rgba(0, 0, 0, 0.1)"
             >
               <Image
                 src={player.image}
                 alt={player.name}
-                borderRadius='full'
-                width={imageSize}
-                height={imageSize}
-                objectFit='cover'
-                border='4px solid white'
-                boxShadow='lg'
-                flexShrink={0}
-                loading='lazy'
+                w="full"
+                h="full"
+                objectFit="cover"
+                loading="lazy"
                 fallback={
                   <Box
-                    width={imageSize}
-                    height={imageSize}
-                    borderRadius='full'
-                    bg='gray.200'
-                    display='flex'
-                    alignItems='center'
-                    justifyContent='center'
-                    border='4px solid white'
-                    boxShadow='lg'
-                    flexShrink={0}
+                    w="full"
+                    h="full"
+                    bg="var(--color-bg)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <Text fontSize='4xl' color='gray.500'>
+                    <Text fontSize="6xl" color="var(--color-text-secondary)" fontFamily="var(--font-display)">
                       {player.name.charAt(0)}
                     </Text>
                   </Box>
                 }
               />
-              <Box flex={1} w={{ base: 'full', lg: 'auto' }}>
-                <Text fontSize={titleFontSize} fontWeight='bold' mb={4} textAlign={{ base: 'center', lg: 'left' }}>
-                  {player.name}
-                </Text>
+            </Box>
 
-                {/* Player Info Grid */}
-                <SimpleGrid columns={gridColumns} spacing={4} mb={4}>
+            <MotionHeading
+              as="h1"
+              fontSize={{ base: '3rem', md: '4.5rem', lg: '5.5rem' }}
+              fontFamily="var(--font-display)"
+              fontWeight={700}
+              letterSpacing="-0.02em"
+              textAlign="center"
+              color="var(--color-text-primary)"
+            >
+              {player.name}
+            </MotionHeading>
+          </MotionVStack>
+
+          {/* Player Info Section */}
+          <MotionBox
+            ref={infoRef}
+            w="full"
+            maxW="900px"
+            bg="white"
+            borderRadius={0}
+            p={{ base: 6, md: 8 }}
+            boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+            initial={{ opacity: 0, y: 20 }}
+            animate={infoInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <VStack spacing={6} align="stretch">
+              {/* Player Details Grid */}
+              {(player.age || player.height || player.mlpTeam || player.currentLocation || player.sponsor) && (
+                <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
                   {player.age && (
                     <Box>
-                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                      <Text
+                        fontSize="sm"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={500}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Age
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="lg"
+                        fontWeight={600}
+                        color="var(--color-text-primary)"
+                        fontFamily="var(--font-body)"
+                      >
                         {player.age} years old
                       </Text>
                     </Box>
                   )}
                   {player.height && (
                     <Box>
-                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                      <Text
+                        fontSize="sm"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={500}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Height
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="lg"
+                        fontWeight={600}
+                        color="var(--color-text-primary)"
+                        fontFamily="var(--font-body)"
+                      >
                         {player.height}
                       </Text>
                     </Box>
                   )}
                   {player.mlpTeam && (
                     <Box>
-                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                      <Text
+                        fontSize="sm"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={500}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         MLP Team
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="lg"
+                        fontWeight={600}
+                        color="var(--color-text-primary)"
+                        fontFamily="var(--font-body)"
+                      >
                         {player.mlpTeam}
                       </Text>
                     </Box>
                   )}
                   {player.currentLocation && (
                     <Box>
-                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                      <Text
+                        fontSize="sm"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={500}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Location
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="lg"
+                        fontWeight={600}
+                        color="var(--color-text-primary)"
+                        fontFamily="var(--font-body)"
+                      >
                         {player.currentLocation}
                       </Text>
                     </Box>
                   )}
                   {player.sponsor && (
                     <Box>
-                      <Text fontSize='sm' color='white' opacity={0.8} mb={1}>
+                      <Text
+                        fontSize="sm"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={500}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Sponsor
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Badge
+                        px={3}
+                        py={1}
+                        borderRadius="full"
+                        bg="var(--color-primary)"
+                        color="white"
+                        fontSize="md"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                      >
                         {player.sponsor}
-                      </Text>
+                      </Badge>
                     </Box>
                   )}
                 </SimpleGrid>
+              )}
 
-                {/* About Section */}
-                {player.about && (
-                  <Box mt={4}>
-                    <Text fontSize='sm' color='white' opacity={0.8} mb={2}>
-                      About
-                    </Text>
-                    <Text fontSize='md' lineHeight='1.6'>
-                      {player.about}
-                    </Text>
-                  </Box>
-                )}
-              </Box>
-            </Stack>
-          </Box>
+              {/* About Section */}
+              {player.about && (
+                <Box pt={4} borderTop="1px solid" borderColor="rgba(0, 0, 0, 0.1)">
+                  <Text
+                    fontSize="sm"
+                    color="var(--color-text-secondary)"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                    mb={3}
+                    textTransform="uppercase"
+                    letterSpacing="0.05em"
+                  >
+                    About
+                  </Text>
+                  <Text
+                    fontSize="md"
+                    lineHeight="1.8"
+                    color="var(--color-text-primary)"
+                    fontFamily="var(--font-body)"
+                    fontWeight={400}
+                  >
+                    {player.about}
+                  </Text>
+                </Box>
+              )}
+            </VStack>
+          </MotionBox>
 
           {/* Equipment Section */}
-          <Box p={padding}>
-            <VStack spacing={verticalSpacing} align='start'>
-              <Stack 
-                direction={{ base: 'column', md: 'row' }}
-                justify="space-between" 
-                align={{ base: 'start', md: 'center' }} 
-                w="full" 
+          <MotionBox
+            ref={equipmentRef}
+            w="full"
+            maxW="900px"
+            initial={{ opacity: 1, y: 0 }}
+            animate={equipmentInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <VStack spacing={4} align="stretch">
+              <MotionHeading
+                as="h2"
+                fontSize={{ base: '2rem', md: '2.5rem' }}
+                fontFamily="var(--font-display)"
+                fontWeight={700}
+                color="var(--color-text-primary)"
+                textAlign="center"
+              >
+                Equipment
+              </MotionHeading>
+
+              <MotionText
+                fontSize="sm"
+                color="var(--color-text-secondary)"
+                fontFamily="var(--font-body)"
+                fontStyle="italic"
+                textAlign="center"
                 mb={4}
-                spacing={{ base: 2, md: 4 }}
               >
-                <Text fontSize={sectionFontSize} fontWeight='bold' color='gray.800'>
-                  Equipment
-                </Text>
-                <Text fontSize='sm' color='gray.600' fontStyle='italic' textAlign={{ base: 'left', md: 'right' }}>
-                  It is possible for gear to be outdated, please feel free to comment down below with any updates
-                </Text>
-              </Stack>
+                It is possible for gear to be outdated, please feel free to comment down below with any updates
+              </MotionText>
 
-              {/* Paddle Module */}
-              <EquipmentModule
-                player={player}
-                title='Paddle'
-                icon='paddle'
-                imageField='paddleImage'
-                nameField='paddle'
-                brandField='paddleBrand'
-                modelField='paddleModel'
-                badgeColor='blue'
-                specifications={[
-                  { label: 'Shape', field: 'paddleShape' },
-                  { label: 'Paddle Length', field: 'paddleLength' },
-                  { label: 'Thickness', field: 'paddleThickness' },
-                  { label: 'Paddle Width', field: 'paddleWidth' },
-                  { label: 'Core', field: 'paddleCore' },
-                  { label: 'Handle Length', field: 'paddleHandleLength' },
-                ]}
-              />
-
-              {/* Shoes Module */}
-              <EquipmentModule
-                player={player}
-                title='Shoes'
-                icon='shoes'
-                imageField='shoeImage'
-                nameField='shoeModel'
-                brandField='shoeBrand'
-                badgeColor='green'
-              />
-
-              {/* Modifications Module */}
-              <EquipmentModule
-                player={player}
-                title='Modifications'
-                icon='modifications'
-                hideProductDisplay={true}
-                modifications={[
-                  {
-                    label: 'Overgrips',
-                    field: 'overgrips',
-                    imageField: 'overgripImage',
-                    brandField: 'overgripBrand',
-                    badgeColor: 'purple',
-                  },
-                  {
-                    label: 'Weight',
-                    field: 'weight',
-                    imageField: 'weightImage',
-                    brandField: 'weightType',
-                    badgeColor: 'orange',
-                  },
-                  {
-                    label: 'Additional modification',
-                    field: 'additionalModification',
-                    imageField: 'additionalModificationImage',
-                    brandField: 'additionalModificationBrand',
-                    badgeColor: 'green',
-                  },
-                ]}
-              />
-
-              <Stack 
-                direction={{ base: 'column', sm: 'row' }}
-                spacing={4} 
-                w='full' 
-                pt={4}
+              {/* Equipment Modules */}
+              <Box
+                bg="white"
+                borderRadius={0}
+                p={{ base: 6, md: 8 }}
+                boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
               >
+                <VStack spacing={4} align="stretch">
+                  {/* Paddle Module */}
+                  <EquipmentModule
+                    player={player}
+                    title='Paddle'
+                    icon='paddle'
+                    imageField='paddleImage'
+                    nameField='paddle'
+                    brandField='paddleBrand'
+                    modelField='paddleModel'
+                    badgeColor='blue'
+                    specifications={[
+                      { label: 'Shape', field: 'paddleShape' },
+                      { label: 'Paddle Length', field: 'paddleLength' },
+                      { label: 'Thickness', field: 'paddleThickness' },
+                      { label: 'Paddle Width', field: 'paddleWidth' },
+                      { label: 'Core', field: 'paddleCore' },
+                      { label: 'Handle Length', field: 'paddleHandleLength' },
+                    ]}
+                  />
+
+                  {/* Shoes Module */}
+                  <EquipmentModule
+                    player={player}
+                    title='Shoes'
+                    icon='shoes'
+                    imageField='shoeImage'
+                    nameField='shoeModel'
+                    brandField='shoeBrand'
+                    badgeColor='green'
+                  />
+
+                  {/* Modifications Module */}
+                  <EquipmentModule
+                    player={player}
+                    title='Modifications'
+                    icon='modifications'
+                    hideProductDisplay={true}
+                    modifications={[
+                      {
+                        label: 'Overgrips',
+                        field: 'overgrips',
+                        imageField: 'overgripImage',
+                        brandField: 'overgripBrand',
+                        badgeColor: 'purple',
+                      },
+                      {
+                        label: 'Weight',
+                        field: 'weight',
+                        imageField: 'weightImage',
+                        brandField: 'weightType',
+                        badgeColor: 'orange',
+                      },
+                      {
+                        label: 'Additional modification',
+                        field: 'additionalModification',
+                        imageField: 'additionalModificationImage',
+                        brandField: 'additionalModificationBrand',
+                        badgeColor: 'green',
+                      },
+                    ]}
+                  />
+                </VStack>
+              </Box>
+
+              {/* Action Buttons */}
+              <HStack spacing={4} justify="center" flexWrap="wrap">
                 {getRoleFromToken() === 'admin' && (
                   <Button
-                    colorScheme='blue'
                     onClick={() => navigate(`/edit/${playerId}`)}
-                    flex={1}
-                    size={{ base: 'sm', md: 'md' }}
+                    size="lg"
+                    px={6}
+                    bg="var(--color-primary)"
+                    color="white"
+                    border="none"
+                    borderRadius="full"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                    fontSize="md"
+                    _hover={{
+                      bg: "var(--color-accent)",
+                    }}
+                    transition="all 0.3s ease"
+                    as={motion.button}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Edit Player
                   </Button>
                 )}
                 <Button
-                  colorScheme='red'
-                  variant='outline'
                   onClick={() => navigate('/players')}
-                  flex={1}
-                  size={{ base: 'sm', md: 'md' }}
+                  size="lg"
+                  px={6}
+                  variant="outline"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  borderRadius="full"
+                  color="var(--color-text-primary)"
+                  fontFamily="var(--font-body)"
+                  fontWeight={600}
+                  fontSize="md"
+                  bg="white"
+                  _hover={{
+                    bg: "var(--color-bg)",
+                    borderColor: "var(--color-accent)",
+                    color: "var(--color-accent)",
+                  }}
+                  transition="all 0.3s ease"
+                  as={motion.button}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Back to List
                 </Button>
-              </Stack>
+              </HStack>
 
               {/* Comments Section */}
               <Box
-                w='full'
-                bg='white'
-                borderRadius='lg'
-                boxShadow='lg'
-                border='1px solid'
-                borderColor='gray.200'
-                overflow='hidden'
-                mt={6}
+                w="full"
+                bg="white"
+                borderRadius={0}
+                p={{ base: 6, md: 8 }}
+                boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+                mt={4}
               >
-                <Box p={padding}>
-                  <CommentSection targetType="player" targetId={playerId} />
-                </Box>
+                <CommentSection targetType="player" targetId={playerId} />
               </Box>
             </VStack>
-          </Box>
-        </Box>
-      </VStack>
-    </Container>
+          </MotionBox>
+        </VStack>
+      </Container>
+    </Box>
   );
 };
 

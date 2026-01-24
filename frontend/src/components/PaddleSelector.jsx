@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Input,
@@ -40,17 +40,32 @@ const PaddleSelector = ({
     fetchPaddles();
   }, [fetchPaddles]);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+  // Initialize search results when modal opens or paddles change
+  useEffect(() => {
+    if (isOpen && paddles.length > 0) {
+      setSearchResults(paddles);
+    }
+  }, [isOpen, paddles]);
+
+  // Reset search when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  }, [isOpen]);
+
+  const handleSearch = useCallback(async (query) => {
+    if (!query || !query.trim()) {
       setSearchResults(paddles);
       return;
     }
 
     setIsSearching(true);
     try {
-      const result = await searchPaddles(searchQuery);
+      const result = await searchPaddles(query);
       if (result.success) {
-        setSearchResults(result.data);
+        setSearchResults(result.data || []);
       } else {
         toast({
           title: 'Error',
@@ -59,13 +74,30 @@ const PaddleSelector = ({
           duration: 3000,
           isClosable: true,
         });
+        setSearchResults([]);
       }
     } catch (error) {
       console.error('Search error:', error);
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [paddles, searchPaddles, toast]);
+
+  // Debounced search on input change
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim()) {
+        handleSearch(searchQuery);
+      } else {
+        setSearchResults(paddles);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, isOpen, handleSearch, paddles]);
 
   const handlePaddleSelect = paddle => {
     onPaddleSelect(paddle);
@@ -87,7 +119,8 @@ const PaddleSelector = ({
     onClose();
   };
 
-  const displayPaddles = searchQuery ? searchResults : paddles;
+  // Show search results if there's a query, otherwise show all paddles
+  const displayPaddles = searchQuery.trim() ? searchResults : (searchResults.length > 0 ? searchResults : paddles);
 
   return (
     <>
@@ -125,21 +158,18 @@ const PaddleSelector = ({
                   <SearchIcon color='gray.400' />
                 </InputLeftElement>
                 <Input
-                  placeholder='Search paddles...'
+                  placeholder='Search paddles by name, brand, or model...'
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                  onKeyPress={e => e.key === 'Enter' && handleSearch(searchQuery)}
                 />
               </InputGroup>
 
-              <Button
-                colorScheme='blue'
-                onClick={handleSearch}
-                isLoading={isSearching}
-                w='full'
-              >
-                Search
-              </Button>
+              {isSearching && (
+                <Text fontSize='sm' color='gray.500' textAlign='center'>
+                  Searching...
+                </Text>
+              )}
 
               <Divider />
 

@@ -17,26 +17,32 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
-  Checkbox,
-  CheckboxGroup,
   Divider,
   Badge,
-  Flex,
   IconButton,
   Tooltip,
+  Heading,
 } from '@chakra-ui/react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { usePlayerStore } from '../store/player';
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
 import { SearchIcon } from '@chakra-ui/icons';
 import { FaFilter } from 'react-icons/fa';
+import { motion, useInView } from 'framer-motion';
+
+const MotionBox = motion(Box);
+const MotionVStack = motion(VStack);
+const MotionHeading = motion(Heading);
+const MotionText = motion(Text);
 
 const Players = () => {
   const { fetchPlayers, players } = usePlayerStore();
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const headerRef = useRef(null);
+  const headerInView = useInView(headerRef, { once: true, amount: 0.3 });
   
   // Initialize search query from URL parameters
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -89,15 +95,21 @@ const Players = () => {
 
   useEffect(() => {
     fetchPlayers();
-  }, [fetchPlayers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only fetch once on mount - fetchPlayers is stable from Zustand
 
-  // When landing on players list, ensure paddle scroll flags never affect this page
+  useEffect(() => {
+    document.title = 'Pickleball Settings';
+    return () => {
+      document.title = 'Pickleball Settings';
+    };
+  }, []);
+
   useEffect(() => {
     sessionStorage.removeItem('restorePaddleListScroll');
     sessionStorage.removeItem('paddleListScrollPosition');
   }, []);
 
-  // If not restoring from player detail, always start at top on initial mount
   useEffect(() => {
     const shouldRestore = sessionStorage.getItem('restorePlayerListScroll') === 'true';
     if (!shouldRestore) {
@@ -105,26 +117,20 @@ const Players = () => {
     }
   }, []);
 
-  // Update search query when URL changes
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchParam = urlParams.get('search') || '';
     setSearchQuery(searchParam);
   }, [location.search]);
 
-  // Save filters to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('playerFilters', JSON.stringify(filters));
   }, [filters]);
-
-
-  console.log('players', players);
 
   // Filter players based on search query and filters
   const filteredPlayers = useMemo(() => {
     let filtered = players;
 
-    // Search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(
         player =>
@@ -134,7 +140,6 @@ const Players = () => {
       );
     }
 
-    // Apply other filters
     Object.entries(filters).forEach(([key, value]) => {
       if (value && value !== '') {
         filtered = filtered.filter(player => {
@@ -176,29 +181,29 @@ const Players = () => {
     return filtered;
   }, [players, searchQuery, filters]);
 
-  // Scroll position restoration (only when flagged as coming from the players list)
+  // Only restore scroll once when component mounts and data is ready
   useEffect(() => {
+    if (players.length === 0) return; // Wait for data to load
+    
     const shouldRestore = sessionStorage.getItem('restorePlayerListScroll') === 'true';
     const savedScrollPosition = sessionStorage.getItem('playerListScrollPosition');
-    if (shouldRestore && savedScrollPosition && filteredPlayers.length > 0) {
+    
+    if (shouldRestore && savedScrollPosition) {
       const restoreScroll = () => {
         window.scrollTo(0, parseInt(savedScrollPosition));
         sessionStorage.removeItem('playerListScrollPosition');
         sessionStorage.removeItem('restorePlayerListScroll');
       };
-      requestAnimationFrame(() => {
-        requestAnimationFrame(restoreScroll);
-      });
+      // Use a single RAF for better performance
+      requestAnimationFrame(restoreScroll);
     } else if (!shouldRestore) {
-      // If not restoring, ensure we clear stale flags/positions
       sessionStorage.removeItem('restorePlayerListScroll');
     }
-  }, [filteredPlayers]);
-
-  // Don't automatically save scroll position - only save when clicking on a player
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [players.length]); // Only depend on players.length, not filteredPlayers
 
   const handlePlayerDeleted = () => {
-    fetchPlayers(); // Refresh the players list after deletion
+    fetchPlayers();
   };
 
   const clearFilters = () => {
@@ -223,398 +228,817 @@ const Players = () => {
   ).length;
 
   return (
-    <Container maxW='container.xl' py={{ base: 6, md: 12 }}>
-      <VStack spacing={{ base: 6, md: 8 }}>
-        <Text
-          fontSize={'30'}
-          fontWeight={'bold'}
-          bgGradient={'linear(to-r, cyan.400, blue.500)'}
-          bgClip={'text'}
-          textAlign={'center'}
-        >
-          Player List
-        </Text>
+    <Box
+      sx={{
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+        '--color-primary': '#2C5F7C',
+        '--color-secondary': '#D4A574',
+        '--color-accent': '#8B9DC3',
+        '--color-bg': '#FAF9F6',
+        '--color-text-primary': '#1A1A1A',
+        '--color-text-secondary': '#6B6B6B',
+        fontFamily: 'var(--font-body)',
+      }}
+      bg="var(--color-bg)"
+      minH="100vh"
+      position="relative"
+    >
+      {/* Subtle background gradient */}
+      <Box
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        pointerEvents="none"
+        zIndex={0}
+        sx={{
+          background: `
+            radial-gradient(circle at 20% 30%, rgba(44, 95, 124, 0.06) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(212, 165, 116, 0.06) 0%, transparent 50%)
+          `,
+        }}
+      />
 
-        {/* Search and Filter Bar */}
-        <VStack w='full' spacing={{ base: 3, md: 4 }}>
-          <HStack w='full' spacing={{ base: 2, md: 4 }} align="stretch">
-            <Box flex={1}>
-              <InputGroup>
-                <InputLeftElement pointerEvents='none'>
-                  <SearchIcon color='gray.400' />
-                </InputLeftElement>
-                <Input
-                  placeholder='Search players by name or sponsor...'
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  size={{ base: 'md', md: 'lg' }}
-                  bg='white'
-                  border='2px'
-                  borderColor='gray.200'
-                  _focus={{
-                    borderColor: 'blue.500',
-                    boxShadow: '0 0 0 1px blue.500',
-                  }}
-                  _hover={{
-                    borderColor: 'gray.300',
-                  }}
-                />
-              </InputGroup>
-            </Box>
+      <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
+        <VStack spacing={{ base: 10, md: 12 }}>
+          {/* Simple Header */}
+          <MotionVStack
+            ref={headerRef}
+            spacing={6}
+            w="full"
+            align="center"
+            initial={{ opacity: 1, y: 0 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <MotionHeading
+              as="h1"
+              fontSize={{ base: '3.5rem', md: '5rem', lg: '6rem' }}
+              fontFamily="var(--font-display)"
+              fontWeight={700}
+              letterSpacing="-0.02em"
+              textAlign="center"
+              color="var(--color-text-primary)"
+            >
+              Players
+            </MotionHeading>
+          </MotionVStack>
 
-            <Tooltip label='Filter Players' placement='top'>
-              <IconButton
-                icon={<FaFilter />}
-                onClick={onOpen}
-                size={{ base: 'md', md: 'lg' }}
-                colorScheme={activeFiltersCount > 0 ? 'blue' : 'gray'}
-                aria-label='Filter players'
-                position='relative'
-              />
-            </Tooltip>
-          </HStack>
+          {/* Search and Filter - Clean Design */}
+          <MotionVStack 
+            w='full' 
+            spacing={{ base: 4, md: 5 }}
+            maxW="800px"
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <HStack w='full' spacing={4} align="center">
+              <Box flex={1}>
+                <InputGroup size="lg">
+                  <InputLeftElement pointerEvents='none' h="100%">
+                    <SearchIcon color="var(--color-text-secondary)" />
+                  </InputLeftElement>
+                  <Input
+                    placeholder='Search players by name or sponsor...'
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    bg='white'
+                    color="var(--color-text-primary)"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    borderRadius="full"
+                    fontSize="md"
+                    fontFamily="var(--font-body)"
+                    fontWeight={400}
+                    h="56px"
+                    _placeholder={{
+                      color: "var(--color-text-secondary)",
+                      opacity: 0.5,
+                    }}
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                      outline: "none",
+                    }}
+                    _hover={{
+                      borderColor: "var(--color-accent)",
+                    }}
+                    transition="all 0.3s ease"
+                  />
+                </InputGroup>
+              </Box>
 
-          {/* Active Filters Display */}
-          {(activeFiltersCount > 0 || searchQuery.trim()) && (
-            <HStack w='full' flexWrap='wrap' spacing={2}>
-              <Text fontSize='sm' color='gray.600' fontWeight='medium'>
-                Active filters:
-              </Text>
-              {Object.entries(filters).map(
-                ([key, value]) =>
-                  value && (
-                    <Badge key={key} colorScheme='blue' variant='subtle'>
-                      {key}: {value}
-                    </Badge>
-                  )
-              )}
-              {searchQuery.trim() && (
-                <Badge colorScheme='green' variant='subtle'>
-                  search: "{searchQuery}"
-                </Badge>
-              )}
-              <Button size='xs' variant='ghost' onClick={clearFilters}>
-                Clear all
-              </Button>
-              <Text fontSize='sm' color='gray.600' fontWeight='medium' ml={{ base: 0, md: 4 }}>
-                Showing {filteredPlayers.length} out of {players.length} players
-              </Text>
+              <HStack spacing={4} align="center">
+                <Tooltip label='Filter Players' placement='top'>
+                  <IconButton
+                    icon={<FaFilter />}
+                    onClick={onOpen}
+                    size="lg"
+                    h="56px"
+                    w="56px"
+                    bg={activeFiltersCount > 0 ? "var(--color-primary)" : "white"}
+                    color={activeFiltersCount > 0 ? "white" : "var(--color-text-primary)"}
+                    border="1px solid"
+                    borderColor={activeFiltersCount > 0 ? "var(--color-primary)" : "rgba(0, 0, 0, 0.1)"}
+                    borderRadius="full"
+                    aria-label='Filter players'
+                    position='relative'
+                    _hover={{
+                      bg: activeFiltersCount > 0 ? "var(--color-accent)" : "var(--color-primary)",
+                      color: "white",
+                      borderColor: activeFiltersCount > 0 ? "var(--color-accent)" : "var(--color-primary)",
+                    }}
+                    transition="all 0.3s ease"
+                    as={motion.button}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {activeFiltersCount > 0 && (
+                      <MotionBox
+                        position="absolute"
+                        top={-1}
+                        right={-1}
+                        w="20px"
+                        h="20px"
+                        bg="var(--color-secondary)"
+                        color="white"
+                        borderRadius="full"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        fontSize="xs"
+                        fontWeight={700}
+                        fontFamily="var(--font-body)"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                      >
+                        {activeFiltersCount}
+                      </MotionBox>
+                    )}
+                  </IconButton>
+                </Tooltip>
+
+                <MotionText
+                  fontSize={{ base: 'md', md: 'lg' }}
+                  color="var(--color-text-secondary)"
+                  fontFamily="var(--font-body)"
+                  fontWeight={400}
+                  whiteSpace="nowrap"
+                  initial={{ opacity: 1 }}
+                  animate={headerInView ? { opacity: 1 } : { opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'}
+                </MotionText>
+              </HStack>
             </HStack>
-          )}
+
+            {/* Active Filters Display */}
+            {(activeFiltersCount > 0 || searchQuery.trim()) && (
+              <MotionBox
+                w='full'
+                bg="white"
+                p={5}
+                borderRadius="full"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.08)"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <HStack w='full' flexWrap='wrap' spacing={3}>
+                  <Text 
+                    fontSize='sm' 
+                    color="var(--color-text-secondary)" 
+                    fontWeight='500'
+                    fontFamily="var(--font-body)"
+                  >
+                    Filters:
+                  </Text>
+                  {Object.entries(filters).map(
+                    ([key, value]) =>
+                      value && (
+                        <Badge 
+                          key={key} 
+                          bg="var(--color-primary)"
+                          color="white"
+                          borderRadius="full"
+                          fontFamily="var(--font-body)"
+                          fontSize="xs"
+                          px={3}
+                          py={1}
+                          fontWeight={600}
+                          as={motion.div}
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          {key}: {value}
+                        </Badge>
+                      )
+                  )}
+                  {searchQuery.trim() && (
+                    <Badge 
+                      bg="var(--color-secondary)"
+                      color="white"
+                      borderRadius="full"
+                      fontFamily="var(--font-body)"
+                      fontSize="xs"
+                      px={3}
+                      py={1}
+                      fontWeight={600}
+                      as={motion.div}
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      "{searchQuery}"
+                    </Badge>
+                  )}
+                  <Button 
+                    size='xs' 
+                    variant='ghost' 
+                    onClick={clearFilters}
+                    borderRadius="full"
+                    fontFamily="var(--font-body)"
+                    fontWeight={500}
+                    color="var(--color-text-secondary)"
+                    fontSize="xs"
+                    _hover={{
+                      color: "var(--color-primary)",
+                      bg: "rgba(44, 95, 124, 0.05)",
+                    }}
+                    transition="all 0.2s"
+                    as={motion.button}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Clear all
+                  </Button>
+                </HStack>
+              </MotionBox>
+            )}
+          </MotionVStack>
+
+          {/* Players Grid - Simple and Clean */}
+          <MotionBox
+            w="full"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {players.length === 0 ? (
+              <SimpleGrid
+                columns={{ base: 1, md: 2, lg: 3 }}
+                spacing={{ base: 8, md: 10 }}
+                w={'full'}
+              >
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Box
+                    key={i}
+                    w='full'
+                    h="400px"
+                    bg="white"
+                    borderRadius="0"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.08)"
+                  />
+                ))}
+              </SimpleGrid>
+            ) : filteredPlayers.length === 0 ? (
+              <Box
+                textAlign="center"
+                py={16}
+                bg="white"
+                borderRadius="0"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.08)"
+                px={8}
+              >
+                <MotionText
+                  fontSize={{ base: 'xl', md: '2xl' }}
+                  fontFamily="var(--font-display)"
+                  fontWeight={600}
+                  color="var(--color-text-primary)"
+                  mb={4}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  {searchQuery.trim() || activeFiltersCount > 0 ? (
+                    <>
+                      No players found
+                      <br />
+                      <Text 
+                        fontSize={{ base: 'md', md: 'lg' }} 
+                        mt={4}
+                        fontFamily="var(--font-body)"
+                        color="var(--color-text-secondary)"
+                        fontWeight={400}
+                      >
+                        Try adjusting your search or filters
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      No players yet
+                      <br />
+                      <Link to={'/create'}>
+                        <Text
+                          as='span'
+                          color="var(--color-primary)"
+                          fontFamily="var(--font-body)"
+                          fontWeight={600}
+                          fontSize={{ base: 'md', md: 'lg' }}
+                          _hover={{ 
+                            textDecoration: 'underline',
+                          }}
+                          transition="color 0.2s"
+                        >
+                          Create the first one
+                        </Text>
+                      </Link>
+                    </>
+                  )}
+                </MotionText>
+              </Box>
+            ) : (
+              <SimpleGrid
+                columns={{ base: 1, md: 2, lg: 3 }}
+                spacing={{ base: 8, md: 10 }}
+                w={'full'}
+              >
+                {filteredPlayers.map((player, index) => (
+                  <MotionBox
+                    key={player._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: Math.min(index * 0.02, 0.3), // Cap delay at 0.3s max
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    viewport={{ once: true }}
+                  >
+                    <PlayerCard
+                      player={player}
+                      onPlayerDeleted={handlePlayerDeleted}
+                    />
+                  </MotionBox>
+                ))}
+              </SimpleGrid>
+            )}
+          </MotionBox>
         </VStack>
 
-        <SimpleGrid
-          columns={{ base: 1, md: 2, lg: 3 }}
-          spacing={{ base: 6, md: 10 }}
-          w={'full'}
-        >
-          {players.length === 0 ? (
-            // Show skeleton cards while loading
-            [1, 2, 3, 4, 5, 6].map((i) => (
-              <Box
-                key={i}
-                maxW='sm'
-                borderWidth='1px'
-                borderRadius='lg'
-                overflow='hidden'
-                boxShadow='md'
-                bg='white'
-              >
-                <Box p={{ base: 4, md: 6 }} display='flex' justifyContent='center' alignItems='center'>
-                  <Box
-                    width={{ base: '120px', md: '160px' }}
-                    height={{ base: '120px', md: '160px' }}
-                    borderRadius='full'
-                    bg='gray.200'
-                  />
-                </Box>
-                <Box p={{ base: 4, md: 6 }}>
-                  <VStack spacing={{ base: 2, md: 3 }} align='start'>
-                    <Box w="150px" h="24px" bg="gray.200" borderRadius="sm" />
-                    <HStack spacing={{ base: 3, md: 4 }} w='full' align='start' justifyContent='space-between'>
-                      <Box>
-                        <Box w="60px" h="12px" bg="gray.200" borderRadius="sm" mb={1} />
-                        <Box w="80px" h="20px" bg="gray.200" borderRadius="sm" />
-                      </Box>
-                      <Box>
-                        <Box w="70px" h="12px" bg="gray.200" borderRadius="sm" mb={1} />
-                        <Box w="90px" h="20px" bg="gray.200" borderRadius="sm" />
-                      </Box>
-                    </HStack>
-                    <Box w="100px" h="20px" bg="gray.200" borderRadius="sm" />
-                  </VStack>
-                </Box>
-              </Box>
-            ))
-          ) : (
-            filteredPlayers.map(player => (
-              <PlayerCard
-                key={player._id}
-                player={player}
-                onPlayerDeleted={handlePlayerDeleted}
-              />
-            ))
-          )}
-        </SimpleGrid>
-
-        {filteredPlayers.length === 0 && (
-          <Text
-            fontSize='xl'
-            textAlign={'center'}
-            fontWeight='bold'
-            color='gray.500'
+        {/* Filter Drawer */}
+        <Drawer isOpen={isOpen} placement='right' onClose={onClose} size='md'>
+          <DrawerOverlay />
+          <DrawerContent
+            sx={{
+              fontFamily: 'var(--font-body)',
+            }}
+            borderRadius="0"
           >
-            {searchQuery.trim() || activeFiltersCount > 0 ? (
-              <>
-                No players found matching your criteria
-                <br />
-                <Text fontSize='md' mt={2}>
-                  Try adjusting your search terms or filters
-                </Text>
-              </>
-            ) : (
-              <>
-                No player found 😢{' '}
-                <Link to={'/create'}>
-                  <Text
-                    as='span'
-                    color='blue.500'
-                    _hover={{ textDecoration: 'underline' }}
+            <DrawerCloseButton />
+            <DrawerHeader 
+              borderBottomWidth='1px'
+              borderColor="rgba(0, 0, 0, 0.1)"
+              fontFamily="var(--font-display)"
+              fontSize="2xl"
+              fontWeight={600}
+              color="var(--color-text-primary)"
+              py={6}
+            >
+              Filter Players
+            </DrawerHeader>
+
+            <DrawerBody py={8}>
+              <VStack spacing={6} align='stretch'>
+                {/* Paddle Filter */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
                   >
-                    Create a player
+                    Paddle
                   </Text>
-                </Link>
-              </>
-            )}
-          </Text>
-        )}
-      </VStack>
+                  <Select
+                    placeholder='All paddles'
+                    value={filters.paddle}
+                    onChange={e =>
+                      setFilters({ ...filters, paddle: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.paddle.map(paddle => (
+                      <option key={paddle} value={paddle}>
+                        {paddle}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-      {/* Filter Drawer */}
-      <Drawer isOpen={isOpen} placement='right' onClose={onClose} size='md'>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader borderBottomWidth='1px'>Filter Players</DrawerHeader>
+                {/* Paddle Thickness Filter */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Paddle Thickness
+                  </Text>
+                  <Select
+                    placeholder='All thicknesses'
+                    value={filters.paddleThickness}
+                    onChange={e =>
+                      setFilters({ ...filters, paddleThickness: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.paddleThickness.map(thickness => (
+                      <option key={thickness} value={thickness}>
+                        {thickness}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-          <DrawerBody>
-            <VStack spacing={6} align='stretch'>
-              {/* Paddle Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Paddle
-                </Text>
-                <Select
-                  placeholder='All paddles'
-                  value={filters.paddle}
-                  onChange={e =>
-                    setFilters({ ...filters, paddle: e.target.value })
-                  }
-                >
-                  {filterOptions.paddle.map(paddle => (
-                    <option key={paddle} value={paddle}>
-                      {paddle}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                {/* Paddle Shape Filter */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Paddle Shape
+                  </Text>
+                  <Select
+                    placeholder='All shapes'
+                    value={filters.paddleShape}
+                    onChange={e =>
+                      setFilters({ ...filters, paddleShape: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.paddleShape.map(shape => (
+                      <option key={shape} value={shape}>
+                        {shape}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-              {/* Paddle Thickness Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Paddle Thickness
-                </Text>
-                <Select
-                  placeholder='All thicknesses'
-                  value={filters.paddleThickness}
-                  onChange={e =>
-                    setFilters({ ...filters, paddleThickness: e.target.value })
-                  }
-                >
-                  {filterOptions.paddleThickness.map(thickness => (
-                    <option key={thickness} value={thickness}>
-                      {thickness}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                <Divider borderColor="rgba(0, 0, 0, 0.1)" />
 
-              {/* Paddle Shape Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Paddle Shape
-                </Text>
-                <Select
-                  placeholder='All shapes'
-                  value={filters.paddleShape}
-                  onChange={e =>
-                    setFilters({ ...filters, paddleShape: e.target.value })
-                  }
-                >
-                  {filterOptions.paddleShape.map(shape => (
-                    <option key={shape} value={shape}>
-                      {shape}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                {/* Shoes Filter */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Shoe Model
+                  </Text>
+                  <Select
+                    placeholder='All shoes'
+                    value={filters.shoeModel}
+                    onChange={e =>
+                      setFilters({ ...filters, shoeModel: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.shoeModel.map(shoe => (
+                      <option key={shoe} value={shoe}>
+                        {shoe}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-              <Divider />
+                <Divider borderColor="rgba(0, 0, 0, 0.1)" />
 
-              {/* Shoes Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Shoe Model
-                </Text>
-                <Select
-                  placeholder='All shoes'
-                  value={filters.shoeModel}
-                  onChange={e =>
-                    setFilters({ ...filters, shoeModel: e.target.value })
-                  }
-                >
-                  {filterOptions.shoeModel.map(shoe => (
-                    <option key={shoe} value={shoe}>
-                      {shoe}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                {/* Age Range Filter */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Age Range
+                  </Text>
+                  <Select
+                    placeholder='All ages'
+                    value={filters.ageRange}
+                    onChange={e =>
+                      setFilters({ ...filters, ageRange: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    <option value='18-25'>18-25</option>
+                    <option value='26-35'>26-35</option>
+                    <option value='36-45'>36-45</option>
+                    <option value='46+'>46+</option>
+                  </Select>
+                </Box>
 
-              <Divider />
+                {/* MLP Team Filter */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    MLP Team
+                  </Text>
+                  <Select
+                    placeholder='All teams'
+                    value={filters.mlpTeam}
+                    onChange={e =>
+                      setFilters({ ...filters, mlpTeam: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.mlpTeam.map(team => (
+                      <option key={team} value={team}>
+                        {team}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-              {/* Age Range Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Age Range
-                </Text>
-                <Select
-                  placeholder='All ages'
-                  value={filters.ageRange}
-                  onChange={e =>
-                    setFilters({ ...filters, ageRange: e.target.value })
-                  }
-                >
-                  <option value='18-25'>18-25</option>
-                  <option value='26-35'>26-35</option>
-                  <option value='36-45'>36-45</option>
-                  <option value='46+'>46+</option>
-                </Select>
-              </Box>
+                <Divider borderColor="rgba(0, 0, 0, 0.1)" />
 
-              {/* MLP Team Filter */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  MLP Team
-                </Text>
-                <Select
-                  placeholder='All teams'
-                  value={filters.mlpTeam}
-                  onChange={e =>
-                    setFilters({ ...filters, mlpTeam: e.target.value })
-                  }
-                >
-                  {filterOptions.mlpTeam.map(team => (
-                    <option key={team} value={team}>
-                      {team}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                {/* Modifications Filters */}
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Overgrips
+                  </Text>
+                  <Select
+                    placeholder='All overgrips'
+                    value={filters.overgrips}
+                    onChange={e =>
+                      setFilters({ ...filters, overgrips: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.overgrips.map(overgrip => (
+                      <option key={overgrip} value={overgrip}>
+                        {overgrip}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Total Weight
+                  </Text>
+                  <Select
+                    placeholder='All total weights'
+                    value={filters.totalWeight}
+                    onChange={e =>
+                      setFilters({ ...filters, totalWeight: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.totalWeight.map(totalWeight => (
+                      <option key={totalWeight} value={totalWeight}>
+                        {totalWeight}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-              <Divider />
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Weight Info
+                  </Text>
+                  <Select
+                    placeholder='All players'
+                    value={filters.weightComplete}
+                    onChange={e =>
+                      setFilters({ ...filters, weightComplete: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    <option value='yes'>Known weight setup</option>
+                    <option value='no'>Unknown weight setup</option>
+                  </Select>
+                </Box>
 
-              {/* Modifications Filters */}
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Overgrips
-                </Text>
-                <Select
-                  placeholder='All overgrips'
-                  value={filters.overgrips}
-                  onChange={e =>
-                    setFilters({ ...filters, overgrips: e.target.value })
-                  }
-                >
-                  {filterOptions.overgrips.map(overgrip => (
-                    <option key={overgrip} value={overgrip}>
-                      {overgrip}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                <Box>
+                  <Text 
+                    fontWeight='600' 
+                    mb={3}
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                    fontSize="sm"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Sponsor
+                  </Text>
+                  <Select
+                    placeholder='All sponsors'
+                    value={filters.sponsor}
+                    onChange={e =>
+                      setFilters({ ...filters, sponsor: e.target.value })
+                    }
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    h="48px"
+                    fontSize="md"
+                    _focus={{
+                      borderColor: "var(--color-primary)",
+                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    }}
+                  >
+                    {filterOptions.sponsor.map(sponsor => (
+                      <option key={sponsor} value={sponsor}>
+                        {sponsor}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
 
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Total Weight
-                </Text>
-                <Select
-                  placeholder='All total weights'
-                  value={filters.totalWeight}
-                  onChange={e =>
-                    setFilters({ ...filters, totalWeight: e.target.value })
-                  }
-                >
-                  {filterOptions.totalWeight.map(totalWeight => (
-                    <option key={totalWeight} value={totalWeight}>
-                      {totalWeight}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
+                <Divider borderColor="rgba(0, 0, 0, 0.1)" />
 
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Weight Info
-                </Text>
-                <Select
-                  placeholder='All players'
-                  value={filters.weightComplete}
-                  onChange={e =>
-                    setFilters({ ...filters, weightComplete: e.target.value })
-                  }
-                >
-                  <option value='yes'>Known weight setup</option>
-                  <option value='no'>Unknown weight setup</option>
-                </Select>
-              </Box>
-
-              <Box>
-                <Text fontWeight='bold' mb={2}>
-                  Sponsor
-                </Text>
-                <Select
-                  placeholder='All sponsors'
-                  value={filters.sponsor}
-                  onChange={e =>
-                    setFilters({ ...filters, sponsor: e.target.value })
-                  }
-                >
-                  {filterOptions.sponsor.map(sponsor => (
-                    <option key={sponsor} value={sponsor}>
-                      {sponsor}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
-
-              <Divider />
-
-              {/* Action Buttons */}
-              <HStack spacing={4}>
-                <Button colorScheme='blue' onClick={onClose} flex={1}>
-                  Apply Filters
-                </Button>
-                <Button variant='outline' onClick={clearFilters} flex={1}>
-                  Clear All
-                </Button>
-              </HStack>
-            </VStack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-    </Container>
+                {/* Action Buttons */}
+                <HStack spacing={4} pt={4}>
+                  <Button 
+                    onClick={onClose} 
+                    flex={1}
+                    bg="var(--color-primary)"
+                    color="white"
+                    border="none"
+                    borderRadius="full"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                    h="48px"
+                    fontSize="md"
+                    _hover={{
+                      bg: "var(--color-accent)",
+                    }}
+                    transition="all 0.3s ease"
+                    as={motion.button}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Apply Filters
+                  </Button>
+                  <Button 
+                    variant='outline' 
+                    onClick={clearFilters} 
+                    flex={1}
+                    border="1px solid"
+                    borderColor="var(--color-primary)"
+                    borderRadius="full"
+                    color="var(--color-primary)"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                    h="48px"
+                    fontSize="md"
+                    _hover={{
+                      bg: "var(--color-primary)",
+                      color: "white",
+                    }}
+                    transition="all 0.3s ease"
+                    as={motion.button}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Clear All
+                  </Button>
+                </HStack>
+              </VStack>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+      </Container>
+    </Box>
   );
 };
 

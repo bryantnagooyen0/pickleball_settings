@@ -10,7 +10,6 @@ import {
   useToast,
   Spinner,
   Center,
-  Divider,
   Link,
   IconButton,
   useDisclosure,
@@ -22,11 +21,16 @@ import {
   AlertDialogOverlay,
   Tooltip,
   Textarea,
+  Heading,
 } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { formatDistanceToNow } from 'date-fns';
+import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth.js';
 import useCommentStore from '../store/comment.js';
+
+const MotionBox = motion(Box);
+const MotionVStack = motion(VStack);
 
 const UserComments = () => {
   const [userComments, setUserComments] = useState([]);
@@ -63,7 +67,7 @@ const UserComments = () => {
     };
 
     fetchUserComments();
-  }, [user?.id]);
+  }, [user?.id, fetchUserCommentsFromStore]);
 
   useEffect(() => {
     setLoading(false);
@@ -187,16 +191,33 @@ const UserComments = () => {
   if (loading) {
     return (
       <Center py={8}>
-        <Spinner size="lg" />
+        <Spinner size="lg" color="var(--color-primary)" />
       </Center>
     );
   }
 
   if (userComments.length === 0) {
     return (
-      <Box textAlign="center" py={8} color="gray.500">
-        <Text>You haven't posted any comments yet.</Text>
-        <Text fontSize="sm" mt={2}>
+      <Box 
+        textAlign="center" 
+        py={12} 
+        color="var(--color-text-secondary)"
+        sx={{
+          '--color-text-secondary': '#666666',
+          '--font-body': '"Inter", sans-serif',
+        }}
+      >
+        <Text
+          fontFamily="var(--font-body)"
+          fontSize="md"
+          mb={2}
+        >
+          You haven't posted any comments yet.
+        </Text>
+        <Text 
+          fontSize="sm"
+          fontFamily="var(--font-body)"
+        >
           Start commenting on players and paddles to see them here!
         </Text>
       </Box>
@@ -204,41 +225,84 @@ const UserComments = () => {
   }
 
   return (
-    <Box>
-      <Text fontSize="xl" fontWeight="bold" mb={4}>
+    <Box
+      sx={{
+        '--color-primary': '#2C5F7C',
+        '--color-accent': '#FF6B6B',
+        '--color-bg': '#FAF9F6',
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+        '--color-text-primary': '#1A1A1A',
+        '--color-text-secondary': '#666666',
+      }}
+    >
+      <Heading
+        as="h3"
+        fontSize={{ base: 'xl', md: '2xl' }}
+        fontFamily="var(--font-display)"
+        fontWeight={700}
+        color="var(--color-text-primary)"
+        mb={6}
+      >
         My Comments ({userComments.length})
-      </Text>
+      </Heading>
 
       <VStack align="stretch" spacing={4}>
-        {userComments.map((comment) => (
-          <Box
+        {userComments.map((comment, index) => (
+          <MotionBox
             key={comment._id}
-            p={4}
-            border="1px"
-            borderColor="gray.200"
-            borderRadius="md"
+            p={5}
+            border="none"
+            borderRadius={0}
             bg="white"
+            boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: index * 0.05 }}
           >
-            <HStack justify="space-between" align="flex-start" mb={2}>
+            <HStack justify="space-between" align="flex-start" mb={3}>
               <HStack spacing={3}>
                 <Avatar
                   size="sm"
                   name={comment.authorName}
-                  bg="blue.500"
+                  bg="var(--color-primary)"
                   color="white"
+                  fontFamily="var(--font-body)"
+                  fontWeight={600}
                 />
                 <VStack align="flex-start" spacing={0}>
-                  <Text fontWeight="semibold" fontSize="sm">
+                  <Text 
+                    fontWeight={600} 
+                    fontSize="sm"
+                    fontFamily="var(--font-body)"
+                    color="var(--color-text-primary)"
+                  >
                     {comment.authorName}
                   </Text>
-                  <Text fontSize="xs" color="gray.500">
-                    {formatDate(comment.createdAt)}
+                  <HStack spacing={2}>
+                    <Text 
+                      fontSize="xs" 
+                      color="var(--color-text-secondary)"
+                      fontFamily="var(--font-body)"
+                    >
+                      {formatDate(comment.createdAt)}
+                    </Text>
                     {comment.updatedAt !== comment.createdAt && (
-                      <Badge ml={2} size="sm" colorScheme="gray">
+                      <Badge 
+                        px={2} 
+                        py={0.5} 
+                        borderRadius="full"
+                        bg="var(--color-bg)"
+                        color="var(--color-text-secondary)"
+                        fontSize="2xs"
+                        fontFamily="var(--font-body)"
+                        fontWeight={500}
+                      >
                         edited
                       </Badge>
                     )}
-                  </Text>
+                  </HStack>
                 </VStack>
               </HStack>
 
@@ -248,9 +312,19 @@ const UserComments = () => {
                     <Tooltip label="Save">
                       <Button
                         size="sm"
-                        colorScheme="green"
-                        variant="ghost"
+                        px={3}
+                        bg="var(--color-primary)"
+                        color="white"
+                        variant="solid"
                         onClick={handleSaveEdit}
+                        borderRadius="full"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        fontSize="xs"
+                        _hover={{
+                          bg: "var(--color-accent)",
+                        }}
+                        transition="all 0.3s ease"
                       >
                         Save
                       </Button>
@@ -258,9 +332,22 @@ const UserComments = () => {
                     <Tooltip label="Cancel">
                       <Button
                         size="sm"
-                        colorScheme="gray"
-                        variant="ghost"
+                        px={3}
+                        variant="outline"
+                        border="1px solid"
+                        borderColor="rgba(0, 0, 0, 0.1)"
+                        borderRadius="full"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        fontSize="xs"
                         onClick={handleCancelEdit}
+                        _hover={{
+                          bg: "var(--color-bg)",
+                          borderColor: "var(--color-text-primary)",
+                          color: "var(--color-text-primary)",
+                        }}
+                        transition="all 0.3s ease"
                       >
                         Cancel
                       </Button>
@@ -272,18 +359,30 @@ const UserComments = () => {
                       <IconButton
                         icon={<EditIcon />}
                         size="sm"
-                        colorScheme="blue"
+                        bg="transparent"
+                        color="var(--color-primary)"
                         variant="ghost"
                         onClick={() => handleEditComment(comment)}
+                        _hover={{
+                          bg: "var(--color-bg)",
+                          color: "var(--color-accent)",
+                        }}
+                        transition="all 0.3s ease"
                       />
                     </Tooltip>
                     <Tooltip label="Delete">
                       <IconButton
                         icon={<DeleteIcon />}
                         size="sm"
-                        colorScheme="red"
+                        bg="transparent"
+                        color="var(--color-accent)"
                         variant="ghost"
                         onClick={() => handleDeleteClick(comment)}
+                        _hover={{
+                          bg: "var(--color-bg)",
+                          opacity: 0.8,
+                        }}
+                        transition="all 0.3s ease"
                       />
                     </Tooltip>
                   </>
@@ -299,30 +398,58 @@ const UserComments = () => {
                   rows={3}
                   resize="vertical"
                   maxLength={1000}
+                  bg="white"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  borderRadius={0}
+                  fontFamily="var(--font-body)"
+                  color="var(--color-text-primary)"
+                  _focus={{
+                    borderColor: "var(--color-primary)",
+                    boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                    outline: "none",
+                  }}
                 />
-                <Text fontSize="sm" color="gray.500">
+                <Text 
+                  fontSize="xs" 
+                  color="var(--color-text-secondary)"
+                  fontFamily="var(--font-body)"
+                >
                   {editContent.length}/1000 characters
                 </Text>
               </VStack>
             ) : (
-              <Text whiteSpace="pre-wrap" fontSize="sm" mb={2}>
+              <Text 
+                whiteSpace="pre-wrap" 
+                fontSize="sm"
+                fontFamily="var(--font-body)"
+                color="var(--color-text-primary)"
+                lineHeight="1.6"
+                mb={3}
+              >
                 {comment.content}
               </Text>
             )}
 
             {/* Comment context */}
-            <HStack spacing={2} mt={2}>
+            <HStack spacing={2} mt={3} pt={3} borderTop="1px solid" borderColor="rgba(0, 0, 0, 0.05)">
               <Link
                 href={`${getTargetLink(comment)}#comment-${comment._id}`}
-                color="blue.500"
-                fontSize="sm"
-                _hover={{ textDecoration: 'underline' }}
+                color="var(--color-primary)"
+                fontSize="xs"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                _hover={{ 
+                  color: "var(--color-accent)",
+                  textDecoration: "none",
+                }}
+                transition="all 0.3s ease"
               >
                 View Comment
                 <ExternalLinkIcon ml={1} boxSize={3} />
               </Link>
             </HStack>
-          </Box>
+          </MotionBox>
         ))}
       </VStack>
 
@@ -333,23 +460,60 @@ const UserComments = () => {
         onClose={onClose}
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+          <AlertDialogContent
+            sx={{
+              '--font-display': '"Merriweather", serif',
+              '--font-body': '"Inter", sans-serif',
+              '--color-primary': '#2C5F7C',
+              '--color-accent': '#FF6B6B',
+            }}
+            borderRadius={0}
+            border="1px solid"
+            borderColor="rgba(0, 0, 0, 0.1)"
+          >
+            <AlertDialogHeader 
+              fontSize="lg" 
+              fontWeight={700}
+              fontFamily="var(--font-display)"
+            >
               Delete Comment
             </AlertDialogHeader>
 
-            <AlertDialogBody>
+            <AlertDialogBody
+              fontFamily="var(--font-body)"
+            >
               Are you sure you want to delete this comment? This action cannot be undone.
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
+              <Button 
+                ref={cancelRef} 
+                onClick={onClose}
+                variant="outline"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                borderRadius="full"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                _hover={{
+                  bg: "var(--color-bg)",
+                }}
+                transition="all 0.3s ease"
+              >
                 Cancel
               </Button>
               <Button
-                colorScheme="red"
+                bg="var(--color-accent)"
+                color="white"
                 onClick={handleConfirmDelete}
                 ml={3}
+                borderRadius="full"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                _hover={{
+                  bg: "var(--color-primary)",
+                }}
+                transition="all 0.3s ease"
               >
                 Delete
               </Button>

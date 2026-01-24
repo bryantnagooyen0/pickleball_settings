@@ -10,24 +10,36 @@ import {
   SimpleGrid,
   Icon,
   Badge,
+  Heading,
 } from '@chakra-ui/react';
 import { FaShoppingBag } from 'react-icons/fa';
 import { TbShoe } from 'react-icons/tb';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion(Box);
 
 // Custom Paddle SVG Icon Component
 const PaddleIcon = ({ ...props }) => (
   <svg
     xmlns='http://www.w3.org/2000/svg'
-    viewBox='0 0 700 875'
-    fill='currentColor'
+    viewBox='0 0 200 300'
+    fill='none'
+    stroke='currentColor'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
     {...props}
   >
-    <path d='M373.9,621.6c-10,5.3-35.7,5.3-45.7,0c-2.2-1.2-3.9-6-4.5-8.7c-1.9-9,3.4-26.9,3.4-36.1c0-17.5,1.1-114,1.1-114h45.7  c0,0,1.1,98.9,1.1,114c0,9.2,5.3,27.1,3.4,36.1C377.8,615.5,376.1,620.5,373.9,621.6z' />
-    <path d='M374.7,458.9h-47.2c-1,0-1.8-0.8-1.8-1.8v-7.8c0-1,0.8-1.8,1.8-1.8h47.2c1,0,1.8,0.8,1.8,1.8v7.8  C376.5,458.1,375.7,458.9,374.7,458.9z' />
-    <g>
-      <path d='M407.8,116.6c18.3,0,33.7,5.6,44.4,16.1c9.6,9.4,14.8,22.3,14.8,36.3v152.7c0,28-11.7,41.6-29.1,53.4   c-19.8,13.3-43.1,30.6-51.6,37.5c-10.8,8.8-17,17-18.8,24.9h-32.9c-1.8-7.9-8-16.1-18.8-24.9c-8.8-7-32.3-24.4-51.6-37.5   c-17.5-11.8-29.2-25.4-29.2-53.4V169c0-14,5.3-26.9,14.8-36.3c10.7-10.5,26-16.1,44.4-16.1H407.8 M407.8,110.6   c-16.7,0-96.9,0-113.6,0c-42.7,0-65.2,28-65.2,58.4c0,20.5,0,140.5,0,152.7c0,31.8,14.3,46.6,31.8,58.4   c18.8,12.7,42.3,30.1,51.2,37.2c9.2,7.5,17.9,16.9,17,26.2c11.4,0,32.6,0,44,0c-0.9-9.3,7.8-18.7,17-26.2   c8.8-7.1,32.3-24.5,51.2-37.2c17.5-11.8,31.8-26.6,31.8-58.4c0-12.2,0-132.2,0-152.7C473,138.6,450.4,110.6,407.8,110.6   L407.8,110.6z' />
-      <path d='M407.8,125.6c16.2,0,29.5,4.7,38.4,13.7c7.6,7.7,11.8,18.2,11.8,29.7v152.7c0,24.2-9.2,35.2-25.2,46   c-20,13.4-43.6,31-52.3,38c-9.6,7.8-16,15.3-19.5,22.9h-20.2c-3.5-7.6-9.9-15.1-19.5-22.9c-9-7.1-32.7-24.8-52.2-38   c-16-10.8-25.2-21.7-25.2-46V169c0-11.5,4.2-22,11.8-29.7c8.9-9,22.2-13.7,38.4-13.7H407.8 M407.8,120.6H294.2   c-38.1,0-55.2,24.3-55.2,48.4v152.7c0,26.3,10.5,38.7,27.4,50.1c19.4,13.1,43,30.6,51.9,37.7c10.2,8.3,16.5,16.2,19.3,24h26.9   c2.7-7.8,9.1-15.7,19.3-24c8.6-6.9,32.1-24.4,51.9-37.7c16.9-11.4,27.4-23.8,27.4-50.1V169C463,144.9,445.9,120.6,407.8,120.6   L407.8,120.6z' />
-    </g>
+    {/* Paddle Head - Rounded oval shape */}
+    <ellipse cx='100' cy='80' rx='50' ry='65' />
+    
+    {/* Paddle Handle */}
+    <line x1='100' y1='145' x2='100' y2='280' strokeWidth='14' />
+    
+    {/* Handle grip lines for detail */}
+    <line x1='85' y1='180' x2='115' y2='180' strokeWidth='1' opacity='0.5' />
+    <line x1='85' y1='210' x2='115' y2='210' strokeWidth='1' opacity='0.5' />
+    <line x1='85' y1='240' x2='115' y2='240' strokeWidth='1' opacity='0.5' />
   </svg>
 );
 
@@ -73,13 +85,13 @@ const EquipmentModule = ({
   const getIcon = () => {
     switch (icon) {
       case 'paddle':
-        return '/paddleIcon2.png';
+        return '/paddleiconTilted.png';
       case 'shoes':
-        return TbShoe;
+        return '/shoesiconT.png';
       case 'modifications':
-        return ModificationsIcon;
+        return '/cogT.png';
       default:
-        return '/paddleIcon2.png';
+        return '/paddleiconTilted.png';
     }
   };
 
@@ -109,14 +121,35 @@ const EquipmentModule = ({
     return (
       <SimpleGrid columns={2} spacing={4}>
         {specifications.map((spec, index) => (
-          <Box key={index}>
-            <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
-              {spec.label}
-            </Text>
-            <Text fontSize='md' fontWeight='semibold' color='gray.800'>
-              {player[spec.field] || spec.default || 'Not specified'}
-            </Text>
-          </Box>
+          <MotionBox 
+            key={index}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
+          >
+            <Box>
+              <Text 
+                fontSize='xs' 
+                color='var(--color-text-secondary)'
+                fontFamily='var(--font-body)'
+                fontWeight={600}
+                mb={2}
+                textTransform='uppercase'
+                letterSpacing='0.05em'
+              >
+                {spec.label}
+              </Text>
+              <Text 
+                fontSize='md' 
+                fontWeight={600}
+                fontFamily='var(--font-body)'
+                color='var(--color-text-primary)'
+              >
+                {player[spec.field] || spec.default || 'Not specified'}
+              </Text>
+            </Box>
+          </MotionBox>
         ))}
       </SimpleGrid>
     );
@@ -152,25 +185,31 @@ const EquipmentModule = ({
           // Special layout for weight module
           if (mod.field === 'weight') {
             return (
-              <Box
+              <MotionBox
                 key={index}
-                bg='gray.50'
+                bg='white'
                 p={6}
-                borderRadius='md'
-                border='1px solid'
-                borderColor='gray.200'
+                borderRadius={0}
+                border='none'
                 w='full'
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
               >
                 {/* Weight Setup Title */}
-                <Text 
-                  fontSize='lg' 
-                  fontWeight='bold' 
-                  color='gray.800' 
+                <Heading
+                  as='h4'
+                  fontSize='md' 
+                  fontWeight={700}
+                  fontFamily='var(--font-display)'
+                  color='var(--color-text-primary)'
                   textAlign='center' 
                   mb={4}
+                  letterSpacing='-0.01em'
                 >
                   Weight Setup
-                </Text>
+                </Heading>
                 
                 <Stack 
                   direction={{ base: 'column', md: 'row' }} 
@@ -229,31 +268,66 @@ const EquipmentModule = ({
                   {/* Weight details - Below image on mobile, Right side on desktop */}
                   <VStack align='start' spacing={3} flex={1} w={{ base: 'full', md: 'auto' }}>
                     <Box>
-                      <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
+                      <Text 
+                        fontSize='xs' 
+                        color='var(--color-text-secondary)'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
+                        mb={1}
+                        textTransform='uppercase'
+                        letterSpacing='0.05em'
+                      >
                         Total Weight
                       </Text>
-                      <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                      <Text 
+                        fontSize='md' 
+                        fontWeight={600}
+                        fontFamily='var(--font-body)'
+                        color='var(--color-text-primary)'
+                      >
                         {player.totalWeight || 'Not specified'}
                       </Text>
                     </Box>
                     
                     <Box>
-                      <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
+                      <Text 
+                        fontSize='xs' 
+                        color='var(--color-text-secondary)'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
+                        mb={1}
+                        textTransform='uppercase'
+                        letterSpacing='0.05em'
+                      >
                         Weight Location
                       </Text>
-                      <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                      <Text 
+                        fontSize='md' 
+                        fontWeight={600}
+                        fontFamily='var(--font-body)'
+                        color='var(--color-text-primary)'
+                      >
                         {player.weightLocation || 'Not specified'}
                       </Text>
                     </Box>
                     
                     <Box>
-                      <Text fontSize='sm' color='gray.600' fontWeight='medium' mb={1}>
+                      <Text 
+                        fontSize='xs' 
+                        color='var(--color-text-secondary)'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
+                        mb={1}
+                        textTransform='uppercase'
+                        letterSpacing='0.05em'
+                      >
                         Tape Details
                       </Text>
                       <Text 
                         fontSize='md' 
-                        fontWeight='semibold' 
-                        color='gray.800'
+                        fontWeight={600}
+                        fontFamily='var(--font-body)'
+                        color='var(--color-text-primary)'
                         whiteSpace='pre-line'
                       >
                         {player.tapeDetails || 'Not specified'}
@@ -262,29 +336,37 @@ const EquipmentModule = ({
                     
                     {player[mod.brandField] && (
                       <Badge
-                        colorScheme={mod.badgeColor || 'purple'}
-                        variant='subtle'
-                        size='sm'
+                        px={3}
+                        py={1}
+                        borderRadius='full'
+                        bg='var(--color-primary)'
+                        color='white'
+                        fontSize='xs'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
                       >
                         {player[mod.brandField]}
                       </Badge>
                     )}
                   </VStack>
                 </Stack>
-              </Box>
+              </MotionBox>
             );
           }
           
           // Default layout for other modifications
           return (
-            <Box
+            <MotionBox
               key={index}
-              bg='gray.50'
+              bg='white'
               p={4}
-              borderRadius='md'
-              border='1px solid'
-              borderColor='gray.200'
+              borderRadius={0}
+              border='none'
               w='full'
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
             >
               <HStack justify='space-between' align='center'>
                 <HStack spacing={4}>
@@ -296,8 +378,7 @@ const EquipmentModule = ({
                       h={16}
                       borderRadius='md'
                       objectFit='cover'
-                      border='1px solid'
-                      borderColor='gray.300'
+                      border='none'
                       loading='lazy'
                       fallback={
                         <Box
@@ -335,17 +416,34 @@ const EquipmentModule = ({
                     </Box>
                   )}
                   <VStack align='start' spacing={1}>
-                    <Text fontSize='sm' color='gray.600' fontWeight='medium'>
+                    <Text 
+                      fontSize='xs' 
+                      color='var(--color-text-secondary)'
+                      fontFamily='var(--font-body)'
+                      fontWeight={600}
+                      textTransform='uppercase'
+                      letterSpacing='0.05em'
+                    >
                       {mod.label}
                     </Text>
-                    <Text fontSize='md' fontWeight='semibold' color='gray.800'>
+                    <Text 
+                      fontSize='md' 
+                      fontWeight={600}
+                      fontFamily='var(--font-body)'
+                      color='var(--color-text-primary)'
+                    >
                       {player[mod.field] || 'None specified'}
                     </Text>
                     {player[mod.brandField] && (
                       <Badge
-                        colorScheme={mod.badgeColor || 'purple'}
-                        variant='subtle'
-                        size='sm'
+                        px={3}
+                        py={1}
+                        borderRadius='full'
+                        bg='var(--color-primary)'
+                        color='white'
+                        fontSize='xs'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
                       >
                         {player[mod.brandField]}
                       </Badge>
@@ -353,17 +451,35 @@ const EquipmentModule = ({
                   </VStack>
                 </HStack>
                 {mod.field !== 'overgrips' && mod.field !== 'additionalModification' && (
-                  <Button
-                    size='sm'
-                    colorScheme='blue'
-                    leftIcon={<FaShoppingBag />}
-                    onClick={() => handleCheckPrice(mod.field)}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    Check price
-                  </Button>
+                    <Button
+                      size='sm'
+                      px={4}
+                      py={2}
+                      h='auto'
+                      bg="var(--color-primary)"
+                      color="white"
+                      leftIcon={<FaShoppingBag />}
+                      onClick={() => handleCheckPrice(mod.field)}
+                      fontFamily='var(--font-body)'
+                      fontWeight={600}
+                      fontSize='sm'
+                      borderRadius='full'
+                      border='none'
+                      _hover={{
+                        bg: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
+                    >
+                      Check price
+                    </Button>
+                  </motion.div>
                 )}
               </HStack>
-            </Box>
+            </MotionBox>
           );
         })}
       </VStack>
@@ -371,39 +487,68 @@ const EquipmentModule = ({
   };
 
   return (
-    <Box
+    <MotionBox
       w='full'
       bg='white'
-      borderRadius='lg'
-      boxShadow='lg'
-      border='1px solid'
-      borderColor='gray.200'
+      borderRadius={0}
+      boxShadow='0 4px 20px rgba(0, 0, 0, 0.08)'
+      border='none'
+      sx={{
+        '--color-primary': '#2C5F7C',
+        '--color-accent': '#FF6B6B',
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+      }}
       overflow='hidden'
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Module Header */}
-      <Box p={6} borderBottom='1px solid' borderColor='gray.200'>
-        <HStack align='center' spacing={3}>
+      <Box 
+        p={4} 
+        borderBottom='1px solid' 
+        borderColor='rgba(0, 0, 0, 0.08)'
+        bg='white'
+      >
+        <HStack align='center' spacing={2}>
           {typeof getIcon() === 'string' ? (
-            <Image src={getIcon()} w={icon === 'paddle' ? 10 : 10} h={icon === 'paddle' ? 10 : 10} alt="icon" />
+            <Image 
+              src={getIcon()} 
+              w={icon === 'paddle' ? '2.5rem' : icon === 'shoes' ? '3rem' : icon === 'modifications' ? '2.5rem' : '0.875rem'} 
+              h={icon === 'paddle' ? '2.5rem' : icon === 'shoes' ? '3rem' : icon === 'modifications' ? '2.5rem' : '0.875rem'} 
+              alt="icon"
+              objectFit='contain'
+            />
           ) : (
-            <Icon as={getIcon()} w={icon === 'paddle' ? 14 : 10} h={icon === 'paddle' ? 14 : 10} color='gray.600' />
+            <Icon as={getIcon()} w={icon === 'paddle' ? 14 : 10} h={icon === 'paddle' ? 14 : 10} color='var(--color-primary)' />
           )}
-          <Text fontSize='xl' fontWeight='bold' color='gray.800'>
+          <Heading 
+            as='h3' 
+            fontSize='lg' 
+            fontWeight={700}
+            fontFamily='var(--font-display)'
+            color='var(--color-text-primary)'
+          >
             {title}
-          </Text>
+          </Heading>
         </HStack>
       </Box>
 
       {/* Product Display */}
       <Box p={6}>
         {!hideProductDisplay && (
-          <Box
-            bg='gray.50'
-            p={4}
-            borderRadius='md'
+          <MotionBox
+            bg='white'
+            p={5}
+            borderRadius={0}
             mb={6}
-            border='1px solid'
-            borderColor='gray.200'
+            border='none'
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
             <Stack 
               direction={{ base: 'column', md: 'row' }} 
@@ -425,8 +570,7 @@ const EquipmentModule = ({
                     h={16}
                     borderRadius='md'
                     objectFit='cover'
-                    border='1px solid'
-                    borderColor='gray.300'
+                    border='none'
                     flexShrink={0}
                     loading='lazy'
                     fallback={
@@ -466,32 +610,46 @@ const EquipmentModule = ({
                     )}
                   </Box>
                 )}
-                <VStack align={{ base: 'center', md: 'start' }} spacing={1} w={{ base: 'full', md: 'auto' }}>
+                <VStack align={{ base: 'center', md: 'start' }} spacing={2} w={{ base: 'full', md: 'auto' }}>
                   <Text 
-                    fontSize={{ base: 'md', md: 'lg' }} 
-                    fontWeight='bold' 
-                    color='gray.800'
+                    fontSize={{ base: 'lg', md: 'xl' }} 
+                    fontWeight={700}
+                    fontFamily='var(--font-display)'
+                    color='var(--color-text-primary)'
                     textAlign={{ base: 'center', md: 'left' }}
                     wordBreak='break-word'
                     w='full'
+                    letterSpacing='-0.01em'
                   >
                     {getName()}
                   </Text>
                   <HStack spacing={2} flexWrap='wrap' justify={{ base: 'center', md: 'flex-start' }}>
                     {getBrand() && (
                       <Badge
-                        colorScheme={badgeColor}
-                        variant='subtle'
-                        size='sm'
+                        px={3}
+                        py={1}
+                        borderRadius='full'
+                        bg='var(--color-primary)'
+                        color='white'
+                        fontSize='xs'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
                       >
                         {getBrand()}
                       </Badge>
                     )}
                     {getModel() && (
                       <Badge
-                        colorScheme={badgeColor}
-                        variant='outline'
-                        size='sm'
+                        px={3}
+                        py={1}
+                        borderRadius='full'
+                        border='1px solid'
+                        borderColor='var(--color-primary)'
+                        bg='transparent'
+                        color='var(--color-primary)'
+                        fontSize='xs'
+                        fontFamily='var(--font-body)'
+                        fontWeight={600}
                       >
                         {getModel()}
                       </Badge>
@@ -502,22 +660,45 @@ const EquipmentModule = ({
               {icon !== 'shoes' && (
                 <Button
                   size='sm'
-                  colorScheme='blue'
+                  bg="var(--color-primary)"
+                  color="white"
                   leftIcon={<FaShoppingBag />}
                   onClick={() => handleCheckPrice()}
+                  _hover={{
+                    bg: "var(--color-accent)",
+                  }}
+                  transition="all 0.3s ease"
                 >
                   Check price
                 </Button>
               )}
             </Stack>
-          </Box>
+          </MotionBox>
         )}
 
         {/* Specifications or Modifications */}
-        {specifications.length > 0 && renderSpecifications()}
-        {modifications.length > 0 && renderModifications()}
+        {specifications.length > 0 && (
+          <MotionBox
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {renderSpecifications()}
+          </MotionBox>
+        )}
+        {modifications.length > 0 && (
+          <MotionBox
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {renderModifications()}
+          </MotionBox>
+        )}
       </Box>
-    </Box>
+    </MotionBox>
   );
 };
 

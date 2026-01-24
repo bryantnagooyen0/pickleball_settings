@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   VStack,
@@ -12,15 +12,20 @@ import {
   Spinner,
   Center,
   useToast,
-  Divider,
-  Stack,
-  useBreakpointValue,
+  Heading,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
 import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import PlayerCard from '../components/PlayerCard';
 import CommentSection from '../components/CommentSection';
+
+const MotionBox = motion(Box);
+const MotionVStack = motion(VStack);
+const MotionHStack = motion(HStack);
+const MotionText = motion(Text);
+const MotionHeading = motion(Heading);
 
 const PaddleDetailPage = () => {
   const { paddleId } = useParams();
@@ -31,15 +36,12 @@ const PaddleDetailPage = () => {
   const [playersUsingPaddle, setPlayersUsingPaddle] = useState([]);
   const { paddles, fetchPaddles } = usePaddleStore();
   const { players, fetchPlayers } = usePlayerStore();
-
-  // Responsive values for mobile optimization - MUST be called before any early returns
-  const containerMaxW = useBreakpointValue({ base: 'container.sm', md: 'container.lg', lg: 'container.xl' });
-  const imageSize = useBreakpointValue({ base: '200px', md: '250px', lg: '300px' });
-  const padding = useBreakpointValue({ base: 4, md: 6, lg: 8 });
-  const titleFontSize = useBreakpointValue({ base: '2xl', md: '3xl', lg: '4xl' });
-  const brandFontSize = useBreakpointValue({ base: 'md', md: 'lg' });
-  const modelFontSize = useBreakpointValue({ base: 'lg', md: 'xl' });
-  const gridColumns = useBreakpointValue({ base: 1, sm: 2 });
+  const headerRef = useRef(null);
+  const infoRef = useRef(null);
+  const playersRef = useRef(null);
+  const headerInView = useInView(headerRef, { once: true, amount: 0 });
+  const infoInView = useInView(infoRef, { once: true, amount: 0 });
+  const playersInView = useInView(playersRef, { once: true, amount: 0 });
 
   useEffect(() => {
     const loadPaddle = async () => {
@@ -99,15 +101,23 @@ const PaddleDetailPage = () => {
     };
 
     loadPaddle();
-  }, [paddleId]); // Only depend on paddleId
+  }, [paddleId, navigate, toast, fetchPaddles, fetchPlayers]);
 
   if (loading) {
     return (
-      <Container maxW='container.sm' py={12}>
-        <Center>
-          <Spinner size='xl' />
-        </Center>
-      </Container>
+      <Box
+        minH="100vh"
+        bg="var(--color-bg)"
+        sx={{
+          background: 'radial-gradient(circle at 20% 50%, rgba(44, 95, 124, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.03) 0%, transparent 50%), var(--color-bg)',
+        }}
+      >
+        <Container maxW='container.xl' py={12}>
+          <Center>
+            <Spinner size='xl' color="var(--color-primary)" />
+          </Center>
+        </Container>
+      </Box>
     );
   }
 
@@ -116,264 +126,477 @@ const PaddleDetailPage = () => {
   }
 
   return (
-    <Container maxW={containerMaxW} py={4}>
-      <VStack spacing={4}>
-        <Button
-          onClick={() => navigate('/paddles')}
-          colorScheme='blue'
-          variant='outline'
-          alignSelf='flex-start'
-          size={{ base: 'sm', md: 'md' }}
-        >
-          ← Back to Paddles
-        </Button>
-
-        {/* Paddle Info Section */}
-        <Box
-          w='full'
-          bg='white'
-          borderRadius='lg'
-          boxShadow='lg'
-          overflow='hidden'
-        >
-          {/* Header with Image and Basic Info */}
-          <Box p={padding}>
-            {/* Mobile: Stack vertically, Desktop: Side by side */}
-            <Stack 
-              direction={{ base: 'column', lg: 'row' }} 
-              spacing={{ base: 4, lg: 8 }}
-              align={{ base: 'center', lg: 'flex-start' }}
+    <Box
+      minH="100vh"
+      bg="var(--color-bg)"
+      sx={{
+        background: 'radial-gradient(circle at 20% 50%, rgba(44, 95, 124, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.03) 0%, transparent 50%), var(--color-bg)',
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+        '--color-primary': '#2C5F7C',
+        '--color-secondary': '#6B8E9F',
+        '--color-accent': '#FF6B6B',
+        '--color-bg': '#FAF9F6',
+        '--color-text-primary': '#1A1A1A',
+        '--color-text-secondary': '#666666',
+      }}
+    >
+      <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
+        <VStack spacing={{ base: 6, md: 8 }}>
+          {/* Back Button */}
+          <MotionBox
+            alignSelf="flex-start"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Button
+              onClick={() => navigate('/paddles')}
+              variant="ghost"
+              color="var(--color-text-primary)"
+              fontFamily="var(--font-body)"
+              fontWeight={600}
+              fontSize={{ base: 'sm', md: 'md' }}
+              _hover={{
+                bg: "var(--color-bg)",
+                color: "var(--color-accent)",
+              }}
+              transition="all 0.3s ease"
             >
-              {paddle.image && (
+              ← Back to Paddles
+            </Button>
+          </MotionBox>
+
+          {/* Paddle Header */}
+          <MotionVStack
+            ref={headerRef}
+            spacing={6}
+            w="full"
+            align="center"
+            initial={{ opacity: 1, y: 0 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {paddle.image && (
+              <Box
+                position="relative"
+                w={{ base: '200px', md: '280px' }}
+                h={{ base: '200px', md: '280px' }}
+                borderRadius={0}
+                overflow="hidden"
+                bg="white"
+                boxShadow="0 8px 32px rgba(0, 0, 0, 0.1)"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                p={4}
+              >
                 <Image
                   src={paddle.image}
                   alt={paddle.name}
-                  borderRadius='lg'
-                  width={imageSize}
-                  height={imageSize}
-                  objectFit='contain'
-                  bg='white'
-                  border='1px solid'
-                  borderColor='gray.200'
-                  flexShrink={0}
-                  loading='lazy'
+                  w="full"
+                  h="full"
+                  objectFit="contain"
+                  loading="lazy"
                   fallback={
                     <Box
-                      width={imageSize}
-                      height={imageSize}
-                      borderRadius='lg'
-                      bg='gray.200'
-                      display='flex'
-                      alignItems='center'
-                      justifyContent='center'
-                      border='1px solid'
-                      borderColor='gray.200'
-                      flexShrink={0}
+                      w="full"
+                      h="full"
+                      bg="var(--color-bg)"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
                     >
-                      <Text fontSize='2xl' color='gray.500'>
+                      <Text fontSize="6xl" color="var(--color-text-secondary)" fontFamily="var(--font-display)">
                         {paddle.name.charAt(0)}
                       </Text>
                     </Box>
                   }
                 />
-              )}
-              <Box flex={1} w={{ base: 'full', lg: 'auto' }}>
-                <Text fontSize={titleFontSize} fontWeight='bold' mb={4} textAlign={{ base: 'center', lg: 'left' }}>
-                  {paddle.name}
-                </Text>
+              </Box>
+            )}
 
-                <HStack 
-                  spacing={4} 
-                  mb={6} 
-                  justify={{ base: 'center', lg: 'flex-start' }}
-                  wrap='wrap'
-                >
-                  {paddle.brand && (
-                    <Badge colorScheme='red' variant='subtle' fontSize={brandFontSize} px={3} py={1}>
-                      {paddle.brand}
-                    </Badge>
-                  )}
-                  {paddle.model && (
-                    <Text fontSize={modelFontSize} color='gray.600'>
-                      {paddle.model}
-                    </Text>
-                  )}
-                </HStack>
+            <MotionHeading
+              as="h1"
+              fontSize={{ base: '3rem', md: '4.5rem', lg: '5.5rem' }}
+              fontFamily="var(--font-display)"
+              fontWeight={700}
+              letterSpacing="-0.02em"
+              textAlign="center"
+              color="var(--color-text-primary)"
+            >
+              {paddle.name}
+            </MotionHeading>
 
-                {/* Paddle Specifications Grid */}
-                <SimpleGrid columns={gridColumns} spacing={4} mb={6}>
+            {/* Brand and Model Badges */}
+            {(paddle.brand || paddle.model) && (
+              <HStack spacing={3} flexWrap="wrap" justify="center">
+                {paddle.brand && (
+                  <Badge
+                    px={3}
+                    py={1}
+                    borderRadius="full"
+                    bg="var(--color-primary)"
+                    color="white"
+                    fontSize="md"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                  >
+                    {paddle.brand}
+                  </Badge>
+                )}
+                {paddle.model && (
+                  <Badge
+                    px={3}
+                    py={1}
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="var(--color-primary)"
+                    bg="transparent"
+                    color="var(--color-primary)"
+                    fontSize="md"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                  >
+                    {paddle.model}
+                  </Badge>
+                )}
+              </HStack>
+            )}
+          </MotionVStack>
+
+          {/* Paddle Info Section */}
+          <MotionBox
+            ref={infoRef}
+            w="full"
+            maxW="900px"
+            bg="white"
+            borderRadius={0}
+            p={{ base: 6, md: 8 }}
+            boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+            initial={{ opacity: 1, y: 0 }}
+            animate={infoInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <VStack spacing={6} align="stretch">
+              {/* Paddle Specifications Grid */}
+              {(paddle.shape || paddle.thickness || paddle.handleLength || paddle.length || paddle.width || paddle.core || paddle.weight) && (
+                <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
                   {paddle.shape && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Shape
                       </Text>
-                      <Badge colorScheme='blue' variant='subtle' fontSize='md'>
+                      <Badge
+                        px={3}
+                        py={1}
+                        borderRadius="full"
+                        bg="var(--color-primary)"
+                        color="white"
+                        fontSize="md"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                      >
                         {paddle.shape}
                       </Badge>
                     </Box>
                   )}
                   {paddle.thickness && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Thickness
                       </Text>
-                      <Badge colorScheme='green' variant='subtle' fontSize='md'>
+                      <Badge
+                        px={3}
+                        py={1}
+                        borderRadius="full"
+                        bg="var(--color-accent)"
+                        color="white"
+                        fontSize="md"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                      >
                         {paddle.thickness}
                       </Badge>
                     </Box>
                   )}
                   {paddle.handleLength && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Handle Length
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="md"
+                        fontWeight={600}
+                        fontFamily="var(--font-body)"
+                        color="var(--color-text-primary)"
+                      >
                         {paddle.handleLength}
                       </Text>
                     </Box>
                   )}
                   {paddle.length && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Paddle Length
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="md"
+                        fontWeight={600}
+                        fontFamily="var(--font-body)"
+                        color="var(--color-text-primary)"
+                      >
                         {paddle.length}
                       </Text>
                     </Box>
                   )}
                   {paddle.width && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Paddle Width
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="md"
+                        fontWeight={600}
+                        fontFamily="var(--font-body)"
+                        color="var(--color-text-primary)"
+                      >
                         {paddle.width}
                       </Text>
                     </Box>
                   )}
                   {paddle.core && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Core
                       </Text>
-                      <Text fontSize='lg' fontWeight='semibold'>
+                      <Text
+                        fontSize="md"
+                        fontWeight={600}
+                        fontFamily="var(--font-body)"
+                        color="var(--color-text-primary)"
+                      >
                         {paddle.core}
                       </Text>
                     </Box>
                   )}
                   {paddle.weight && (
                     <Box>
-                      <Text fontSize='sm' color='gray.600' mb={1}>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
                         Weight
                       </Text>
-                      <Badge colorScheme='purple' variant='subtle' fontSize='md'>
+                      <Badge
+                        px={3}
+                        py={1}
+                        borderRadius="full"
+                        bg="var(--color-secondary)"
+                        color="white"
+                        fontSize="md"
+                        fontFamily="var(--font-body)"
+                        fontWeight={600}
+                      >
                         {paddle.weight}
                       </Badge>
                     </Box>
                   )}
                 </SimpleGrid>
+              )}
 
-                <Divider my={4} />
+              {/* Description Section */}
+              {paddle.description && (
+                <Box pt={4} borderTop="1px solid" borderColor="rgba(0, 0, 0, 0.1)">
+                  <Text
+                    fontSize="sm"
+                    color="var(--color-text-secondary)"
+                    fontFamily="var(--font-body)"
+                    fontWeight={600}
+                    mb={3}
+                    textTransform="uppercase"
+                    letterSpacing="0.05em"
+                  >
+                    Description
+                  </Text>
+                  <Text
+                    fontSize="md"
+                    lineHeight="1.8"
+                    color="var(--color-text-primary)"
+                    fontFamily="var(--font-body)"
+                    fontWeight={400}
+                  >
+                    {paddle.description}
+                  </Text>
+                </Box>
+              )}
+            </VStack>
+          </MotionBox>
 
-                {/* Description Section */}
-                {paddle.description && (
-                  <Box>
-                    <Text fontSize='lg' fontWeight='bold' mb={2}>
-                      Description
-                    </Text>
-                    <Text fontSize='md' color='gray.700' lineHeight='1.6'>
-                      {paddle.description}
-                    </Text>
-                  </Box>
-                )}
-              </Box>
-            </Stack>
-          </Box>
-        </Box>
-
-        {/* Used By Section */}
-        <Box
-          w='full'
-          bg='white'
-          borderRadius='lg'
-          boxShadow='lg'
-          overflow='hidden'
-        >
-          <Box p={padding}>
-            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight='bold' color='gray.800' mb={6}>
-              Used By
-            </Text>
-            
-            {playersUsingPaddle.length > 0 ? (
-              <SimpleGrid
-                columns={{
-                  base: 1,
-                  sm: 2,
-                  md: 2,
-                  lg: 3,
-                }}
-                spacing={{ base: 4, md: 6 }}
-                w='full'
+          {/* Used By Section */}
+          <MotionBox
+            ref={playersRef}
+            w="full"
+            maxW="900px"
+            initial={{ opacity: 1, y: 0 }}
+            animate={playersInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <VStack spacing={6} align="stretch">
+              <MotionHeading
+                as="h2"
+                fontSize={{ base: '2rem', md: '2.5rem' }}
+                fontFamily="var(--font-display)"
+                fontWeight={700}
+                color="var(--color-text-primary)"
+                textAlign="center"
               >
-                {playersUsingPaddle.map(player => (
-                  <PlayerCard
-                    key={player._id}
-                    player={player}
-                    onPlayerDeleted={() => {
-                      // Refresh the players list when a player is deleted
-                      fetchPlayers().then(() => {
-                        const usingPaddle = players.filter(p => {
-                          // First check if paddle name matches
-                          const nameMatches = p.paddle === paddle.name || 
-                            (p.paddleBrand && p.paddleModel && 
-                             `${p.paddleBrand} ${p.paddleModel}`.toLowerCase() === paddle.name.toLowerCase());
-                          
-                          if (!nameMatches) return false;
-                          
-                          // Then check if shape matches (if both have shape specified)
-                          const shapeMatches = !paddle.shape || !p.paddleShape || 
-                            p.paddleShape.toLowerCase() === paddle.shape.toLowerCase();
-                          
-                          // Then check if thickness matches (if both have thickness specified)
-                          const thicknessMatches = !paddle.thickness || !p.paddleThickness || 
-                            p.paddleThickness.toLowerCase() === paddle.thickness.toLowerCase();
-                          
-                          return shapeMatches && thicknessMatches;
-                        });
-                        setPlayersUsingPaddle(usingPaddle);
-                      });
-                    }}
-                  />
-                ))}
-              </SimpleGrid>
-            ) : (
-              <Box textAlign='center' py={{ base: 6, md: 8 }}>
-                <Text fontSize={{ base: 'md', md: 'lg' }} color='gray.500'>
-                  No players are currently using this paddle
-                </Text>
-              </Box>
-            )}
+                Used By
+              </MotionHeading>
 
-            {/* Comments Section */}
-            <Box
-              w='full'
-              bg='white'
-              borderRadius='lg'
-              boxShadow='lg'
-              border='1px solid'
-              borderColor='gray.200'
-              overflow='hidden'
-              mt={6}
-            >
-              <Box p={padding}>
+              {playersUsingPaddle.length > 0 ? (
+                <Box
+                  bg="white"
+                  borderRadius={0}
+                  p={{ base: 6, md: 8 }}
+                  boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+                >
+                  <SimpleGrid
+                    columns={{
+                      base: 1,
+                      sm: 2,
+                      md: 2,
+                      lg: 3,
+                    }}
+                    spacing={{ base: 4, md: 6 }}
+                    w="full"
+                  >
+                    {playersUsingPaddle.map((player, index) => (
+                      <MotionBox
+                        key={player._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: index * 0.1 }}
+                      >
+                        <PlayerCard
+                          player={player}
+                          onPlayerDeleted={() => {
+                            // Refresh the players list when a player is deleted
+                            fetchPlayers().then(() => {
+                              const usingPaddle = players.filter(p => {
+                                // First check if paddle name matches
+                                const nameMatches = p.paddle === paddle.name || 
+                                  (p.paddleBrand && p.paddleModel && 
+                                   `${p.paddleBrand} ${p.paddleModel}`.toLowerCase() === paddle.name.toLowerCase());
+                                
+                                if (!nameMatches) return false;
+                                
+                                // Then check if shape matches (if both have shape specified)
+                                const shapeMatches = !paddle.shape || !p.paddleShape || 
+                                  p.paddleShape.toLowerCase() === paddle.shape.toLowerCase();
+                                
+                                // Then check if thickness matches (if both have thickness specified)
+                                const thicknessMatches = !paddle.thickness || !p.paddleThickness || 
+                                  p.paddleThickness.toLowerCase() === paddle.thickness.toLowerCase();
+                                
+                                return shapeMatches && thicknessMatches;
+                              });
+                              setPlayersUsingPaddle(usingPaddle);
+                            });
+                          }}
+                        />
+                      </MotionBox>
+                    ))}
+                  </SimpleGrid>
+                </Box>
+              ) : (
+                <Box
+                  bg="white"
+                  borderRadius={0}
+                  p={{ base: 6, md: 8 }}
+                  boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+                  textAlign="center"
+                >
+                  <Text
+                    fontSize={{ base: 'md', md: 'lg' }}
+                    color="var(--color-text-secondary)"
+                    fontFamily="var(--font-body)"
+                  >
+                    No players are currently using this paddle
+                  </Text>
+                </Box>
+              )}
+
+              {/* Comments Section */}
+              <Box
+                w="full"
+                bg="white"
+                borderRadius={0}
+                p={{ base: 6, md: 8 }}
+                boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+                mt={4}
+              >
                 <CommentSection targetType="paddle" targetId={paddleId} />
               </Box>
-            </Box>
-          </Box>
-        </Box>
-      </VStack>
-    </Container>
+            </VStack>
+          </MotionBox>
+        </VStack>
+      </Container>
+    </Box>
   );
 };
 

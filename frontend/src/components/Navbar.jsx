@@ -98,10 +98,21 @@ const Navbar = () => {
       position="sticky"
       top={0}
       zIndex={1000}
-      bg="white"
-      borderBottom="1px"
-      borderColor="gray.200"
-      boxShadow="sm"
+      sx={{
+        '--font-display': '"Merriweather", serif',
+        '--font-body': '"Inter", sans-serif',
+        '--color-primary': '#2C5F7C',
+        '--color-secondary': '#D4A574',
+        '--color-accent': '#8B9DC3',
+        '--color-bg': '#FAF9F6',
+        '--color-text-primary': '#1A1A1A',
+        '--color-text-secondary': '#6B6B6B',
+        fontFamily: 'var(--font-body)',
+      }}
+      bg="var(--color-bg)"
+      borderBottom="1px solid"
+      borderColor="rgba(0, 0, 0, 0.08)"
+      boxShadow="0 2px 12px rgba(0, 0, 0, 0.04)"
       w="full"
       px={{ base: 4, md: 6 }}
     >
@@ -126,19 +137,111 @@ const Navbar = () => {
         {!showMobileMenu && (
           <>
             <HStack spacing={2} alignItems={'center'} ml={8}>
-              <MiddleClickLink to={'/players'}>
-                <Button variant={'outline'}>Players</Button>
-              </MiddleClickLink>
+              <Box 
+                position="relative"
+                h="full"
+                display="flex"
+                alignItems="center"
+                _hover={{
+                  _after: {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: "2px",
+                    bg: "var(--color-accent)",
+                  },
+                }}
+                _after={{
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: "2px",
+                  bg: "transparent",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <MiddleClickLink to={'/players'}>
+                  <Button
+                    variant={'ghost'}
+                    color="var(--color-text-primary)"
+                    fontFamily='"Merriweather", serif'
+                    fontWeight={600}
+                    border="none"
+                    borderRadius={0}
+                    _hover={{
+                      bg: "transparent",
+                    }}
+                    transition="all 0.3s ease"
+                  >
+                    Players
+                  </Button>
+                </MiddleClickLink>
+              </Box>
               
-              <MiddleClickLink to={'/paddles'}>
-                <Button variant={'outline'}>Paddles</Button>
-              </MiddleClickLink>
+              <Box 
+                position="relative"
+                h="full"
+                display="flex"
+                alignItems="center"
+                _hover={{
+                  _after: {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: "2px",
+                    bg: "var(--color-accent)",
+                  },
+                }}
+                _after={{
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: "2px",
+                  bg: "transparent",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <MiddleClickLink to={'/paddles'}>
+                  <Button
+                    variant={'ghost'}
+                    color="var(--color-text-primary)"
+                    fontFamily='"Merriweather", serif'
+                    fontWeight={600}
+                    border="none"
+                    borderRadius={0}
+                    _hover={{
+                      bg: "transparent",
+                    }}
+                    transition="all 0.3s ease"
+                  >
+                    Paddles
+                  </Button>
+                </MiddleClickLink>
+              </Box>
             </HStack>
 
             <HStack spacing={2} alignItems={'center'} ml={'auto'}>
               {user?.role === 'admin' && (
                 <MiddleClickLink to={'/create'}>
-                  <Button>
+                  <Button
+                    fontFamily='"Inter", sans-serif'
+                    fontWeight={600}
+                    borderRadius="full"
+                    bg="var(--color-primary)"
+                    color="white"
+                    _hover={{
+                      bg: "var(--color-accent)",
+                    }}
+                    transition="all 0.3s ease"
+                  >
                     <PlusSquareIcon fontSize={20} />
                   </Button>
                 </MiddleClickLink>
@@ -147,17 +250,74 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <MiddleClickLink to={'/account'}>
-                    <Button variant={'outline'}>My Account</Button>
+                    <Button 
+                      variant={'outline'}
+                      border="1px solid"
+                      borderColor="rgba(0, 0, 0, 0.1)"
+                      borderRadius="full"
+                      color="var(--color-text-primary)"
+                      fontFamily='"Merriweather", serif'
+                      fontWeight={600}
+                      _hover={{
+                        bg: "var(--color-bg)",
+                        borderColor: "var(--color-accent)",
+                        color: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
+                    >
+                      My Account
+                    </Button>
                   </MiddleClickLink>
-                  <Button colorScheme={'red'} onClick={onOpen}>Log Out</Button>
+                  <Button 
+                    bg="rgba(220, 38, 38, 1)"
+                    color="white"
+                    onClick={onOpen}
+                    borderRadius="full"
+                    fontFamily='"Merriweather", serif'
+                    fontWeight={600}
+                    _hover={{
+                      bg: "rgba(220, 38, 38, 0.9)",
+                    }}
+                    transition="all 0.3s ease"
+                  >
+                    Log Out
+                  </Button>
                 </>
               ) : (
                 <>
                   <MiddleClickLink to={'/login'}>
-                    <Button variant={'outline'}>Login</Button>
+                    <Button 
+                      variant={'outline'}
+                      border="1px solid"
+                      borderColor="rgba(0, 0, 0, 0.1)"
+                      borderRadius="full"
+                      color="var(--color-text-primary)"
+                      fontFamily='"Inter", sans-serif'
+                      fontWeight={600}
+                      _hover={{
+                        bg: "var(--color-bg)",
+                        borderColor: "var(--color-accent)",
+                        color: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
+                    >
+                      Login
+                    </Button>
                   </MiddleClickLink>
                   <MiddleClickLink to={'/signup'}>
-                    <Button colorScheme={'blue'}>Sign Up</Button>
+                    <Button 
+                      bg="var(--color-primary)"
+                      color="white"
+                      borderRadius="full"
+                      fontFamily='"Inter", sans-serif'
+                      fontWeight={600}
+                      _hover={{
+                        bg: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
+                    >
+                      Sign Up
+                    </Button>
                   </MiddleClickLink>
                 </>
               )}
@@ -174,6 +334,16 @@ const Navbar = () => {
                 aria-label="Options"
                 icon={<HamburgerIcon />}
                 variant="outline"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                color="var(--color-text-primary)"
+                bg="transparent"
+                fontFamily="var(--font-body)"
+                _hover={{
+                  bg: "var(--color-bg)",
+                  borderColor: "var(--color-primary)",
+                }}
+                transition="all 0.3s ease"
               />
               <MenuList 
                 placement="bottom-end"
@@ -181,13 +351,24 @@ const Navbar = () => {
                 right={0}
                 left="auto"
                 transform="translateX(0)"
+                borderRadius="0"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                bg="white"
+                fontFamily="var(--font-body)"
+                boxShadow="0 4px 16px rgba(0, 0, 0, 0.1)"
               >
                 {mobileMenuItems().map((item, index) => (
                   <MenuItem
                     key={index}
                     onClick={item.onClick}
-                    color={item.color}
+                    color={item.color === 'red' ? 'rgba(220, 38, 38, 1)' : item.color === 'blue' ? 'var(--color-primary)' : 'var(--color-text-primary)'}
                     icon={item.icon}
+                    fontFamily="var(--font-body)"
+                    fontWeight={500}
+                    _hover={{
+                      bg: "var(--color-bg)",
+                    }}
                   >
                     {item.to ? (
                       <MiddleClickLink to={item.to}>
@@ -206,26 +387,58 @@ const Navbar = () => {
 
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+          <AlertDialogContent
+            sx={{
+              fontFamily: 'var(--font-body)',
+            }}
+            borderRadius="0"
+          >
+            <AlertDialogHeader
+              fontSize='xl'
+              fontWeight={600}
+              fontFamily='"Merriweather", serif'
+              color="var(--color-text-primary)"
+            >
               Log Out
             </AlertDialogHeader>
 
-            <AlertDialogBody>
+            <AlertDialogBody
+              fontFamily='"Inter", sans-serif'
+              color="var(--color-text-secondary)"
+            >
               Are you sure you want to log out?
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
+              <Button
+                ref={cancelRef}
+                onClick={onClose}
+                borderRadius="full"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.2)"
+                fontFamily='"Inter", sans-serif'
+                fontWeight={500}
+                _hover={{
+                  bg: "rgba(0, 0, 0, 0.05)",
+                }}
+              >
                 Cancel
               </Button>
               <Button
-                colorScheme='red'
                 onClick={() => {
                   handleLogout();
                   onClose();
                 }}
                 ml={3}
+                bg="rgba(220, 38, 38, 1)"
+                color="white"
+                borderRadius="full"
+                fontFamily='"Inter", sans-serif'
+                fontWeight={500}
+                _hover={{
+                  bg: "rgba(220, 38, 38, 0.9)",
+                }}
+                transition="all 0.3s ease"
               >
                 Log Out
               </Button>
