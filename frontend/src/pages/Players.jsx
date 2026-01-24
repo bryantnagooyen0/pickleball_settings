@@ -23,9 +23,8 @@ import {
   Tooltip,
   Heading,
 } from '@chakra-ui/react';
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect, useEffect } from 'react';
 import { usePlayerStore } from '../store/player';
-import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
 import { SearchIcon } from '@chakra-ui/icons';
@@ -110,9 +109,21 @@ const Players = () => {
     sessionStorage.removeItem('paddleListScrollPosition');
   }, []);
 
-  useEffect(() => {
+  // Restore scroll position immediately on mount (before paint) to prevent flash
+  useLayoutEffect(() => {
     const shouldRestore = sessionStorage.getItem('restorePlayerListScroll') === 'true';
-    if (!shouldRestore) {
+    const savedScrollPosition = sessionStorage.getItem('playerListScrollPosition');
+    
+    if (shouldRestore && savedScrollPosition) {
+      const scrollPos = parseInt(savedScrollPosition, 10);
+      if (!isNaN(scrollPos)) {
+        // Set scroll position immediately, before browser paints
+        window.scrollTo(0, scrollPos);
+        // Also set document.documentElement.scrollTop for better compatibility
+        document.documentElement.scrollTop = scrollPos;
+        document.body.scrollTop = scrollPos;
+      }
+    } else if (!shouldRestore) {
       window.scrollTo(0, 0);
     }
   }, []);
@@ -181,7 +192,7 @@ const Players = () => {
     return filtered;
   }, [players, searchQuery, filters]);
 
-  // Only restore scroll once when component mounts and data is ready
+  // Fine-tune scroll position after content loads (if needed)
   useEffect(() => {
     if (players.length === 0) return; // Wait for data to load
     
@@ -189,15 +200,17 @@ const Players = () => {
     const savedScrollPosition = sessionStorage.getItem('playerListScrollPosition');
     
     if (shouldRestore && savedScrollPosition) {
-      const restoreScroll = () => {
-        window.scrollTo(0, parseInt(savedScrollPosition));
-        sessionStorage.removeItem('playerListScrollPosition');
-        sessionStorage.removeItem('restorePlayerListScroll');
-      };
-      // Use a single RAF for better performance
-      requestAnimationFrame(restoreScroll);
-    } else if (!shouldRestore) {
-      sessionStorage.removeItem('restorePlayerListScroll');
+      // Fine-tune scroll position after content renders
+      const scrollPos = parseInt(savedScrollPosition, 10);
+      if (!isNaN(scrollPos)) {
+        // Use RAF to ensure content is rendered, then fine-tune
+        requestAnimationFrame(() => {
+          window.scrollTo(0, scrollPos);
+          // Clear flags after successful restoration
+          sessionStorage.removeItem('playerListScrollPosition');
+          sessionStorage.removeItem('restorePlayerListScroll');
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players.length]); // Only depend on players.length, not filteredPlayers
@@ -287,13 +300,10 @@ const Players = () => {
           </MotionVStack>
 
           {/* Search and Filter - Clean Design */}
-          <MotionVStack 
+          <VStack 
             w='full' 
             spacing={{ base: 4, md: 5 }}
             maxW="800px"
-            initial={{ opacity: 0, y: 20 }}
-            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <HStack w='full' spacing={4} align="center">
               <Box flex={1}>
@@ -390,7 +400,7 @@ const Players = () => {
                   whiteSpace="nowrap"
                   initial={{ opacity: 1 }}
                   animate={headerInView ? { opacity: 1 } : { opacity: 1 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.2 }}
                 >
                   {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'}
                 </MotionText>
@@ -478,7 +488,7 @@ const Players = () => {
                 </HStack>
               </MotionBox>
             )}
-          </MotionVStack>
+          </VStack>
 
           {/* Players Grid - Simple and Clean */}
           <MotionBox

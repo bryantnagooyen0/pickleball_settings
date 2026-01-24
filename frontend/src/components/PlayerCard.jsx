@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useState, useRef, useEffect } from 'react';
 import {
   Box,
   Image,
@@ -27,7 +27,6 @@ import {
   FormLabel,
   Heading,
 } from '@chakra-ui/react';
-import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../utils/api';
 import { motion, useAnimation } from 'framer-motion';

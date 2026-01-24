@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
 import {
   Container,
   VStack,
@@ -105,10 +105,21 @@ const PaddleManagementPage = () => {
     sessionStorage.removeItem('playerListScrollPosition');
   }, []);
 
-  // If not restoring from paddle detail, always start at top on initial mount
-  useEffect(() => {
+  // Restore scroll position immediately on mount (before paint) to prevent flash
+  useLayoutEffect(() => {
     const shouldRestore = sessionStorage.getItem('restorePaddleListScroll') === 'true';
-    if (!shouldRestore) {
+    const savedScrollPosition = sessionStorage.getItem('paddleListScrollPosition');
+    
+    if (shouldRestore && savedScrollPosition) {
+      const scrollPos = parseInt(savedScrollPosition, 10);
+      if (!isNaN(scrollPos)) {
+        // Set scroll position immediately, before browser paints
+        window.scrollTo(0, scrollPos);
+        // Also set document.documentElement.scrollTop for better compatibility
+        document.documentElement.scrollTop = scrollPos;
+        document.body.scrollTop = scrollPos;
+      }
+    } else if (!shouldRestore) {
       window.scrollTo(0, 0);
     }
   }, []);
@@ -127,23 +138,30 @@ const PaddleManagementPage = () => {
     );
   }, [paddles, searchQuery]);
 
-  // Scroll position restoration (only when flagged as coming from the paddles list)
+  // Fine-tune scroll position after content loads (if needed)
   useEffect(() => {
+    if (paddles.length === 0 || isLoading) return; // Wait for data to load and loading to complete
+    
     const shouldRestore = sessionStorage.getItem('restorePaddleListScroll') === 'true';
     const savedScrollPosition = sessionStorage.getItem('paddleListScrollPosition');
-    if (shouldRestore && savedScrollPosition && filteredPaddles.length > 0) {
-      const restoreScroll = () => {
-        window.scrollTo(0, parseInt(savedScrollPosition));
-        sessionStorage.removeItem('paddleListScrollPosition');
-        sessionStorage.removeItem('restorePaddleListScroll');
-      };
-      requestAnimationFrame(() => {
-        requestAnimationFrame(restoreScroll);
-      });
-    } else if (!shouldRestore) {
-      sessionStorage.removeItem('restorePaddleListScroll');
+    
+    if (shouldRestore && savedScrollPosition) {
+      // Fine-tune scroll position after content renders
+      const scrollPos = parseInt(savedScrollPosition, 10);
+      if (!isNaN(scrollPos)) {
+        // Use double RAF to ensure content is fully rendered, then restore
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, scrollPos);
+            // Clear flags after successful restoration
+            sessionStorage.removeItem('paddleListScrollPosition');
+            sessionStorage.removeItem('restorePaddleListScroll');
+          });
+        });
+      }
     }
-  }, [filteredPaddles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paddles.length, isLoading]); // Depend on both paddles.length and isLoading
 
   const handleSubmit = async () => {
     if (!paddleForm.name || !paddleForm.brand) {
@@ -358,13 +376,10 @@ const PaddleManagementPage = () => {
           </MotionVStack>
 
           {/* Search and Add Button */}
-          <MotionVStack 
+          <VStack 
             w='full' 
             spacing={{ base: 4, md: 5 }}
             maxW="800px"
-            initial={{ opacity: 0, y: 20 }}
-            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <HStack w='full' spacing={4} align="center">
               <Box flex={1}>
@@ -443,7 +458,7 @@ const PaddleManagementPage = () => {
                 </MotionText>
               </HStack>
             </HStack>
-          </MotionVStack>
+          </VStack>
 
           {/* Paddles Grid */}
           <MotionBox

@@ -130,7 +130,7 @@ const EquipmentModule = ({
           >
             <Box>
               <Text 
-                fontSize='xs' 
+                fontSize='sm' 
                 color='var(--color-text-secondary)'
                 fontFamily='var(--font-body)'
                 fontWeight={600}
@@ -141,7 +141,7 @@ const EquipmentModule = ({
                 {spec.label}
               </Text>
               <Text 
-                fontSize='md' 
+                fontSize='lg' 
                 fontWeight={600}
                 fontFamily='var(--font-body)'
                 color='var(--color-text-primary)'
@@ -188,7 +188,7 @@ const EquipmentModule = ({
               <MotionBox
                 key={index}
                 bg='white'
-                p={6}
+                p={7}
                 borderRadius={0}
                 border='none'
                 w='full'
@@ -200,13 +200,14 @@ const EquipmentModule = ({
                 {/* Weight Setup Title */}
                 <Heading
                   as='h4'
-                  fontSize='md' 
+                  fontSize={{ base: 'xl', md: '2xl' }} 
                   fontWeight={700}
                   fontFamily='var(--font-display)'
                   color='var(--color-text-primary)'
                   textAlign='center' 
-                  mb={4}
+                  mb={6}
                   letterSpacing='-0.01em'
+                  w='full'
                 >
                   Weight Setup
                 </Heading>
@@ -215,6 +216,7 @@ const EquipmentModule = ({
                   direction={{ base: 'column', md: 'row' }} 
                   align={{ base: 'center', md: 'flex-start' }} 
                   spacing={{ base: 4, md: 6 }}
+                  w='full'
                 >
                   {/* Image - Top on mobile, Left on desktop */}
                   <Box align={{ base: 'center', md: 'flex-start' }}>
@@ -222,8 +224,8 @@ const EquipmentModule = ({
                     <Image
                       src={imageUrl}
                       alt={mod.label}
-                      w={{ base: 48, md: 64 }}
-                      h={{ base: 48, md: 64 }}
+                      w={{ base: 56, md: 72 }}
+                      h={{ base: 56, md: 72 }}
                       borderRadius='md'
                       objectFit='contain'
                       border='none'
@@ -269,7 +271,7 @@ const EquipmentModule = ({
                   <VStack align='start' spacing={3} flex={1} w={{ base: 'full', md: 'auto' }}>
                     <Box>
                       <Text 
-                        fontSize='xs' 
+                        fontSize='sm' 
                         color='var(--color-text-secondary)'
                         fontFamily='var(--font-body)'
                         fontWeight={600}
@@ -291,7 +293,7 @@ const EquipmentModule = ({
                     
                     <Box>
                       <Text 
-                        fontSize='xs' 
+                        fontSize='sm' 
                         color='var(--color-text-secondary)'
                         fontFamily='var(--font-body)'
                         fontWeight={600}
@@ -313,7 +315,7 @@ const EquipmentModule = ({
                     
                     <Box>
                       <Text 
-                        fontSize='xs' 
+                        fontSize='sm' 
                         color='var(--color-text-secondary)'
                         fontFamily='var(--font-body)'
                         fontWeight={600}
@@ -417,7 +419,7 @@ const EquipmentModule = ({
                   )}
                   <VStack align='start' spacing={1}>
                     <Text 
-                      fontSize='xs' 
+                      fontSize='sm' 
                       color='var(--color-text-secondary)'
                       fontFamily='var(--font-body)'
                       fontWeight={600}
@@ -427,7 +429,7 @@ const EquipmentModule = ({
                       {mod.label}
                     </Text>
                     <Text 
-                      fontSize='md' 
+                      fontSize='lg' 
                       fontWeight={600}
                       fontFamily='var(--font-body)'
                       color='var(--color-text-primary)'
@@ -436,12 +438,12 @@ const EquipmentModule = ({
                     </Text>
                     {player[mod.brandField] && (
                       <Badge
-                        px={3}
-                        py={1}
+                        px={4}
+                        py={1.5}
                         borderRadius='full'
                         bg='var(--color-primary)'
                         color='white'
-                        fontSize='xs'
+                        fontSize='sm'
                         fontFamily='var(--font-body)'
                         fontWeight={600}
                       >
@@ -526,7 +528,7 @@ const EquipmentModule = ({
           )}
           <Heading 
             as='h3' 
-            fontSize='lg' 
+            fontSize='xl' 
             fontWeight={700}
             fontFamily='var(--font-display)'
             color='var(--color-text-primary)'
@@ -537,7 +539,7 @@ const EquipmentModule = ({
       </Box>
 
       {/* Product Display */}
-      <Box p={6}>
+      <Box p={7}>
         {!hideProductDisplay && (
           <MotionBox
             bg='white'
@@ -566,8 +568,8 @@ const EquipmentModule = ({
                   <Image
                     src={getImage()}
                     alt={title}
-                    w={16}
-                    h={16}
+                    w={24}
+                    h={24}
                     borderRadius='md'
                     objectFit='cover'
                     border='none'
@@ -575,8 +577,8 @@ const EquipmentModule = ({
                     loading='lazy'
                     fallback={
                       <Box
-                        w={16}
-                        h={16}
+                        w={20}
+                        h={20}
                         bg='gray.300'
                         borderRadius='md'
                         display='flex'
@@ -594,8 +596,8 @@ const EquipmentModule = ({
                   />
                 ) : (
                   <Box
-                    w={16}
-                    h={16}
+                    w={24}
+                    h={24}
                     bg='gray.300'
                     borderRadius='md'
                     display='flex'
@@ -631,7 +633,7 @@ const EquipmentModule = ({
                         borderRadius='full'
                         bg='var(--color-primary)'
                         color='white'
-                        fontSize='xs'
+                        fontSize='sm'
                         fontFamily='var(--font-body)'
                         fontWeight={600}
                       >
@@ -640,14 +642,14 @@ const EquipmentModule = ({
                     )}
                     {getModel() && (
                       <Badge
-                        px={3}
-                        py={1}
+                        px={4}
+                        py={1.5}
                         borderRadius='full'
                         border='1px solid'
                         borderColor='var(--color-primary)'
                         bg='transparent'
                         color='var(--color-primary)'
-                        fontSize='xs'
+                        fontSize='sm'
                         fontFamily='var(--font-body)'
                         fontWeight={600}
                       >
@@ -659,7 +661,7 @@ const EquipmentModule = ({
               </Stack>
               {icon !== 'shoes' && (
                 <Button
-                  size='sm'
+                  size='md'
                   bg="var(--color-primary)"
                   color="white"
                   leftIcon={<FaShoppingBag />}
@@ -668,6 +670,10 @@ const EquipmentModule = ({
                     bg: "var(--color-accent)",
                   }}
                   transition="all 0.3s ease"
+                  px={5}
+                  fontFamily="var(--font-body)"
+                  fontWeight={600}
+                  fontSize='md'
                 >
                   Check price
                 </Button>

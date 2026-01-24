@@ -54,6 +54,18 @@ const PlayerDetailPage = () => {
   const infoInView = useInView(infoRef, { once: true, amount: 0 });
   const equipmentInView = useInView(equipmentRef, { once: true, amount: 0 });
 
+  // Always scroll to top when component mounts or playerId changes
+  // Don't clear scroll restoration flags - let Players page handle that after restoring
+  useEffect(() => {
+    // Scroll to top immediately and after a brief delay to ensure it sticks
+    window.scrollTo(0, 0);
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
+  }, [playerId]);
+
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
