@@ -26,6 +26,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../utils/api';
@@ -223,17 +224,35 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   // Animation controls for badges
   const badgeControls = useAnimation();
   const [isHovered, setIsHovered] = useState(false);
+  const [alwaysShowBadges] = useMediaQuery('(hover: none)'); // true on touch/mobile where hover doesn't work
 
-  // Initialize badges as hidden
+  // Initialize badges as hidden (desktop only); on mobile/touch, keep them visible
   useEffect(() => {
-    badgeControls.set({
-      opacity: 0,
-      y: 10,
-      scale: 0.95,
-    });
-  }, [badgeControls]);
+    if (alwaysShowBadges) {
+      badgeControls.set({ opacity: 1, y: 0, scale: 1 });
+    } else {
+      badgeControls.set({
+        opacity: 0,
+        y: 10,
+        scale: 0.95,
+      });
+    }
+  }, [badgeControls, alwaysShowBadges]);
+
+  // On mobile/touch, ensure badges stay visible (no hover to trigger them)
+  useEffect(() => {
+    if (alwaysShowBadges) {
+      badgeControls.start({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+      });
+    }
+  }, [alwaysShowBadges, badgeControls]);
 
   const handleMouseEnter = () => {
+    if (alwaysShowBadges) return;
     setIsHovered(true);
     badgeControls.start({
       opacity: 1,
@@ -244,6 +263,7 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
   };
 
   const handleMouseLeave = () => {
+    if (alwaysShowBadges) return;
     setIsHovered(false);
     badgeControls.start({
       opacity: 0,
@@ -366,12 +386,12 @@ const PlayerCard = ({ player, onPlayerDeleted }) => {
               {player.name}
             </MotionHeading>
 
-            {/* Equipment badges - oval shaped - expandable container */}
+            {/* Equipment badges - oval shaped - expandable container; always visible on mobile/touch */}
             <MotionBox
               w="full"
               overflow="hidden"
-              initial={{ maxHeight: 0, opacity: 0 }}
-              animate={isHovered ? { maxHeight: 200, opacity: 1 } : { maxHeight: 0, opacity: 0 }}
+              initial={alwaysShowBadges ? { maxHeight: 200, opacity: 1 } : { maxHeight: 0, opacity: 0 }}
+              animate={(isHovered || alwaysShowBadges) ? { maxHeight: 200, opacity: 1 } : { maxHeight: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <VStack spacing={3} align='start' w='full' pt={2}>
