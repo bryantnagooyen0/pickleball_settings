@@ -35,10 +35,10 @@ const PrivacyPolicyPage = () => {
               add player or paddle information, or post comments. This may include:
             </Text>
             <Text as="ul" pl={6} mb={4}>
-              <Text as="li" mb={2}>• Name, email address, and account credentials</Text>
-              <Text as="li" mb={2}>• Player profiles and equipment information</Text>
-              <Text as="li" mb={2}>• Comments and interactions on the platform</Text>
-              <Text as="li" mb={2}>• Usage data and analytics information</Text>
+              <Text as="li" mb={2}>Name, email address, and account credentials</Text>
+              <Text as="li" mb={2}>Player profiles and equipment information</Text>
+              <Text as="li" mb={2}>Comments and interactions on the platform</Text>
+              <Text as="li" mb={2}>Usage data and analytics information</Text>
             </Text>
           </Box>
 
@@ -50,11 +50,11 @@ const PrivacyPolicyPage = () => {
               We use the information we collect to:
             </Text>
             <Text as="ul" pl={6} mb={4}>
-              <Text as="li" mb={2}>• Provide and maintain our services</Text>
-              <Text as="li" mb={2}>• Process transactions and send related information</Text>
-              <Text as="li" mb={2}>• Send technical notices and support messages</Text>
-              <Text as="li" mb={2}>• Respond to your comments and questions</Text>
-              <Text as="li" mb={2}>• Improve our services and develop new features</Text>
+              <Text as="li" mb={2}>Provide and maintain our services</Text>
+              <Text as="li" mb={2}>Process transactions and send related information</Text>
+              <Text as="li" mb={2}>Send technical notices and support messages</Text>
+              <Text as="li" mb={2}>Respond to your comments and questions</Text>
+              <Text as="li" mb={2}>Improve our services and develop new features</Text>
             </Text>
           </Box>
 
@@ -67,10 +67,10 @@ const PrivacyPolicyPage = () => {
               without your consent, except as described in this policy. We may share your information:
             </Text>
             <Text as="ul" pl={6} mb={4}>
-              <Text as="li" mb={2}>• With your explicit consent</Text>
-              <Text as="li" mb={2}>• To comply with legal obligations</Text>
-              <Text as="li" mb={2}>• To protect our rights and prevent fraud</Text>
-              <Text as="li" mb={2}>• With service providers who assist in our operations</Text>
+              <Text as="li" mb={2}>With your explicit consent</Text>
+              <Text as="li" mb={2}>To comply with legal obligations</Text>
+              <Text as="li" mb={2}>To protect our rights and prevent fraud</Text>
+              <Text as="li" mb={2}>With service providers who assist in our operations</Text>
             </Text>
           </Box>
 
@@ -93,10 +93,10 @@ const PrivacyPolicyPage = () => {
               You have the right to:
             </Text>
             <Text as="ul" pl={6} mb={4}>
-              <Text as="li" mb={2}>• Access and update your personal information</Text>
-              <Text as="li" mb={2}>• Delete your account and associated data</Text>
-              <Text as="li" mb={2}>• Opt out of certain communications</Text>
-              <Text as="li" mb={2}>• Request a copy of your data</Text>
+              <Text as="li" mb={2}>Access and update your personal information</Text>
+              <Text as="li" mb={2}>Delete your account and associated data</Text>
+              <Text as="li" mb={2}>Opt out of certain communications</Text>
+              <Text as="li" mb={2}>Request a copy of your data</Text>
             </Text>
           </Box>
 
