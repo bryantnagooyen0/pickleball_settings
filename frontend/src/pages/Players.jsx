@@ -22,8 +22,10 @@ import {
   IconButton,
   Tooltip,
   Heading,
+  Center,
+  Spinner,
 } from '@chakra-ui/react';
-import React, { useState, useMemo, useRef, useLayoutEffect, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 import { usePlayerStore } from '../store/player';
 import { Link, useLocation } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
@@ -36,13 +38,53 @@ const MotionVStack = motion(VStack);
 const MotionHeading = motion(Heading);
 const MotionText = motion(Text);
 
+// Isolated header so it doesn't re-render when players/filters load (avoids animation jank)
+// Animation matches Paddles page header exactly for comparison
+const PlayersPageHeader = React.memo(({ headerRef, headerInView, onAnimationComplete }) => (
+  <MotionVStack
+    ref={headerRef}
+    spacing={6}
+    w="full"
+    align="center"
+    initial={{ opacity: 0, y: 30 }}
+    animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+    onAnimationComplete={() => headerInView && onAnimationComplete?.()}
+  >
+    <MotionHeading
+      as="h1"
+      fontSize={{ base: '3.5rem', md: '5rem', lg: '6rem' }}
+      fontFamily="var(--font-display)"
+      fontWeight={700}
+      letterSpacing="-0.02em"
+      textAlign="center"
+      color="var(--color-text-primary)"
+    >
+      Players
+    </MotionHeading>
+  </MotionVStack>
+));
+
+PlayersPageHeader.displayName = 'PlayersPageHeader';
+
+const FALLBACK_CONTENT_READY_MS = 550;
+
 const Players = () => {
   const { fetchPlayers, players } = usePlayerStore();
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const headerRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, amount: 0.3 });
-  
+  const [contentReady, setContentReady] = useState(false);
+
+  const handleHeaderAnimationComplete = useCallback(() => setContentReady(true), []);
+
+  // Fallback: show list after 700ms if header callback never fires (e.g. header off-screen on load)
+  useEffect(() => {
+    const t = setTimeout(() => setContentReady(true), FALLBACK_CONTENT_READY_MS);
+    return () => clearTimeout(t);
+  }, []);
+
   // Initialize search query from URL parameters
   const [searchQuery, setSearchQuery] = useState(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -276,28 +318,8 @@ const Players = () => {
 
       <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
         <VStack spacing={{ base: 10, md: 12 }}>
-          {/* Simple Header */}
-          <MotionVStack
-            ref={headerRef}
-            spacing={6}
-            w="full"
-            align="center"
-            initial={{ opacity: 1, y: 0 }}
-            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <MotionHeading
-              as="h1"
-              fontSize={{ base: '3.5rem', md: '5rem', lg: '6rem' }}
-              fontFamily="var(--font-display)"
-              fontWeight={700}
-              letterSpacing="-0.02em"
-              textAlign="center"
-              color="var(--color-text-primary)"
-            >
-              Players
-            </MotionHeading>
-          </MotionVStack>
+          {/* Simple Header - memoized so it doesn't re-render when players load (smoother animation) */}
+          <PlayersPageHeader headerRef={headerRef} headerInView={headerInView} onAnimationComplete={handleHeaderAnimationComplete} />
 
           {/* Search and Filter - Clean Design */}
           <VStack 
@@ -497,24 +519,10 @@ const Players = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {players.length === 0 ? (
-              <SimpleGrid
-                columns={{ base: 1, md: 2, lg: 3 }}
-                spacing={{ base: 8, md: 10 }}
-                w={'full'}
-              >
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Box
-                    key={i}
-                    w='full'
-                    h="400px"
-                    bg="white"
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.08)"
-                  />
-                ))}
-              </SimpleGrid>
+            {players.length === 0 || !contentReady ? (
+              <Center py={16}>
+                <Spinner size="xl" color="var(--color-primary)" thickness="4px" />
+              </Center>
             ) : filteredPlayers.length === 0 ? (
               <Box
                 textAlign="center"
@@ -578,23 +586,13 @@ const Players = () => {
                 spacing={{ base: 8, md: 10 }}
                 w={'full'}
               >
-                {filteredPlayers.map((player, index) => (
-                  <MotionBox
-                    key={player._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.4,
-                      delay: Math.min(index * 0.02, 0.3), // Cap delay at 0.3s max
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    viewport={{ once: true }}
-                  >
+                {filteredPlayers.map((player) => (
+                  <Box key={player._id}>
                     <PlayerCard
                       player={player}
                       onPlayerDeleted={handlePlayerDeleted}
                     />
-                  </MotionBox>
+                  </Box>
                 ))}
               </SimpleGrid>
             )}

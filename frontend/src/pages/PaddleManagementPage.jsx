@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useLayoutEffect, useCallback } from 'react';
 import {
   Container,
   VStack,
@@ -59,10 +59,595 @@ const getRoleFromToken = () => {
   }
 };
 
-const PaddleManagementPage = () => {
-  const { paddles, fetchPaddles, createPaddle, updatePaddle, deletePaddle } =
-    usePaddleStore();
+const EMPTY_PADDLE_FORM = {
+  name: '',
+  brand: '',
+  model: '',
+  shape: '',
+  thickness: '',
+  handleLength: '',
+  length: '',
+  width: '',
+  core: '',
+  image: '',
+  description: '',
+  priceLink: '',
+};
+
+// Modal with its own form state so typing doesn't re-render the paddle list
+const AddEditPaddleModal = ({ isOpen, onClose, isEditing, initialPaddle }) => {
+  const { createPaddle, updatePaddle } = usePaddleStore();
   const { refreshPlayers } = usePlayerStore();
+  const toast = useToast();
+  const [paddleForm, setPaddleForm] = useState(EMPTY_PADDLE_FORM);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPaddleForm(
+        isEditing && initialPaddle
+          ? {
+              name: initialPaddle.name,
+              brand: initialPaddle.brand,
+              model: initialPaddle.model || '',
+              shape: initialPaddle.shape || '',
+              thickness: initialPaddle.thickness || '',
+              handleLength: initialPaddle.handleLength || '',
+              length: initialPaddle.length || '',
+              width: initialPaddle.width || '',
+              core: initialPaddle.core || '',
+              image: initialPaddle.image || '',
+              description: initialPaddle.description || '',
+              priceLink: initialPaddle.priceLink || '',
+            }
+          : EMPTY_PADDLE_FORM
+      );
+    }
+  }, [isOpen, isEditing, initialPaddle]);
+
+  const handleSubmit = async () => {
+    if (!paddleForm.name || !paddleForm.brand) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in name and brand',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const result = isEditing
+      ? await updatePaddle(initialPaddle._id, paddleForm)
+      : await createPaddle(paddleForm);
+
+    if (result.success) {
+      toast({
+        title: 'Success',
+        description: result.message,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      if (isEditing) {
+        await refreshPlayers();
+      }
+      onClose();
+    } else {
+      toast({
+        title: 'Error',
+        description: result.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <ModalOverlay />
+      <ModalContent
+        sx={{
+          fontFamily: '"Inter", sans-serif',
+          '--font-display': '"Merriweather", serif',
+          '--font-body': '"Inter", sans-serif',
+          '--color-primary': '#2C5F7C',
+          '--color-secondary': '#D4A574',
+          '--color-accent': '#8B9DC3',
+          '--color-bg': '#FAF9F6',
+          '--color-text-primary': '#1A1A1A',
+          '--color-text-secondary': '#6B6B6B',
+        }}
+        borderRadius="0"
+      >
+        <ModalHeader
+          fontFamily="var(--font-display)"
+          fontSize="2xl"
+          fontWeight={600}
+          color="var(--color-text-primary)"
+          borderBottom="1px solid"
+          borderColor="rgba(0, 0, 0, 0.1)"
+        >
+          {isEditing ? 'Edit Paddle' : 'Add New Paddle'}
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody py={8}>
+          <VStack spacing={4}>
+            <FormControl>
+              <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">
+                Paddle Name
+              </FormLabel>
+              <Input
+                placeholder="Enter paddle name"
+                value={paddleForm.name}
+                onChange={e => setPaddleForm({ ...paddleForm, name: e.target.value })}
+                borderRadius="0"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+              />
+            </FormControl>
+            <HStack spacing={4} w="full">
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Brand</FormLabel>
+                <Input
+                  placeholder="Enter brand"
+                  value={paddleForm.brand}
+                  onChange={e => setPaddleForm({ ...paddleForm, brand: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Model</FormLabel>
+                <Input
+                  placeholder="Enter model"
+                  value={paddleForm.model}
+                  onChange={e => setPaddleForm({ ...paddleForm, model: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+            </HStack>
+            <HStack spacing={4} w="full">
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Shape</FormLabel>
+                <Input
+                  placeholder="Enter shape"
+                  value={paddleForm.shape}
+                  onChange={e => setPaddleForm({ ...paddleForm, shape: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Thickness</FormLabel>
+                <Input
+                  placeholder="Enter thickness"
+                  value={paddleForm.thickness}
+                  onChange={e => setPaddleForm({ ...paddleForm, thickness: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+            </HStack>
+            <HStack spacing={4} w="full">
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Handle Length</FormLabel>
+                <Input
+                  placeholder="Enter handle length"
+                  value={paddleForm.handleLength}
+                  onChange={e => setPaddleForm({ ...paddleForm, handleLength: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Paddle Length</FormLabel>
+                <Input
+                  placeholder="Enter paddle length"
+                  value={paddleForm.length}
+                  onChange={e => setPaddleForm({ ...paddleForm, length: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+            </HStack>
+            <HStack spacing={4} w="full">
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Paddle Width</FormLabel>
+                <Input
+                  placeholder="Enter paddle width"
+                  value={paddleForm.width}
+                  onChange={e => setPaddleForm({ ...paddleForm, width: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Core</FormLabel>
+                <Input
+                  placeholder="Enter core"
+                  value={paddleForm.core}
+                  onChange={e => setPaddleForm({ ...paddleForm, core: e.target.value })}
+                  borderRadius="0"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.1)"
+                  _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+                />
+              </FormControl>
+            </HStack>
+            <FormControl>
+              <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Image URL</FormLabel>
+              <Input
+                placeholder="Enter image URL"
+                value={paddleForm.image}
+                onChange={e => setPaddleForm({ ...paddleForm, image: e.target.value })}
+                borderRadius="0"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Price Link</FormLabel>
+              <Input
+                placeholder="Enter price link (e.g., Amazon, manufacturer website)"
+                value={paddleForm.priceLink}
+                onChange={e => setPaddleForm({ ...paddleForm, priceLink: e.target.value })}
+                borderRadius="0"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel fontFamily="var(--font-body)" fontWeight={500} color="var(--color-text-primary)" fontSize="sm">Description</FormLabel>
+              <Textarea
+                placeholder="Enter description"
+                value={paddleForm.description}
+                onChange={e => setPaddleForm({ ...paddleForm, description: e.target.value })}
+                rows={3}
+                borderRadius="0"
+                border="1px solid"
+                borderColor="rgba(0, 0, 0, 0.1)"
+                _focus={{ borderColor: "var(--color-primary)", boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)" }}
+              />
+            </FormControl>
+            <HStack spacing={4} w="full" pt={4}>
+              <Button
+                onClick={handleSubmit}
+                flex={1}
+                bg="var(--color-primary)"
+                color="white"
+                border="none"
+                borderRadius="full"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                h="48px"
+                fontSize="md"
+                _hover={{ bg: "var(--color-accent)" }}
+                transition="all 0.3s ease"
+                as={motion.button}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                {isEditing ? 'Update' : 'Create'} Paddle
+              </Button>
+              <Button
+                onClick={onClose}
+                flex={1}
+                border="1px solid"
+                borderColor="var(--color-primary)"
+                borderRadius="full"
+                color="var(--color-primary)"
+                fontFamily="var(--font-body)"
+                fontWeight={600}
+                h="48px"
+                fontSize="md"
+                _hover={{ bg: "var(--color-primary)", color: "white" }}
+                transition="all 0.3s ease"
+                as={motion.button}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                Cancel
+              </Button>
+            </HStack>
+          </VStack>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+};
+
+// Standalone card so the list doesn't remount when parent re-renders (e.g. modal form state)
+const PaddleCard = ({ paddle, index, onPaddleClick, onPaddleMouseDown, onButtonClick }) => {
+  const [fontSize, setFontSize] = useState({ base: '2xl', md: '3xl' });
+  const [isHovered, setIsHovered] = useState(false);
+  const badgeControls = useAnimation();
+  const nameRef = useRef(null);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (nameRef.current) {
+        setFontSize({ base: '2xl', md: '3xl' });
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            if (nameRef.current) {
+              const element = nameRef.current;
+              if (element.scrollWidth > element.clientWidth) {
+                setFontSize({ base: 'xl', md: '2xl' });
+                requestAnimationFrame(() => {
+                  setTimeout(() => {
+                    if (nameRef.current && nameRef.current.scrollWidth > nameRef.current.clientWidth) {
+                      setFontSize({ base: 'lg', md: 'xl' });
+                    }
+                  }, 50);
+                });
+              }
+            }
+          }, 100);
+        });
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [paddle.name]);
+
+  useEffect(() => {
+    badgeControls.set({ opacity: 0, y: 10, scale: 0.95 });
+  }, [badgeControls]);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    badgeControls.start({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    badgeControls.start({
+      opacity: 0,
+      y: 10,
+      scale: 0.95,
+      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
+    });
+  };
+
+  return (
+    <Box>
+      <MotionBox
+        w="full"
+        maxW="400px"
+        bg="var(--color-bg)"
+        borderRadius="0"
+        overflow="hidden"
+        position="relative"
+        cursor="pointer"
+        onClick={() => onPaddleClick(paddle)}
+        onMouseDown={e => onPaddleMouseDown(e, paddle)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        whileHover={{ y: -6, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
+        sx={{
+          '--font-display': '"Merriweather", serif',
+          '--font-body': '"Inter", sans-serif',
+          '--color-primary': '#2C5F7C',
+          '--color-secondary': '#D4A574',
+          '--color-accent': '#8B9DC3',
+          '--color-bg': '#FAF9F6',
+          '--color-text-primary': '#1A1A1A',
+          '--color-text-secondary': '#6B6B6B',
+          fontFamily: 'var(--font-body)',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+        }}
+        _hover={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)' }}
+      >
+        <Box
+          position="relative"
+          h={{ base: '180px', md: '200px' }}
+          bg="white"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          p={4}
+        >
+          <Image
+            src={paddle.image || '/unknownPaddle.png'}
+            alt={paddle.name}
+            borderRadius="0"
+            w="full"
+            h="full"
+            objectFit="contain"
+            loading="lazy"
+          />
+        </Box>
+        <Box p={{ base: 6, md: 8 }} bg="var(--color-bg)">
+          <VStack spacing={3} align="start">
+            <MotionHeading
+              ref={nameRef}
+              as="h3"
+              fontSize={fontSize}
+              fontFamily='"Merriweather", serif'
+              fontWeight={700}
+              color="var(--color-text-primary)"
+              letterSpacing="-0.01em"
+              lineHeight="1.2"
+              textAlign="center"
+              w="full"
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              {paddle.name}
+            </MotionHeading>
+            <MotionBox
+              w="full"
+              overflow="hidden"
+              initial={{ maxHeight: 0, opacity: 0 }}
+              animate={isHovered ? { maxHeight: 200, opacity: 1 } : { maxHeight: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <VStack spacing={3} align="start" w="full" pt={2}>
+                <MotionBox
+                  w="full"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={badgeControls}
+                  display="flex"
+                  flexWrap="wrap"
+                  gap={2}
+                  justifyContent="space-between"
+                >
+                  {paddle.brand && (
+                    <Badge
+                      borderRadius="full"
+                      px={3}
+                      py={1}
+                      fontSize={{ base: 'xs', md: 'sm' }}
+                      fontFamily="var(--font-body)"
+                      bg="var(--color-primary)"
+                      color="white"
+                      fontWeight={600}
+                      as={motion.div}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.2 }}
+                      flexShrink={0}
+                    >
+                      {paddle.brand}
+                    </Badge>
+                  )}
+                  {paddle.shape && (
+                    <Badge
+                      borderRadius="full"
+                      px={3}
+                      py={1}
+                      fontSize={{ base: 'xs', md: 'sm' }}
+                      fontFamily="var(--font-body)"
+                      bg="var(--color-secondary)"
+                      color="white"
+                      fontWeight={600}
+                      as={motion.div}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.2 }}
+                      flexShrink={0}
+                    >
+                      {paddle.shape}
+                    </Badge>
+                  )}
+                </MotionBox>
+                {paddle.thickness && (
+                  <MotionBox w="full" initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={badgeControls}>
+                    <Badge
+                      borderRadius="full"
+                      px={3}
+                      py={1}
+                      fontSize={{ base: 'xs', md: 'sm' }}
+                      fontFamily="var(--font-body)"
+                      bg="var(--color-accent)"
+                      color="white"
+                      fontWeight={600}
+                      as={motion.div}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {paddle.thickness}
+                    </Badge>
+                  </MotionBox>
+                )}
+              </VStack>
+            </MotionBox>
+            {getRoleFromToken() === 'admin' && (
+              <MotionHStack
+                spacing={3}
+                w="full"
+                pt={4}
+                borderTop="1px solid"
+                borderColor="rgba(0, 0, 0, 0.08)"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Button
+                  size="sm"
+                  onClick={e => onButtonClick(e, 'edit', paddle)}
+                  flex={1}
+                  bg="var(--color-primary)"
+                  color="white"
+                  border="none"
+                  borderRadius="full"
+                  fontFamily="var(--font-body)"
+                  fontWeight={600}
+                  fontSize="sm"
+                  h="36px"
+                  _hover={{ bg: "var(--color-accent)" }}
+                  transition="all 0.3s ease"
+                  as={motion.button}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={e => onButtonClick(e, 'delete', paddle)}
+                  flex={1}
+                  bg="transparent"
+                  color="var(--color-text-primary)"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.15)"
+                  borderRadius="full"
+                  fontFamily="var(--font-body)"
+                  fontWeight={600}
+                  fontSize="sm"
+                  h="36px"
+                  _hover={{
+                    bg: "rgba(220, 38, 38, 0.08)",
+                    borderColor: "rgba(220, 38, 38, 0.4)",
+                    color: "rgba(220, 38, 38, 1)",
+                  }}
+                  transition="all 0.3s ease"
+                  as={motion.button}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Delete
+                </Button>
+              </MotionHStack>
+            )}
+          </VStack>
+        </Box>
+      </MotionBox>
+    </Box>
+  );
+};
+
+const FALLBACK_CONTENT_READY_MS = 550;
+
+const PaddleManagementPage = () => {
+  const { paddles, fetchPaddles, deletePaddle } = usePaddleStore();
   const toast = useToast();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -71,24 +656,12 @@ const PaddleManagementPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [contentReady, setContentReady] = useState(false);
   const cancelRef = useRef();
   const headerRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, amount: 0.3 });
 
-  const [paddleForm, setPaddleForm] = useState({
-    name: '',
-    brand: '',
-    model: '',
-    shape: '',
-    thickness: '',
-    handleLength: '',
-    length: '',
-    width: '',
-    core: '',
-    image: '',
-    description: '',
-    priceLink: '',
-  });
+  const handleHeaderAnimationComplete = useCallback(() => setContentReady(true), []);
 
   useEffect(() => {
     const loadPaddles = async () => {
@@ -97,6 +670,12 @@ const PaddleManagementPage = () => {
       setIsLoading(false);
     };
     loadPaddles();
+  }, []);
+
+  // Fallback: show paddle list after 700ms if header callback never fires
+  useEffect(() => {
+    const t = setTimeout(() => setContentReady(true), FALLBACK_CONTENT_READY_MS);
+    return () => clearTimeout(t);
   }, []);
 
   // When landing on paddles list, ensure player scroll flags never affect this page
@@ -163,64 +742,8 @@ const PaddleManagementPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paddles.length, isLoading]); // Depend on both paddles.length and isLoading
 
-  const handleSubmit = async () => {
-    if (!paddleForm.name || !paddleForm.brand) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in name and brand',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    const result = isEditing
-      ? await updatePaddle(selectedPaddle._id, paddleForm)
-      : await createPaddle(paddleForm);
-
-    if (result.success) {
-      toast({
-        title: 'Success',
-        description: result.message,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-
-      // If this was an update, refresh player data to reflect the changes
-      if (isEditing) {
-        await refreshPlayers();
-      }
-
-      handleClose();
-    } else {
-      toast({
-        title: 'Error',
-        description: result.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
   const handleEdit = paddle => {
     setSelectedPaddle(paddle);
-    setPaddleForm({
-      name: paddle.name,
-      brand: paddle.brand,
-      model: paddle.model,
-      shape: paddle.shape || '',
-      thickness: paddle.thickness || '',
-      handleLength: paddle.handleLength || '',
-      length: paddle.length || '',
-      width: paddle.width || '',
-      core: paddle.core || '',
-      image: paddle.image || '',
-      description: paddle.description || '',
-      priceLink: paddle.priceLink || '',
-    });
     setIsEditing(true);
     onOpen();
   };
@@ -251,20 +774,6 @@ const PaddleManagementPage = () => {
   };
 
   const handleClose = () => {
-    setPaddleForm({
-      name: '',
-      brand: '',
-      model: '',
-      shape: '',
-      thickness: '',
-      handleLength: '',
-      length: '',
-      width: '',
-      core: '',
-      image: '',
-      description: '',
-      priceLink: '',
-    });
     setSelectedPaddle(null);
     setIsEditing(false);
     onClose();
@@ -272,20 +781,6 @@ const PaddleManagementPage = () => {
 
   const handleAddNew = () => {
     setIsEditing(false);
-    setPaddleForm({
-      name: '',
-      brand: '',
-      model: '',
-      shape: '',
-      thickness: '',
-      handleLength: '',
-      length: '',
-      width: '',
-      core: '',
-      image: '',
-      description: '',
-      priceLink: '',
-    });
     onOpen();
   };
 
@@ -360,7 +855,8 @@ const PaddleManagementPage = () => {
             align="center"
             initial={{ opacity: 0, y: 30 }}
             animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            onAnimationComplete={() => headerInView && handleHeaderAnimationComplete()}
           >
             <MotionHeading
               as="h1"
@@ -460,14 +956,9 @@ const PaddleManagementPage = () => {
             </HStack>
           </VStack>
 
-          {/* Paddles Grid */}
-          <MotionBox
-            w="full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            {isLoading ? (
+          {/* Paddles Grid - show spinner until title animation done and data loaded (matches Players page) */}
+          <Box w="full">
+            {isLoading || !contentReady ? (
               <Center py={16}>
                 <Spinner size='xl' color="var(--color-primary)" thickness="4px" />
               </Center>
@@ -481,725 +972,42 @@ const PaddleManagementPage = () => {
                 borderColor="rgba(0, 0, 0, 0.08)"
                 px={8}
               >
-                <MotionText
+                <Text
                   fontSize={{ base: 'xl', md: '2xl' }}
                   fontFamily="var(--font-display)"
                   fontWeight={600}
                   color="var(--color-text-primary)"
                   mb={4}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
                 >
                   {searchQuery
                     ? 'No paddles found matching your search'
                     : 'No paddles found'}
-                </MotionText>
+                </Text>
               </Box>
             ) : (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={{ base: 8, md: 10 }} w='full'>
-                {filteredPaddles.map((paddle, index) => {
-                  // Create a PaddleCard component inline with hover state
-                  const PaddleCard = () => {
-                    const [fontSize, setFontSize] = useState({ base: '2xl', md: '3xl' });
-                    const [isHovered, setIsHovered] = useState(false);
-                    const badgeControls = useAnimation();
-                    const nameRef = useRef(null);
-
-                    // Check if name overflows and adjust font size
-                    useEffect(() => {
-                      const checkOverflow = () => {
-                        if (nameRef.current) {
-                          setFontSize({ base: '2xl', md: '3xl' });
-                          requestAnimationFrame(() => {
-                            setTimeout(() => {
-                              if (nameRef.current) {
-                                const element = nameRef.current;
-                                if (element.scrollWidth > element.clientWidth) {
-                                  setFontSize({ base: 'xl', md: '2xl' });
-                                  requestAnimationFrame(() => {
-                                    setTimeout(() => {
-                                      if (nameRef.current && nameRef.current.scrollWidth > nameRef.current.clientWidth) {
-                                        setFontSize({ base: 'lg', md: 'xl' });
-                                      }
-                                    }, 50);
-                                  });
-                                }
-                              }
-                            }, 100);
-                          });
-                        }
-                      };
-                      checkOverflow();
-                      window.addEventListener('resize', checkOverflow);
-                      return () => window.removeEventListener('resize', checkOverflow);
-                    }, [paddle.name]);
-
-                    // Initialize badges as hidden
-                    useEffect(() => {
-                      badgeControls.set({
-                        opacity: 0,
-                        y: 10,
-                        scale: 0.95,
-                      });
-                    }, [badgeControls]);
-
-                    const handleMouseEnter = () => {
-                      setIsHovered(true);
-                      badgeControls.start({
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
-                      });
-                    };
-
-                    const handleMouseLeave = () => {
-                      setIsHovered(false);
-                      badgeControls.start({
-                        opacity: 0,
-                        y: 10,
-                        scale: 0.95,
-                        transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
-                      });
-                    };
-
-                    return (
-                      <MotionBox
-                        w='full'
-                        maxW='400px'
-                        bg="var(--color-bg)"
-                        borderRadius='0'
-                        overflow='hidden'
-                        position='relative'
-                        cursor='pointer'
-                        onClick={() => handlePaddleClick(paddle)}
-                        onMouseDown={(e) => handlePaddleMouseDown(e, paddle)}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        whileHover={{ 
-                          y: -6,
-                          transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
-                        }}
-                        sx={{
-                          '--font-display': '"Merriweather", serif',
-                          '--font-body': '"Inter", sans-serif',
-                          '--color-primary': '#2C5F7C',
-                          '--color-secondary': '#D4A574',
-                          '--color-accent': '#8B9DC3',
-                          '--color-bg': '#FAF9F6',
-                          '--color-text-primary': '#1A1A1A',
-                          '--color-text-secondary': '#6B6B6B',
-                          fontFamily: 'var(--font-body)',
-                          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
-                        }}
-                        _hover={{
-                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-                        }}
-                      >
-                        {/* Image section */}
-                        <Box
-                          position="relative"
-                          h={{ base: '180px', md: '200px' }}
-                          bg="white"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          p={4}
-                        >
-                          <Image
-                            src={paddle.image || '/unknownPaddle.png'}
-                            alt={paddle.name}
-                            borderRadius="0"
-                            w="full"
-                            h="full"
-                            objectFit="contain"
-                            loading="lazy"
-                          />
-                        </Box>
-
-                        {/* Content section */}
-                        <Box p={{ base: 6, md: 8 }} bg="var(--color-bg)">
-                          <VStack spacing={3} align='start'>
-                            {/* Name */}
-                            <MotionHeading
-                              ref={nameRef}
-                              as="h3"
-                              fontSize={fontSize}
-                              fontFamily='"Merriweather", serif'
-                              fontWeight={700}
-                              color="var(--color-text-primary)"
-                              letterSpacing="-0.01em"
-                              lineHeight="1.2"
-                              textAlign="center"
-                              w="full"
-                              whiteSpace="nowrap"
-                              overflow="hidden"
-                              textOverflow="ellipsis"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.1 }}
-                            >
-                              {paddle.name}
-                            </MotionHeading>
-
-                            {/* Equipment badges - oval shaped - expandable container */}
-                            <MotionBox
-                              w="full"
-                              overflow="hidden"
-                              initial={{ maxHeight: 0, opacity: 0 }}
-                              animate={isHovered ? { maxHeight: 200, opacity: 1 } : { maxHeight: 0, opacity: 0 }}
-                              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                            >
-                              <VStack spacing={3} align='start' w='full' pt={2}>
-                                {/* Brand and Shape badges - wrap if needed */}
-                                <MotionBox
-                                  w="full"
-                                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                  animate={badgeControls}
-                                  display="flex"
-                                  flexWrap="wrap"
-                                  gap={2}
-                                  justifyContent="space-between"
-                                >
-                                  {/* Brand badge */}
-                                  {paddle.brand && (
-                                    <Badge 
-                                      borderRadius="full"
-                                      px={3}
-                                      py={1}
-                                      fontSize={{ base: 'xs', md: 'sm' }}
-                                      fontFamily="var(--font-body)"
-                                      bg="var(--color-primary)"
-                                      color="white"
-                                      fontWeight={600}
-                                      as={motion.div}
-                                      whileHover={{ scale: 1.05 }}
-                                      transition={{ duration: 0.2 }}
-                                      flexShrink={0}
-                                    >
-                                      {paddle.brand}
-                                    </Badge>
-                                  )}
-
-                                  {/* Shape badge */}
-                                  {paddle.shape && (
-                                    <Badge 
-                                      borderRadius="full"
-                                      px={3}
-                                      py={1}
-                                      fontSize={{ base: 'xs', md: 'sm' }}
-                                      fontFamily="var(--font-body)"
-                                      bg="var(--color-secondary)"
-                                      color="white"
-                                      fontWeight={600}
-                                      as={motion.div}
-                                      whileHover={{ scale: 1.05 }}
-                                      transition={{ duration: 0.2 }}
-                                      flexShrink={0}
-                                    >
-                                      {paddle.shape}
-                                    </Badge>
-                                  )}
-                                </MotionBox>
-
-                                {/* Thickness badge below if exists */}
-                                {paddle.thickness && (
-                                  <MotionBox
-                                    w="full"
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={badgeControls}
-                                  >
-                                    <Badge 
-                                      borderRadius="full"
-                                      px={3}
-                                      py={1}
-                                      fontSize={{ base: 'xs', md: 'sm' }}
-                                      fontFamily="var(--font-body)"
-                                      bg="var(--color-accent)"
-                                      color="white"
-                                      fontWeight={600}
-                                      as={motion.div}
-                                      whileHover={{ scale: 1.05 }}
-                                      transition={{ duration: 0.2 }}
-                                    >
-                                      {paddle.thickness}
-                                    </Badge>
-                                  </MotionBox>
-                                )}
-                              </VStack>
-                            </MotionBox>
-
-                            {/* Admin buttons */}
-                            {getRoleFromToken() === 'admin' && (
-                              <MotionHStack 
-                                spacing={3} 
-                                w='full'
-                                pt={4}
-                                borderTop="1px solid"
-                                borderColor="rgba(0, 0, 0, 0.08)"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
-                              >
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => handleButtonClick(e, 'edit', paddle)}
-                                  flex={1}
-                                  bg="var(--color-primary)"
-                                  color="white"
-                                  border="none"
-                                  borderRadius="full"
-                                  fontFamily="var(--font-body)"
-                                  fontWeight={600}
-                                  fontSize="sm"
-                                  h="36px"
-                                  _hover={{
-                                    bg: "var(--color-accent)",
-                                  }}
-                                  transition="all 0.3s ease"
-                                  as={motion.button}
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => handleButtonClick(e, 'delete', paddle)}
-                                  flex={1}
-                                  bg="transparent"
-                                  color="var(--color-text-primary)"
-                                  border="1px solid"
-                                  borderColor="rgba(0, 0, 0, 0.15)"
-                                  borderRadius="full"
-                                  fontFamily="var(--font-body)"
-                                  fontWeight={600}
-                                  fontSize="sm"
-                                  h="36px"
-                                  _hover={{
-                                    bg: "rgba(220, 38, 38, 0.08)",
-                                    borderColor: "rgba(220, 38, 38, 0.4)",
-                                    color: "rgba(220, 38, 38, 1)",
-                                  }}
-                                  transition="all 0.3s ease"
-                                  as={motion.button}
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                >
-                                  Delete
-                                </Button>
-                              </MotionHStack>
-                            )}
-                          </VStack>
-                        </Box>
-                      </MotionBox>
-                    );
-                  };
-
-                  return (
-                    <MotionBox
-                      key={paddle._id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.5,
-                        delay: index * 0.05,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                    >
-                      <PaddleCard />
-                    </MotionBox>
-                  );
-                })}
+                {filteredPaddles.map((paddle, index) => (
+                  <PaddleCard
+                    key={paddle._id}
+                    paddle={paddle}
+                    index={index}
+                    onPaddleClick={handlePaddleClick}
+                    onPaddleMouseDown={handlePaddleMouseDown}
+                    onButtonClick={handleButtonClick}
+                  />
+                ))}
               </SimpleGrid>
             )}
-          </MotionBox>
+          </Box>
         </VStack>
       </Container>
 
-      {/* Add/Edit Modal */}
-      <Modal isOpen={isOpen} onClose={handleClose} size='xl'>
-        <ModalOverlay />
-        <ModalContent
-          sx={{
-            fontFamily: 'var(--font-body)',
-          }}
-          borderRadius="0"
-        >
-          <ModalHeader
-            fontFamily="var(--font-display)"
-            fontSize="2xl"
-            fontWeight={600}
-            color="var(--color-text-primary)"
-            borderBottom="1px solid"
-            borderColor="rgba(0, 0, 0, 0.1)"
-          >
-            {isEditing ? 'Edit Paddle' : 'Add New Paddle'}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody py={8}>
-            <VStack spacing={4}>
-              <FormControl>
-                <FormLabel
-                  fontFamily="var(--font-body)"
-                  fontWeight={500}
-                  color="var(--color-text-primary)"
-                  fontSize="sm"
-                >
-                  Paddle Name
-                </FormLabel>
-                <Input
-                  placeholder='Enter paddle name'
-                  value={paddleForm.name}
-                  onChange={e =>
-                    setPaddleForm({ ...paddleForm, name: e.target.value })
-                  }
-                  borderRadius="0"
-                  border="1px solid"
-                  borderColor="rgba(0, 0, 0, 0.1)"
-                  _focus={{
-                    borderColor: "var(--color-primary)",
-                    boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                  }}
-                />
-              </FormControl>
-
-              <HStack spacing={4} w='full'>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Brand
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter brand'
-                    value={paddleForm.brand}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, brand: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Model
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter model'
-                    value={paddleForm.model}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, model: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-              </HStack>
-
-              <HStack spacing={4} w='full'>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Shape
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter shape'
-                    value={paddleForm.shape}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, shape: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Thickness
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter thickness'
-                    value={paddleForm.thickness}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, thickness: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-              </HStack>
-
-              <HStack spacing={4} w='full'>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Handle Length
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter handle length'
-                    value={paddleForm.handleLength}
-                    onChange={e =>
-                      setPaddleForm({
-                        ...paddleForm,
-                        handleLength: e.target.value,
-                      })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Paddle Length
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter paddle length'
-                    value={paddleForm.length}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, length: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-              </HStack>
-
-              <HStack spacing={4} w='full'>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Paddle Width
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter paddle width'
-                    value={paddleForm.width}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, width: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-primary)"
-                    fontSize="sm"
-                  >
-                    Core
-                  </FormLabel>
-                  <Input
-                    placeholder='Enter core'
-                    value={paddleForm.core}
-                    onChange={e =>
-                      setPaddleForm({ ...paddleForm, core: e.target.value })
-                    }
-                    borderRadius="0"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                    }}
-                  />
-                </FormControl>
-              </HStack>
-
-              <FormControl>
-                <FormLabel
-                  fontFamily="var(--font-body)"
-                  fontWeight={500}
-                  color="var(--color-text-primary)"
-                  fontSize="sm"
-                >
-                  Image URL
-                </FormLabel>
-                <Input
-                  placeholder='Enter image URL'
-                  value={paddleForm.image}
-                  onChange={e =>
-                    setPaddleForm({ ...paddleForm, image: e.target.value })
-                  }
-                  borderRadius="0"
-                  border="1px solid"
-                  borderColor="rgba(0, 0, 0, 0.1)"
-                  _focus={{
-                    borderColor: "var(--color-primary)",
-                    boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                  }}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel
-                  fontFamily="var(--font-body)"
-                  fontWeight={500}
-                  color="var(--color-text-primary)"
-                  fontSize="sm"
-                >
-                  Price Link
-                </FormLabel>
-                <Input
-                  placeholder='Enter price link (e.g., Amazon, manufacturer website)'
-                  value={paddleForm.priceLink}
-                  onChange={e =>
-                    setPaddleForm({ ...paddleForm, priceLink: e.target.value })
-                  }
-                  borderRadius="0"
-                  border="1px solid"
-                  borderColor="rgba(0, 0, 0, 0.1)"
-                  _focus={{
-                    borderColor: "var(--color-primary)",
-                    boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                  }}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel
-                  fontFamily="var(--font-body)"
-                  fontWeight={500}
-                  color="var(--color-text-primary)"
-                  fontSize="sm"
-                >
-                  Description
-                </FormLabel>
-                <Textarea
-                  placeholder='Enter description'
-                  value={paddleForm.description}
-                  onChange={e =>
-                    setPaddleForm({ ...paddleForm, description: e.target.value })
-                  }
-                  rows={3}
-                  borderRadius="0"
-                  border="1px solid"
-                  borderColor="rgba(0, 0, 0, 0.1)"
-                  _focus={{
-                    borderColor: "var(--color-primary)",
-                    boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                  }}
-                />
-              </FormControl>
-
-              <HStack spacing={4} w='full' pt={4}>
-                <Button
-                  onClick={handleSubmit}
-                  flex={1}
-                  bg="var(--color-primary)"
-                  color="white"
-                  border="none"
-                  borderRadius="full"
-                  fontFamily="var(--font-body)"
-                  fontWeight={600}
-                  h="48px"
-                  fontSize="md"
-                  _hover={{
-                    bg: "var(--color-accent)",
-                  }}
-                  transition="all 0.3s ease"
-                  as={motion.button}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  {isEditing ? 'Update' : 'Create'} Paddle
-                </Button>
-                <Button
-                  onClick={handleClose}
-                  flex={1}
-                  border="1px solid"
-                  borderColor="var(--color-primary)"
-                  borderRadius="full"
-                  color="var(--color-primary)"
-                  fontFamily="var(--font-body)"
-                  fontWeight={600}
-                  h="48px"
-                  fontSize="md"
-                  _hover={{
-                    bg: "var(--color-primary)",
-                    color: "white",
-                  }}
-                  transition="all 0.3s ease"
-                  as={motion.button}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  Cancel
-                </Button>
-              </HStack>
-            </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      <AddEditPaddleModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        isEditing={isEditing}
+        initialPaddle={selectedPaddle}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog
