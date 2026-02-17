@@ -452,7 +452,7 @@ const EquipmentModule = ({
                     )}
                   </VStack>
                 </HStack>
-                {mod.field !== 'overgrips' && mod.field !== 'additionalModification' && (
+                {mod.field !== 'overgrips' && mod.field !== 'additionalModification' && player.paddlePriceLink && player.paddlePriceLink.trim() !== '' && (
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -659,7 +659,7 @@ const EquipmentModule = ({
                   </HStack>
                 </VStack>
               </Stack>
-              {icon !== 'shoes' && (
+              {icon !== 'shoes' && player.paddlePriceLink && player.paddlePriceLink.trim() !== '' && (
                 <Button
                   size='md'
                   bg="var(--color-primary)"
