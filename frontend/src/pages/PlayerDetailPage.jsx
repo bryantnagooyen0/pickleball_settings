@@ -279,7 +279,8 @@ const PlayerDetailPage = () => {
             </MotionHeading>
           </MotionVStack>
 
-          {/* Player Info Section */}
+          {/* Player Info Section - only show when at least one field has content */}
+          {(player.age || player.height || player.mlpTeam || player.currentLocation || player.sponsor || (player.about && String(player.about).trim())) && (
           <MotionBox
             ref={infoRef}
             w="full"
@@ -445,6 +446,7 @@ const PlayerDetailPage = () => {
               )}
             </VStack>
           </MotionBox>
+          )}
 
           {/* Equipment Section */}
           <MotionBox
