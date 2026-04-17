@@ -1,14 +1,8 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "https://pickleball-settings.onrender.com/sitemap.xml",
-      "permanent": false
-    }
-  ],
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
