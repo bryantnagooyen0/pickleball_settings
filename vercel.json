@@ -5,6 +5,10 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://pickleball-settings.onrender.com/sitemap.xml"
+    },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

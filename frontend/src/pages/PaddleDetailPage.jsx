@@ -20,6 +20,7 @@ import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import PlayerCard from '../components/PlayerCard';
 import CommentSection from '../components/CommentSection';
+import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -153,6 +154,33 @@ const PaddleDetailPage = () => {
         '--color-text-secondary': '#666666',
       }}
     >
+      {paddle && (
+        <SEO
+          title={`${paddle.brand} ${paddle.model || paddle.name}`}
+          description={`${paddle.brand} ${paddle.model || paddle.name} pickleball paddle specs${
+            paddle.shape ? `: ${paddle.shape} shape` : ''
+          }${paddle.thickness ? `, ${paddle.thickness}mm thick` : ''}${
+            paddle.core ? `, ${paddle.core} core` : ''
+          }. See which pros use this paddle on Pickleball Settings.`}
+          image={paddle.image || undefined}
+          url={`/paddle/${paddleId}`}
+          type="product"
+          jsonLd={{
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: `${paddle.brand} ${paddle.model || paddle.name}`,
+            brand: {
+              '@type': 'Brand',
+              name: paddle.brand,
+            },
+            image: paddle.image,
+            description:
+              paddle.description ||
+              `${paddle.brand} ${paddle.model || paddle.name} pickleball paddle specifications and pro usage.`,
+            ...(paddle.priceLink ? { url: paddle.priceLink } : {}),
+          }}
+        />
+      )}
       <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
         <VStack spacing={{ base: 6, md: 8 }}>
           {/* Back Button */}

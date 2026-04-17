@@ -6,6 +6,7 @@ import playerRoutes from './routes/player.route.js';
 import paddleRoutes from './routes/paddle.route.js';
 import commentRoutes from './routes/comment.route.js';
 import userRoutes from './controllers/users_controller.mjs';
+import sitemapRoute from './routes/sitemap.route.js';
 import cors from 'cors';
 import { securityMiddleware, additionalSecurity } from './middleware/security.js';
 import { generalLimiter, authLimiter, commentLimiter } from './middleware/rateLimiter.js';
@@ -79,6 +80,9 @@ app.get('/health', (req, res) => {
 app.get('/ping', (req, res) => {
   res.status(200).send('pong');
 });
+
+// Sitemap route (before API routes)
+app.use('/', sitemapRoute);
 
 // API Routes
 app.use('/api/players', playerRoutes);
