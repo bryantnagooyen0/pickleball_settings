@@ -1,33 +1,34 @@
-# Pickleball Settings Manager
+# Pickleball Settings
 
-A full-stack web application for managing pickleball pros and their equipment settings. Built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
+A full-stack web application that tracks pro pickleball players and their gear setups, hosts a paddle catalog, and provides a community hub where players can share and discover paddle setup configurations.
 
 ## Features
 
-- **Player Management**: Add and view pickleball players
-- **Equipment Tracking**: Store player equipment information (paddle, shoes, etc.)
-- **Modern UI**: Clean, responsive interface built with Chakra UI
-- **Dark/Light Mode**: Toggle between color themes
-- **Real-time Updates**: Instant feedback for user actions
+- **Pro Players** — Browse pro players and their equipment (paddle, shoes, sponsors)
+- **Paddle Catalog** — View all paddles, see which pros use them, check specs and pricing
+- **Community Setups** — Share your paddle setup with an interactive lead tape canvas, browse what other players are running, like and comment on setups
+- **Comments & Voting** — Threaded comments with upvote/downvote on players, paddles, and community setups
+- **User Auth** — Sign up, log in, role-based access (user / admin)
+- **Admin Controls** — Create/edit players and paddles, moderate comments
 
 ## Tech Stack
 
 ### Frontend
-
-- **React 19** - Modern React with hooks
-- **Vite** - Fast build tool and development server
-- **Chakra UI** - Component library for beautiful UI
-- **React Router** - Client-side routing
-- **Zustand** - State management
-- **Framer Motion** - Animation library
+- **React 19** + **Vite**
+- **Chakra UI** — component library
+- **Zustand** — state management
+- **Framer Motion** — animations
+- **React Router** — client-side routing
 
 ### Backend
+- **Node.js** + **Express.js**
+- **MongoDB** + **Mongoose**
+- **JWT** — authentication
+- **bcrypt** — password hashing
 
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB object modeling
-- **dotenv** - Environment variable management
+### Deployment
+- Frontend: **Vercel**
+- Backend: **Render** (with keep-alive ping to prevent cold starts)
 
 ## Project Structure
 
@@ -35,159 +36,180 @@ A full-stack web application for managing pickleball pros and their equipment se
 pickleball_settings/
 ├── backend/
 │   ├── config/
-│   │   └── db.js          # Database configuration
+│   │   └── db.js
 │   ├── controllers/
-│   │   └── player.controller.js  # Player CRUD operations
+│   │   ├── player.controller.js
+│   │   ├── paddle.controller.js
+│   │   ├── comment.controller.js
+│   │   ├── setup.controller.js        # Community Setups
+│   │   └── users_controller.mjs
+│   ├── middleware/
+│   │   ├── auth.js                    # JWT authMiddleware + adminMiddleware
+│   │   ├── rateLimiter.js
+│   │   ├── security.js
+│   │   └── validation.js
 │   ├── models/
-│   │   └── player.model.js       # Player data model
+│   │   ├── player.model.js
+│   │   ├── paddle.model.js
+│   │   ├── comment.model.js
+│   │   ├── setup.model.js             # Community Setups
+│   │   └── users_model.mjs
 │   ├── routes/
-│   │   └── player.route.js       # API routes
-│   └── server.js                 # Express server
+│   │   ├── player.route.js
+│   │   ├── paddle.route.js
+│   │   ├── comment.route.js
+│   │   └── setup.route.js             # Community Setups
+│   └── server.js
 ├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx        # Navigation component
-│   │   │   ├── PlayerCard.jsx    # Player display card
-│   │   │   └── ui/               # UI components
-│   │   ├── pages/
-│   │   │   ├── Players.jsx       # Main page with player list
-│   │   │   └── CreatePage.jsx    # Add new player form
-│   │   ├── store/
-│   │   │   └── player.js         # Zustand store
-│   │   └── App.jsx               # Main app component
-│   └── package.json
-└── package.json
+│   └── src/
+│       ├── components/
+│       │   ├── Navbar.jsx
+│       │   ├── Footer.jsx
+│       │   ├── PlayerCard.jsx
+│       │   ├── CommentSection.jsx
+│       │   ├── SetupCanvas.jsx        # Interactive SVG lead tape canvas
+│       │   ├── SetupCard.jsx          # Setup preview card
+│       │   ├── VoteButtons.jsx
+│       │   └── ui/
+│       ├── pages/
+│       │   ├── LandingPage.jsx
+│       │   ├── Players.jsx
+│       │   ├── PlayerDetailPage.jsx
+│       │   ├── PaddleManagementPage.jsx
+│       │   ├── PaddleDetailPage.jsx
+│       │   ├── CommunityPage.jsx      # /community hub
+│       │   ├── PaddleSetupsPage.jsx   # /community/paddle/:id
+│       │   ├── SetupDetailPage.jsx    # /setup/:id
+│       │   ├── NewSetupPage.jsx       # /community/new
+│       │   ├── LoginPage.jsx
+│       │   ├── SignupPage.jsx
+│       │   └── AccountPage.jsx
+│       ├── store/
+│       │   ├── player.js
+│       │   ├── paddle.js
+│       │   └── setup.js               # Community Setups store
+│       ├── hooks/
+│       │   └── useAuth.js
+│       └── utils/
+│           └── api.js
+└── docs/
+    └── superpowers/
+        └── specs/
+            └── 2026-04-17-community-setups-design.md
 ```
 
 ## Getting Started
 
 ### Prerequisites
-
-- Node.js (v16 or higher)
-- MongoDB (local installation or MongoDB Atlas)
-- npm or yarn package manager
+- Node.js v16+
+- MongoDB (local or Atlas)
 
 ### Installation
 
-1. **Clone the repository**
+```bash
+# 1. Install root dependencies
+npm install
 
-   ```bash
-   git clone <repository-url>
-   cd pickleball_settings
-   ```
+# 2. Install backend dependencies
+cd backend && npm install
 
-2. **Install backend dependencies**
+# 3. Install frontend dependencies
+cd ../frontend && npm install
+```
 
-   ```bash
-   npm install
-   ```
+### Environment Variables
 
-3. **Install frontend dependencies**
+Create `backend/.env`:
+```env
+MONGODB_URI=your_mongodb_connection_string
+PORT=5000
+JWT_SECRET=your_jwt_secret
+NODE_ENV=development
+```
 
-   ```bash
-   cd frontend
-   npm install
-   ```
+Create `frontend/.env`:
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-4. **Set up environment variables**
+### Running Locally
 
-   Create a `.env` file in the `backend` directory:
+```bash
+# Terminal 1 — backend (from /backend)
+npm run dev
 
-   ```env
-   MONGODB_URI=your_mongodb_connection_string
-   PORT=5000
-   ```
+# Terminal 2 — frontend (from /frontend)
+npm run dev
+```
 
-5. **Start the development servers**
-
-   In the root directory (for backend):
-
-   ```bash
-   npm run dev
-   ```
-
-   In a new terminal, navigate to frontend directory:
-
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-
-6. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:5000
-
-## Usage
-
-### Adding a Player
-
-1. Navigate to the "Create" page
-2. Fill in the player information:
-   - **Name**: Player's full name
-   - **Paddle**: Paddle brand/model
-   - **Image URL**: Link to player's photo
-3. Click "Add Player" to save
-
-### Viewing Players
-
-- The players page displays all registered players
-- Each player card shows their name, paddle, and image
-- Players are displayed in a responsive grid layout
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
 
 ## API Endpoints
 
-- `GET /api/players` - Get all players
-- `POST /api/players` - Create a new player
-- `GET /api/players/:id` - Get a specific player
-- `PUT /api/players/:id` - Update a player
-- `DELETE /api/players/:id` - Delete a player
+### Players
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/players` | No | List all players |
+| GET | `/api/players/:id` | No | Get player |
+| POST | `/api/players` | Admin | Create player |
+| PUT | `/api/players/:id` | Admin | Update player |
+| DELETE | `/api/players/:id` | Admin | Delete player |
 
-## Features
+### Paddles
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/paddles` | No | List all paddles |
+| GET | `/api/paddles/:id` | No | Get paddle |
+| GET | `/api/paddles/search` | No | Search paddles |
+| POST | `/api/paddles` | Admin | Create paddle |
+| PUT | `/api/paddles/:id` | Admin | Update paddle |
+| DELETE | `/api/paddles/:id` | Admin | Delete paddle |
 
-### Player Model
+### Community Setups
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/setups` | No | List setups (filter by `paddleId`, sort by `likes`/`newest`) |
+| GET | `/api/setups/recent` | No | 5 most recent setups |
+| GET | `/api/setups/paddles-with-setups` | No | Paddles that have setups + counts |
+| GET | `/api/setups/:id` | No | Get setup |
+| POST | `/api/setups` | Yes | Create setup |
+| PUT | `/api/setups/:id` | Yes (author) | Update setup |
+| DELETE | `/api/setups/:id` | Yes (author/admin) | Soft delete setup |
+| POST | `/api/setups/:id/like` | Yes | Toggle like |
 
-```javascript
-{
-  name: String (required),
-  paddle: String (required),
-  shoes: String (optional),
-  image: String (required),
-  createdAt: Date,
-  updatedAt: Date
-}
-```
+### Comments
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/comments/:targetType/:targetId` | No | Get comments (targetType: player, paddle, setup) |
+| POST | `/api/comments/:targetType/:targetId` | Yes | Post comment |
+| PUT | `/api/comments/:id` | Yes (author) | Edit comment |
+| DELETE | `/api/comments/:id` | Yes (author/admin) | Delete comment |
+| POST | `/api/comments/:id/vote` | Yes | Vote on comment |
 
-### UI Features
+### Users
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/users/signup` | No | Register |
+| POST | `/api/users/login` | No | Log in (returns JWT) |
+| GET | `/api/users/me` | Yes | Get current user |
 
-- Responsive design that works on desktop and mobile
-- Dark/light mode toggle
-- Toast notifications for user feedback
-- Loading states and error handling
-- Clean, modern interface with Chakra UI components
+## Community Setups Feature
 
-## Deployment
+Users can share how they've set up their paddle — where they placed lead tape, what overgrip they use, edge guard, and total weight.
 
-### Frontend Deployment
+**Setup fields:**
+- **Lead tape strips** — placed via interactive SVG canvas (positions stored as % of paddle bounding box so they scale to any screen size)
+- **Overgrip** — brand + notes
+- **Edge guard** — brand + notes
+- **Total weight** — grams after all mods
+- **Notes** — free text
+- **Photo** — optional photo of the physical paddle
 
-```bash
-cd frontend
-npm run build
-```
+**Routes:**
+- `/community` — hub page: newest setups strip + browse paddles that have setups
+- `/community/paddle/:paddleId` — all setups for one paddle, sortable by likes or newest
+- `/community/new` — 4-step submission form (login required)
+- `/setup/:setupId` — detail page with full canvas, photo, like button, and comments
 
-### Backend Deployment
-
-- Ensure MongoDB is accessible
-- Set up environment variables
-- Use a process manager like PM2
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the ISC License.
+Setups must be linked to an existing paddle in the catalog. Users can submit multiple setups per paddle.
