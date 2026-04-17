@@ -21,6 +21,7 @@ import EquipmentModule from '../components/EquipmentModule';
 import CommentSection from '../components/CommentSection';
 import { usePaddleStore } from '../store/paddle';
 import { api } from '../utils/api';
+import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -199,6 +200,41 @@ const PlayerDetailPage = () => {
     >
       <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
         <VStack spacing={{ base: 6, md: 8 }}>
+          {player && (
+            <SEO
+              title={player.name}
+              description={`See ${player.name}'s professional pickleball equipment: ${
+                player.paddleBrand
+                  ? `${player.paddleBrand}${player.paddleModel ? ` ${player.paddleModel}` : ''} paddle`
+                  : 'paddle setup'
+              }, ${player.shoes ? player.shoes : 'shoes'}, and full gear configuration.`}
+              image={player.image || undefined}
+              url={`/player/${playerId}`}
+              type="profile"
+              jsonLd={{
+                '@context': 'https://schema.org',
+                '@type': 'Person',
+                name: player.name,
+                image: player.image,
+                jobTitle: 'Professional Pickleball Player',
+                description:
+                  player.about ||
+                  `Professional pickleball player ${player.name}'s equipment settings and gear configuration.`,
+                ...(player.mlpTeam
+                  ? { memberOf: { '@type': 'SportsTeam', name: player.mlpTeam } }
+                  : {}),
+                ...(player.currentLocation
+                  ? {
+                      address: {
+                        '@type': 'PostalAddress',
+                        addressLocality: player.currentLocation,
+                      },
+                    }
+                  : {}),
+                ...(player.sponsor ? { sponsor: { '@type': 'Organization', name: player.sponsor } } : {}),
+              }}
+            />
+          )}
           {/* Back Button */}
           <MotionBox
             alignSelf="flex-start"
