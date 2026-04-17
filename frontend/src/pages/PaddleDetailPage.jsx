@@ -20,6 +20,8 @@ import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import PlayerCard from '../components/PlayerCard';
 import CommentSection from '../components/CommentSection';
+import SetupCard from '../components/SetupCard';
+import { useSetupStore } from '../store/setup';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -34,6 +36,8 @@ const PaddleDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [paddle, setPaddle] = useState(null);
   const [playersUsingPaddle, setPlayersUsingPaddle] = useState([]);
+  const { setups, fetchSetups } = useSetupStore();
+  const [paddleSetups, setPaddleSetups] = useState([]);
   const { paddles, fetchPaddles } = usePaddleStore();
   const { players, fetchPlayers } = usePlayerStore();
   const headerRef = useRef(null);
@@ -67,6 +71,8 @@ const PaddleDetailPage = () => {
         const foundPaddle = currentPaddles.find(p => p._id === paddleId);
         if (foundPaddle) {
           setPaddle(foundPaddle);
+          const setupResult = await fetchSetups(paddleId, 'likes');
+          if (setupResult?.data) setPaddleSetups(setupResult.data.slice(0, 3));
           // Find players using this paddle (matching name, shape, and thickness)
           const usingPaddle = currentPlayerStore.filter(player => {
             // First check if paddle name matches
@@ -592,6 +598,40 @@ const PaddleDetailPage = () => {
                   </Text>
                 </Box>
               )}
+
+              {/* Community Setups Preview */}
+              <Box w="full" bg="gray.800" borderRadius="lg" p={{ base: 4, md: 6 }} mt={4}>
+                <HStack justify="space-between" mb={4} flexWrap="wrap" gap={2}>
+                  <Heading size="md" color="white">Community Setups</Heading>
+                  <HStack spacing={2}>
+                    <Button
+                      size="sm" colorScheme="orange" variant="outline"
+                      onClick={() => navigate(`/community/new?paddleId=${paddleId}`)}
+                    >
+                      + Share Your Setup
+                    </Button>
+                    {paddleSetups.length > 0 && (
+                      <Button
+                        size="sm" variant="ghost" color="orange.400"
+                        onClick={() => navigate(`/community/paddle/${paddleId}`)}
+                      >
+                        See all →
+                      </Button>
+                    )}
+                  </HStack>
+                </HStack>
+                {paddleSetups.length === 0 ? (
+                  <Box textAlign="center" py={6}>
+                    <Text color="gray.500">No community setups yet — be the first!</Text>
+                  </Box>
+                ) : (
+                  <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+                    {paddleSetups.map(setup => (
+                      <SetupCard key={setup._id} setup={setup} />
+                    ))}
+                  </SimpleGrid>
+                )}
+              </Box>
 
               {/* Comments Section */}
               <Box

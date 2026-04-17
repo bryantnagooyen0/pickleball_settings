@@ -6,10 +6,10 @@ import mongoose from 'mongoose';
 export const getComments = async (req, res) => {
   const { targetType, targetId } = req.params;
 
-  if (!['player', 'paddle'].includes(targetType)) {
+  if (!['player', 'paddle', 'setup'].includes(targetType)) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid target type. Must be "player" or "paddle"',
+      message: 'Invalid target type. Must be "player", "paddle", or "setup"',
     });
   }
 
@@ -74,10 +74,10 @@ export const createComment = async (req, res) => {
     });
   }
 
-  if (!['player', 'paddle'].includes(targetType)) {
+  if (!['player', 'paddle', 'setup'].includes(targetType)) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid target type. Must be "player" or "paddle"',
+      message: 'Invalid target type. Must be "player", "paddle", or "setup"',
     });
   }
 
