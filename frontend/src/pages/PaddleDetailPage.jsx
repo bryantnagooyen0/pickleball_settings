@@ -164,6 +164,7 @@ const PaddleDetailPage = () => {
           }. See which pros use this paddle on Pickleball Settings.`}
           image={paddle.image || undefined}
           url={`/paddle/${paddleId}`}
+          type="product"
           jsonLd={{
             '@context': 'https://schema.org',
             '@type': 'Product',

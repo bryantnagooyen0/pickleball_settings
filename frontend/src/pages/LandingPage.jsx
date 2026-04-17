@@ -117,7 +117,6 @@ const LandingPage = () => {
   return (
     <>
       <SEO
-        description="Discover the equipment, settings, and gear used by professional pickleball players. Find your perfect setup and elevate your game."
         url="/"
         jsonLd={[
           {

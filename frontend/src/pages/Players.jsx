@@ -141,13 +141,6 @@ const Players = () => {
   }, []); // Only fetch once on mount - fetchPlayers is stable from Zustand
 
   useEffect(() => {
-    document.title = 'Pickleball Settings';
-    return () => {
-      document.title = 'Pickleball Settings';
-    };
-  }, []);
-
-  useEffect(() => {
     sessionStorage.removeItem('restorePaddleListScroll');
     sessionStorage.removeItem('paddleListScrollPosition');
   }, []);
