@@ -1,1 +1,6 @@
 .env
+.playwright-mcp
+docs/superpowers/
+project.md
+*.local
+.claude
