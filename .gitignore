@@ -1,0 +1,11 @@
+# Docs
+project.md
+
+# Local tooling / logs (do not commit)
+.playwright-mcp/
+.superpowers/
+.claude/
+
+# Local env files
+.env
+*.local
