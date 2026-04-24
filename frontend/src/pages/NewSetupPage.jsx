@@ -122,7 +122,10 @@ const NewSetupPage = () => {
                   onClick={() => setSelectedPaddleId(p._id)}
                 >
                   <Text color="white" fontWeight="bold" fontSize="sm">{p.name}</Text>
-                  <Text color="gray.400" fontSize="xs">{p.brand}</Text>
+                  <HStack spacing={2}>
+                    <Text color="gray.400" fontSize="xs">{p.brand}</Text>
+                    {p.shape && <Text color="orange.300" fontSize="xs">· {p.shape}</Text>}
+                  </HStack>
                 </Box>
               ))}
             </Box>
@@ -136,7 +139,7 @@ const NewSetupPage = () => {
               Click and drag on the paddle to place lead tape strips. Click the × on a strip to remove it.
             </Text>
             <Center>
-              <SetupCanvas strips={leadTapeStrips} onChange={setLeadTapeStrips} width={220} />
+              <SetupCanvas strips={leadTapeStrips} onChange={setLeadTapeStrips} width={220} paddleShape={paddles.find(p => p._id === selectedPaddleId)?.shape} />
             </Center>
             {leadTapeStrips.length > 0 && (
               <Box bg="gray.800" p={3} borderRadius="md">

@@ -113,7 +113,7 @@ const SetupDetailPage = () => {
           <Box>
             <Text color="gray.400" fontSize="sm" mb={2} fontWeight="bold">Lead Tape Placement</Text>
             <Center bg="gray.800" borderRadius="lg" p={4}>
-              <SetupCanvas strips={setup.leadTapeStrips || []} readOnly width={220} />
+              <SetupCanvas strips={setup.leadTapeStrips || []} readOnly width={220} paddleShape={setup.paddle?.shape} />
             </Center>
           </Box>
           {setup.photoUrl && (

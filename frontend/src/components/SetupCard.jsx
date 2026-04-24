@@ -21,7 +21,7 @@ const SetupCard = ({ setup, compact = false }) => {
     >
       {/* Canvas preview */}
       <Box bg="gray.900" display="flex" justifyContent="center" alignItems="center" py={compact ? 2 : 3} px={2} position="relative">
-        <SetupCanvas strips={setup.leadTapeStrips || []} readOnly width={canvasWidth} />
+        <SetupCanvas strips={setup.leadTapeStrips || []} readOnly width={canvasWidth} paddleShape={setup.paddle?.shape} />
         {setup.photoUrl && (
           <Badge position="absolute" top={2} right={2} colorScheme="blue" fontSize="xs">📷</Badge>
         )}

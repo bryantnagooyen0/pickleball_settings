@@ -8,7 +8,7 @@ export const getSetups = async (req, res) => {
   const sortObj = sort === 'newest' ? { createdAt: -1 } : { likesCount: -1, createdAt: -1 };
   try {
     const setups = await Setup.find(filter)
-      .populate('paddle', 'name brand model image')
+      .populate('paddle', 'name brand model shape image')
       .sort(sortObj)
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -21,7 +21,7 @@ export const getSetups = async (req, res) => {
 export const getRecentSetups = async (req, res) => {
   try {
     const setups = await Setup.find({ isActive: true })
-      .populate('paddle', 'name brand model image')
+      .populate('paddle', 'name brand model shape image')
       .sort({ createdAt: -1 })
       .limit(5);
     res.status(200).json({ success: true, data: setups });
@@ -66,7 +66,7 @@ export const getSetup = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Invalid Setup ID' });
   }
   try {
-    const setup = await Setup.findById(id).populate('paddle', 'name brand model image');
+    const setup = await Setup.findById(id).populate('paddle', 'name brand model shape image');
     if (!setup || !setup.isActive) {
       return res.status(404).json({ success: false, message: 'Setup not found' });
     }
@@ -95,7 +95,7 @@ export const createSetup = async (req, res) => {
       photoUrl: photoUrl || '',
     });
     await setup.save();
-    const populated = await setup.populate('paddle', 'name brand model image');
+    const populated = await setup.populate('paddle', 'name brand model shape image');
     res.status(201).json({ success: true, data: populated });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });

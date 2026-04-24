@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
 
 const tapeStripSchema = new mongoose.Schema({
-  x: { type: Number, required: true },
-  y: { type: Number, required: true },
-  width: { type: Number, required: true },
-  height: { type: Number, required: true },
+  // Outline-arc format: fraction (0–1) of total path length
+  t1: { type: Number },
+  t2: { type: Number },
+  // Signed accumulated arc fraction encoding direction + length of the strip.
+  // Positive = forward (increasing t), negative = backward. Null on legacy strips.
+  arcFraction: { type: Number, default: null },
   weightGrams: { type: Number, default: 0 },
   label: { type: String, default: '' },
 }, { _id: false });
