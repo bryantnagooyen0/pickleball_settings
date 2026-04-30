@@ -141,12 +141,19 @@ const SetupDetailPage = () => {
             </Box>
             <Box>
               <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide">Total Weight</Text>
-              <Text color="white" fontSize="sm">{setup.totalWeightGrams > 0 ? `${setup.totalWeightGrams}g` : '—'}</Text>
+              <Text color="white" fontSize="sm">{setup.totalWeightGrams > 0 ? `${setup.totalWeightGrams} oz` : '—'}</Text>
             </Box>
             <Box>
               <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide">Overgrip</Text>
-              <Text color="white" fontSize="sm">{setup.overgrip?.brand || '—'}</Text>
-              {setup.overgrip?.notes && <Text color="gray.400" fontSize="xs">{setup.overgrip.notes}</Text>}
+              <Text color="white" fontSize="sm">
+                {setup.overgrip?.brand
+                  ? `${setup.overgrip.brand}${setup.overgrip?.count > 0 ? ` × ${setup.overgrip.count}` : ''}`
+                  : '—'}
+              </Text>
+            </Box>
+            <Box>
+              <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide">Undergrip</Text>
+              <Text color="white" fontSize="sm">{setup.undergrip || '—'}</Text>
             </Box>
             <Box>
               <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide">Edge Guard</Text>
@@ -154,6 +161,45 @@ const SetupDetailPage = () => {
               {setup.edgeGuard?.notes && <Text color="gray.400" fontSize="xs">{setup.edgeGuard.notes}</Text>}
             </Box>
           </SimpleGrid>
+
+          {/* Per-strip breakdown */}
+          {setup.leadTapeStrips?.length > 0 && (
+            <Box mt={5}>
+              <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide" mb={2}>Lead Tape Strips</Text>
+              <VStack spacing={2} align="stretch">
+                {setup.leadTapeStrips.map((strip, i) => (
+                  <HStack key={i} bg="gray.700" borderRadius="md" px={3} py={2} spacing={4} flexWrap="wrap">
+                    <Text color="gray.400" fontSize="xs" minW="20px">#{i + 1}</Text>
+                    {strip.label && (
+                      <Box>
+                        <Text color="gray.500" fontSize="xs">Position</Text>
+                        <Text color="white" fontSize="sm">{strip.label}</Text>
+                      </Box>
+                    )}
+                    {strip.lengthInches > 0 && (
+                      <Box>
+                        <Text color="gray.500" fontSize="xs">Length</Text>
+                        <Text color="white" fontSize="sm">{strip.lengthInches} in</Text>
+                      </Box>
+                    )}
+                    {strip.densityGramsPerInch > 0 && (
+                      <Box>
+                        <Text color="gray.500" fontSize="xs">Density</Text>
+                        <Text color="white" fontSize="sm">{strip.densityGramsPerInch} g/in</Text>
+                      </Box>
+                    )}
+                    {strip.weightGrams > 0 && (
+                      <Box>
+                        <Text color="gray.500" fontSize="xs">Weight</Text>
+                        <Text color="white" fontSize="sm">{strip.weightGrams} g</Text>
+                      </Box>
+                    )}
+                  </HStack>
+                ))}
+              </VStack>
+            </Box>
+          )}
+
           {setup.notes && (
             <Box mt={4}>
               <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide">Notes</Text>
@@ -161,6 +207,14 @@ const SetupDetailPage = () => {
             </Box>
           )}
         </Box>
+
+        {/* Why this setup */}
+        {setup.setupReasoning && (
+          <Box bg="gray.800" borderRadius="lg" p={5}>
+            <Text color="gray.500" fontSize="xs" textTransform="uppercase" letterSpacing="wide" mb={2}>Why This Setup?</Text>
+            <Text color="white" fontSize="sm" whiteSpace="pre-wrap">{setup.setupReasoning}</Text>
+          </Box>
+        )}
 
         {/* Like button */}
         <HStack>

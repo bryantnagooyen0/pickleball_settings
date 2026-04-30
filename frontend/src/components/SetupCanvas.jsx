@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback, useId } from 'react';
-import { Box, Input, Button, VStack, Text, HStack, IconButton } from '@chakra-ui/react';
-import { DeleteIcon } from '@chakra-ui/icons';
+import { Box, Input, Button, VStack, Text, HStack, IconButton, Select } from '@chakra-ui/react';
+import { DeleteIcon, RepeatIcon, EditIcon } from '@chakra-ui/icons';
 
 const VB_W = 440;
 const VB_H = 881;
@@ -20,7 +20,6 @@ const getPaddlePath = (shape) => {
   return PADDLE_PATHS[key] ?? PADDLE_PATHS.hybrid;
 };
 
-// Pre-sample points along the path for fast nearest-point lookup
 const buildSamples = (pathEl, count = 500) => {
   const L = pathEl.getTotalLength();
   const pts = [];
@@ -32,15 +31,8 @@ const buildSamples = (pathEl, count = 500) => {
   return { pts, L };
 };
 
-// Find the nearest point on the path to an SVG coordinate.
-// prevT: if provided, constrain search to a neighbourhood to prevent cursor
-// jumping to the mirror position on the opposite side of the paddle outline.
 const snapToPath = (samples, svgX, svgY, pathEl, prevT = null) => {
   const { pts, L } = samples;
-
-  // When we have a previous position, only consider points within ±25% of
-  // the path. This stops the cursor teleporting across the paddle at the top
-  // where t≈0 and t≈1 are physically adjacent.
   const HOOD = 0.25;
   const candidates = prevT !== null
     ? pts.filter(p => {
@@ -57,7 +49,6 @@ const snapToPath = (samples, svgX, svgY, pathEl, prevT = null) => {
     if (d < minD) { minD = d; best = p; }
   }
 
-  // Fine-tune with ternary search around best
   const step = 1 / pts.length;
   let lo = Math.max(0, best.t - step * 2);
   let hi = Math.min(1, best.t + step * 2);
@@ -74,8 +65,6 @@ const snapToPath = (samples, svgX, svgY, pathEl, prevT = null) => {
   return best;
 };
 
-// Draw a forward arc (increasing t direction) of length arcLen starting at startD.
-// Returns 1 or 2 stroke-dasharray descriptors; handles wrap-around at the seam.
 const getForwardArc = (startD, arcLen, L) => {
   arcLen = Math.max(0, Math.min(arcLen, L));
   if (arcLen === 0) return [];
@@ -90,22 +79,17 @@ const getForwardArc = (startD, arcLen, L) => {
   return segs;
 };
 
-// Draw an arc from t1 in the direction and length encoded by arcFraction.
-// arcFraction > 0 = forward (increasing t), < 0 = backward.
-// This preserves the user's drag direction, so long strips never flip sides.
 const getDirectionalArcSegments = (t1, arcFraction, L) => {
   const arcLen = Math.abs(arcFraction) * L;
   const startD = t1 * L;
   if (arcFraction >= 0) {
     return getForwardArc(startD, arcLen, L);
   }
-  // Backward: arc ends at startD, so it begins at (startD - arcLen) mod L
   let backStart = startD - arcLen;
   while (backStart < 0) backStart += L;
   return getForwardArc(backStart % L, arcLen, L);
 };
 
-// Fallback for legacy strips that only have t1/t2 (no arcFraction): picks shorter arc.
 const getArcSegments = (t1, t2, L) => {
   const d1 = t1 * L;
   const d2 = t2 * L;
@@ -129,29 +113,122 @@ const getSVGPoint = (svgEl, clientX, clientY) => {
   return pt.matrixTransform(svgEl.getScreenCTM().inverse());
 };
 
+// Shared popup form used for both new strip and editing an existing strip
+const StripDetailsForm = ({
+  title, confirmLabel,
+  lengthInput, setLengthInput,
+  densityPreset, setDensityPreset,
+  densityCustom, setDensityCustom,
+  weightInput, setWeightInput,
+  labelInput, setLabelInput,
+  onConfirm, onCancel,
+  autoFocus = true,
+}) => (
+  <Box position="absolute" top="50%" left="50%" transform="translate(-50%,-50%)"
+    bg="gray.800" border="1px solid" borderColor="gray.600"
+    borderRadius="md" p={3} zIndex={10} minW="180px" boxShadow="lg">
+    <VStack spacing={2} align="stretch">
+      <Text color="white" fontSize="sm" fontWeight="bold">{title}</Text>
+      <Box>
+        <Text color="gray.400" fontSize="xs" mb={1}>Length (inches)</Text>
+        <Input size="sm" type="number" placeholder="e.g. 4"
+          value={lengthInput} onChange={e => setLengthInput(e.target.value)}
+          bg="gray.700" color="white" borderColor="gray.500" autoFocus={autoFocus} />
+      </Box>
+      <Box>
+        <Text color="gray.400" fontSize="xs" mb={1}>Density (g/in)</Text>
+        <Select size="sm" placeholder="Select density..."
+          value={densityPreset} onChange={e => setDensityPreset(e.target.value)}
+          bg="gray.700" color="white" borderColor="gray.500"
+          sx={{ '> option': { background: '#2D3748' } }}>
+          <option value="0.25">0.25 g/in</option>
+          <option value="0.5">0.5 g/in</option>
+          <option value="1">1 g/in</option>
+          <option value="other">Other</option>
+        </Select>
+        {densityPreset === 'other' && (
+          <Input size="sm" type="number" placeholder="e.g. 0.75" mt={1}
+            value={densityCustom} onChange={e => setDensityCustom(e.target.value)}
+            bg="gray.700" color="white" borderColor="gray.500" />
+        )}
+      </Box>
+      <Box>
+        <Text color="gray.400" fontSize="xs" mb={1}>Total Weight (grams)</Text>
+        <Input size="sm" type="number" placeholder="e.g. 1.5"
+          value={weightInput} onChange={e => setWeightInput(e.target.value)}
+          bg="gray.700" color="white" borderColor="gray.500" />
+      </Box>
+      <Box>
+        <Text color="gray.400" fontSize="xs" mb={1}>Position (optional)</Text>
+        <Input size="sm" placeholder="e.g. 3 o'clock"
+          value={labelInput} onChange={e => setLabelInput(e.target.value)}
+          bg="gray.700" color="white" borderColor="gray.500" />
+      </Box>
+      <HStack>
+        <Button size="sm" colorScheme="orange" onClick={onConfirm} flex={1}>{confirmLabel}</Button>
+        <Button size="sm" variant="ghost" color="gray.400" onClick={onCancel}>Cancel</Button>
+      </HStack>
+    </VStack>
+  </Box>
+);
+
 const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, paddleShape = 'hybrid' }) => {
   const uid = useId();
   const clipId = `pc-${uid}`.replace(/:/g, '');
   const svgRef = useRef(null);
   const pathRef = useRef(null);
   const samplesRef = useRef(null);
-  const hoverTRef = useRef(null);    // last snapped t, updated without re-render
-  const firstDotRef = useRef(null);  // mirrors firstDot state for use inside callbacks
-  const previewAccRef = useRef(0);   // accumulated signed arc fraction from firstDot
+  const hoverTRef = useRef(null);
+  const firstDotRef = useRef(null);
+  const previewAccRef = useRef(0);
 
   const [totalLength, setTotalLength] = useState(0);
-  const [firstDot, setFirstDot] = useState(null);    // { t, x, y }
-  const [hoverPt, setHoverPt] = useState(null);      // { t, x, y }
+  const [firstDot, setFirstDot] = useState(null);
+  const [hoverPt, setHoverPt] = useState(null);
   const [pendingStrip, setPendingStrip] = useState(null);
+
+  // New-strip form state
   const [weightInput, setWeightInput] = useState('');
   const [labelInput, setLabelInput] = useState('');
+  const [lengthInput, setLengthInput] = useState('');
+  const [densityPreset, setDensityPreset] = useState('');
+  const [densityCustom, setDensityCustom] = useState('');
+
+  // Edit-strip form state
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editWeight, setEditWeight] = useState('');
+  const [editLabel, setEditLabel] = useState('');
+  const [editLength, setEditLength] = useState('');
+  const [editDensityPreset, setEditDensityPreset] = useState('');
+  const [editDensityCustom, setEditDensityCustom] = useState('');
 
   const pathD = getPaddlePath(paddleShape);
 
-  // Keep firstDotRef in sync so handleMouseMove can read it without stale closure
+  // Auto-calc weight for new strip
+  useEffect(() => {
+    const len = parseFloat(lengthInput);
+    const density = densityPreset === 'other'
+      ? parseFloat(densityCustom)
+      : parseFloat(densityPreset);
+    if (len > 0 && density > 0) {
+      setWeightInput(String(Math.round(len * density * 100) / 100));
+    }
+  }, [lengthInput, densityPreset, densityCustom]);
+
+  // Auto-calc weight for edit popup
+  useEffect(() => {
+    if (editingIndex === null) return;
+    const len = parseFloat(editLength);
+    const density = editDensityPreset === 'other'
+      ? parseFloat(editDensityCustom)
+      : parseFloat(editDensityPreset);
+    if (len > 0 && density > 0) {
+      setEditWeight(String(Math.round(len * density * 100) / 100));
+    }
+  }, [editLength, editDensityPreset, editDensityCustom, editingIndex]);
+
   useEffect(() => { firstDotRef.current = firstDot; }, [firstDot]);
 
-  // Rebuild path samples whenever the shape changes
   useEffect(() => {
     if (!pathRef.current) return;
     const s = buildSamples(pathRef.current, 500);
@@ -168,15 +245,50 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     return snapToPath(samplesRef.current, svgX, svgY, pathRef.current, hoverTRef.current);
   }, []);
 
+  const openEdit = useCallback((originalIndex) => {
+    const strip = strips[originalIndex];
+    if (!strip) return;
+    setEditingIndex(originalIndex);
+    setEditWeight(strip.weightGrams > 0 ? String(strip.weightGrams) : '');
+    setEditLabel(strip.label || '');
+    setEditLength(strip.lengthInches > 0 ? String(strip.lengthInches) : '');
+    const d = strip.densityGramsPerInch;
+    if (!d || d === 0) {
+      setEditDensityPreset('');
+      setEditDensityCustom('');
+    } else if (d === 0.25 || d === 0.5 || d === 1) {
+      setEditDensityPreset(String(d));
+      setEditDensityCustom('');
+    } else {
+      setEditDensityPreset('other');
+      setEditDensityCustom(String(d));
+    }
+  }, [strips]);
+
+  const saveEdit = () => {
+    if (editingIndex === null) return;
+    const density = editDensityPreset === 'other'
+      ? (parseFloat(editDensityCustom) || 0)
+      : (parseFloat(editDensityPreset) || 0);
+    onChange(strips.map((s, i) => i === editingIndex ? {
+      ...s,
+      weightGrams: parseFloat(editWeight) || 0,
+      label: editLabel || '',
+      lengthInches: parseFloat(editLength) || 0,
+      densityGramsPerInch: density,
+    } : s));
+    setEditingIndex(null);
+  };
+
+  const cancelEdit = () => setEditingIndex(null);
+
   const handleMouseMove = useCallback((e) => {
     if (readOnly || !svgRef.current) return;
     const pt = getSVGPoint(svgRef.current, e.clientX, e.clientY);
     const snapped = snap(pt.x, pt.y);
     if (snapped) {
-      // Accumulate signed arc fraction while user drags after placing first dot
       if (firstDotRef.current !== null && hoverTRef.current !== null) {
         let delta = snapped.t - hoverTRef.current;
-        // Correct for seam crossing so delta is always small
         if (delta > 0.5) delta -= 1;
         if (delta < -0.5) delta += 1;
         previewAccRef.current += delta;
@@ -186,24 +298,26 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     }
   }, [readOnly, snap]);
 
-  // Shared click logic used by both mouse click and touch end
   const doClick = useCallback((snapped) => {
     setFirstDot(prev => {
       if (!prev) {
-        previewAccRef.current = 0; // reset accumulator for new strip
+        previewAccRef.current = 0;
         return snapped;
       }
       setPendingStrip({ t1: prev.t, t2: snapped.t, arcFraction: previewAccRef.current });
       setWeightInput('');
       setLabelInput('');
+      setLengthInput('');
+      setDensityPreset('');
+      setDensityCustom('');
       return null;
     });
   }, []);
 
   const handleClick = useCallback(() => {
-    if (readOnly || !hoverPt) return;
+    if (readOnly || !hoverPt || editingIndex !== null) return;
     doClick(hoverPt);
-  }, [readOnly, hoverPt, doClick]);
+  }, [readOnly, hoverPt, doClick, editingIndex]);
 
   const handleTouchMove = (e) => {
     e.preventDefault();
@@ -225,16 +339,21 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
 
   const handleTouchEnd = (e) => {
     e.preventDefault();
-    if (readOnly || !hoverPt) return;
+    if (readOnly || !hoverPt || editingIndex !== null) return;
     doClick(hoverPt);
   };
 
   const confirmStrip = () => {
     if (!pendingStrip) return;
+    const density = densityPreset === 'other'
+      ? (parseFloat(densityCustom) || 0)
+      : (parseFloat(densityPreset) || 0);
     onChange([...strips, {
       ...pendingStrip,
       weightGrams: parseFloat(weightInput) || 0,
       label: labelInput || '',
+      lengthInches: parseFloat(lengthInput) || 0,
+      densityGramsPerInch: density,
     }]);
     setPendingStrip(null);
   };
@@ -247,8 +366,59 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
 
   const deleteStrip = (strip) => onChange(strips.filter(s => s !== strip));
 
+  const mirrorStrip = (strip) => {
+    const mt = (t) => (1 - t) % 1;
+    onChange([...strips, {
+      ...strip,
+      t1: mt(strip.t1),
+      t2: strip.t2 != null ? mt(strip.t2) : strip.t2,
+      arcFraction: strip.arcFraction != null ? -strip.arcFraction : null,
+      label: '',
+    }]);
+  };
+
   const svgHeight = (width / VB_W) * VB_H;
-  const validStrips = strips.filter(s => s.t1 != null && s.t2 != null);
+
+  // Preserve original indices so edits and deletes target the right strip
+  const indexedStrips = strips
+    .map((strip, originalIndex) => ({ strip, originalIndex }))
+    .filter(({ strip }) => strip.t1 != null && strip.t2 != null);
+
+  const getMidDomPoint = (strip) => {
+    if (!pathRef.current || totalLength === 0) return null;
+    let midT;
+    if (strip.arcFraction != null) {
+      midT = ((strip.t1 + strip.arcFraction / 2) % 1 + 1) % 1;
+    } else {
+      midT = (strip.t1 + strip.t2) / 2;
+    }
+    const L = totalLength;
+    const pt = pathRef.current.getPointAtLength(midT * L);
+
+    const delta = 0.005;
+    const ptA = pathRef.current.getPointAtLength(((midT - delta + 1) % 1) * L);
+    const ptB = pathRef.current.getPointAtLength(((midT + delta) % 1) * L);
+    const tx = ptB.x - ptA.x;
+    const ty = ptB.y - ptA.y;
+    const n1 = { x: -ty, y: tx };
+    const n2 = { x: ty, y: -tx };
+    const toCx = VB_W / 2 - pt.x;
+    const toCy = VB_H / 2 - pt.y;
+    const outward = (n1.x * toCx + n1.y * toCy) < 0 ? n1 : n2;
+    const mag = Math.sqrt(outward.x ** 2 + outward.y ** 2);
+    const nx = outward.x / mag;
+    const ny = outward.y / mag;
+
+    const OFFSET = 70;
+    const scaleX = width / (VB_W + 2 * VB_PAD);
+    const scaleY = svgHeight / (VB_H + 2 * VB_PAD);
+    return {
+      x: (pt.x + nx * OFFSET + VB_PAD) * scaleX,
+      y: (pt.y + ny * OFFSET + VB_PAD) * scaleY,
+    };
+  };
+
+  const popupOpen = pendingStrip !== null || editingIndex !== null;
 
   return (
     <Box position="relative" userSelect="none">
@@ -264,25 +434,33 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Invisible reference path used only for length/point calculations */}
         <path ref={pathRef} d={pathD} fill="none" stroke="none" style={{ pointerEvents: 'none' }} />
-
-        {/* Paddle body */}
         <path d={pathD} fill="#1A202C" stroke="#2D3748" strokeWidth="8" strokeMiterlimit="10" />
 
         {/* Confirmed tape strips */}
-        {totalLength > 0 && validStrips.map((strip, i) =>
-          (strip.arcFraction != null
+        {totalLength > 0 && indexedStrips.map(({ strip, originalIndex }) => {
+          const segs = strip.arcFraction != null
             ? getDirectionalArcSegments(strip.t1, strip.arcFraction, totalLength)
-            : getArcSegments(strip.t1, strip.t2, totalLength)
-          ).map((seg, j) => (
-            <path key={`${i}-${j}`} d={pathD}
-              stroke="#FF3B30" strokeWidth="16" fill="none" strokeLinecap="butt"
-              strokeDasharray={seg.dasharray} strokeDashoffset={seg.dashoffset} />
-          ))
-        )}
+            : getArcSegments(strip.t1, strip.t2, totalLength);
+          const isEditing = editingIndex === originalIndex;
+          return segs.map((seg, j) => (
+            <React.Fragment key={`${originalIndex}-${j}`}>
+              <path d={pathD}
+                stroke={isEditing ? '#FFB347' : '#FF3B30'} strokeWidth="16" fill="none" strokeLinecap="butt"
+                strokeDasharray={seg.dasharray} strokeDashoffset={seg.dashoffset} />
+              {/* Wider transparent hit area for clicking strips */}
+              {!readOnly && (
+                <path d={pathD}
+                  stroke="transparent" strokeWidth="32" fill="none" strokeLinecap="butt"
+                  strokeDasharray={seg.dasharray} strokeDashoffset={seg.dashoffset}
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => { e.stopPropagation(); openEdit(originalIndex); }} />
+              )}
+            </React.Fragment>
+          ));
+        })}
 
-        {/* Live preview arc — always follows drag direction, never flips */}
+        {/* Live preview arc */}
         {firstDot && hoverPt && totalLength > 0 &&
           getDirectionalArcSegments(firstDot.t, previewAccRef.current, totalLength).map((seg, j) => (
             <path key={`preview-${j}`} d={pathD}
@@ -291,12 +469,10 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
           ))
         }
 
-        {/* First anchor dot */}
         {firstDot && (
           <circle cx={firstDot.x} cy={firstDot.y} r="24" fill="white" stroke="#FF3B30" strokeWidth="6" />
         )}
 
-        {/* Cursor snapped to outline */}
         {!readOnly && hoverPt && (
           <circle cx={hoverPt.x} cy={hoverPt.y} r="20"
             fill={firstDot ? '#FF6B35' : '#FF3B30'}
@@ -304,8 +480,7 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
             style={{ pointerEvents: 'none' }} />
         )}
 
-        {/* Helper text */}
-        {!readOnly && validStrips.length === 0 && !firstDot && (
+        {!readOnly && indexedStrips.length === 0 && !firstDot && (
           <text x="514" y="1160" textAnchor="middle" fill="#718096" fontSize="46" fontFamily="sans-serif">
             Click edge to start strip
           </text>
@@ -317,49 +492,105 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
         )}
       </svg>
 
-      {/* Weight / label popup after second point is placed */}
+      {/* Mirror buttons overlaid on each strip */}
+      {!readOnly && !popupOpen && !firstDot && indexedStrips.map(({ strip, originalIndex }) => {
+        const mid = getMidDomPoint(strip);
+        if (!mid) return null;
+        return (
+          <Button
+            key={originalIndex}
+            position="absolute"
+            left={`${mid.x}px`}
+            top={`${mid.y}px`}
+            transform="translate(-50%, -50%)"
+            size="xs"
+            bg="blue.500"
+            color="white"
+            borderRadius="full"
+            fontSize="10px"
+            fontWeight="bold"
+            letterSpacing="0.04em"
+            px={2}
+            py={1}
+            h="auto"
+            minW="unset"
+            zIndex={5}
+            boxShadow="0 2px 6px rgba(0,0,0,0.5)"
+            _hover={{ bg: 'blue.400', transform: 'translate(-50%, -50%) scale(1.08)' }}
+            transition="all 0.15s ease"
+            onClick={(e) => { e.stopPropagation(); mirrorStrip(strip); }}
+          >
+            Mirror
+          </Button>
+        );
+      })}
+
+      {/* New strip details popup */}
       {pendingStrip && (
-        <Box position="absolute" top="50%" left="50%" transform="translate(-50%,-50%)"
-          bg="gray.800" border="1px solid" borderColor="gray.600"
-          borderRadius="md" p={3} zIndex={10} minW="180px" boxShadow="lg">
-          <VStack spacing={2} align="stretch">
-            <Text color="white" fontSize="sm" fontWeight="bold">Tape Strip Details</Text>
-            <Box>
-              <Text color="gray.400" fontSize="xs" mb={1}>Weight (grams)</Text>
-              <Input size="sm" type="number" placeholder="e.g. 1.5"
-                value={weightInput} onChange={e => setWeightInput(e.target.value)}
-                bg="gray.700" color="white" borderColor="gray.500" autoFocus />
-            </Box>
-            <Box>
-              <Text color="gray.400" fontSize="xs" mb={1}>Label (optional)</Text>
-              <Input size="sm" placeholder="e.g. 3 o'clock"
-                value={labelInput} onChange={e => setLabelInput(e.target.value)}
-                bg="gray.700" color="white" borderColor="gray.500" />
-            </Box>
-            <HStack>
-              <Button size="sm" colorScheme="orange" onClick={confirmStrip} flex={1}>Add</Button>
-              <Button size="sm" variant="ghost" color="gray.400" onClick={cancelStrip}>Cancel</Button>
-            </HStack>
-          </VStack>
-        </Box>
+        <StripDetailsForm
+          title="Tape Strip Details"
+          confirmLabel="Add"
+          lengthInput={lengthInput} setLengthInput={setLengthInput}
+          densityPreset={densityPreset} setDensityPreset={setDensityPreset}
+          densityCustom={densityCustom} setDensityCustom={setDensityCustom}
+          weightInput={weightInput} setWeightInput={setWeightInput}
+          labelInput={labelInput} setLabelInput={setLabelInput}
+          onConfirm={confirmStrip}
+          onCancel={cancelStrip}
+        />
       )}
 
-      {/* Strip list with delete buttons (edit mode only) */}
-      {!readOnly && validStrips.length > 0 && (
+      {/* Edit strip popup */}
+      {editingIndex !== null && (
+        <StripDetailsForm
+          title={`Edit Strip ${editingIndex + 1}`}
+          confirmLabel="Save"
+          lengthInput={editLength} setLengthInput={setEditLength}
+          densityPreset={editDensityPreset} setDensityPreset={setEditDensityPreset}
+          densityCustom={editDensityCustom} setDensityCustom={setEditDensityCustom}
+          weightInput={editWeight} setWeightInput={setEditWeight}
+          labelInput={editLabel} setLabelInput={setEditLabel}
+          onConfirm={saveEdit}
+          onCancel={cancelEdit}
+        />
+      )}
+
+      {/* Strip list */}
+      {!readOnly && indexedStrips.length > 0 && (
         <VStack mt={2} spacing={1} align="stretch">
-          {validStrips.map((strip, i) => (
-            <HStack key={i} bg="gray.700" px={2} py={1} borderRadius="md" justify="space-between">
-              <HStack spacing={2}>
-                <Box w="10px" h="10px" bg="#FF3B30" borderRadius="sm" flexShrink={0} />
-                <Text color="gray.300" fontSize="xs">
-                  {strip.label || `Strip ${i + 1}`}
-                  {strip.weightGrams > 0 && ` — ${strip.weightGrams}g`}
-                </Text>
+          {indexedStrips.map(({ strip, originalIndex }) => {
+            const isEditing = editingIndex === originalIndex;
+            return (
+              <HStack
+                key={originalIndex}
+                bg={isEditing ? 'gray.600' : 'gray.700'}
+                px={2} py={1} borderRadius="md" justify="space-between"
+                cursor="pointer"
+                _hover={{ bg: isEditing ? 'gray.600' : 'gray.650' }}
+                onClick={() => openEdit(originalIndex)}
+                outline={isEditing ? '1px solid' : 'none'}
+                outlineColor="orange.400"
+              >
+                <HStack spacing={2}>
+                  <Box w="10px" h="10px" bg={isEditing ? '#FFB347' : '#FF3B30'} borderRadius="sm" flexShrink={0} />
+                  <Text color="gray.300" fontSize="xs">
+                    {strip.label || `Strip ${originalIndex + 1}`}
+                    {strip.weightGrams > 0 && ` — ${strip.weightGrams}g`}
+                    {strip.lengthInches > 0 && ` — ${strip.lengthInches}"`}
+                    {strip.densityGramsPerInch > 0 && ` — ${strip.densityGramsPerInch}g/in`}
+                  </Text>
+                </HStack>
+                <HStack spacing={1} onClick={e => e.stopPropagation()}>
+                  <IconButton size="xs" icon={<EditIcon />} variant="ghost" colorScheme="orange"
+                    aria-label="Edit strip" onClick={() => openEdit(originalIndex)} />
+                  <IconButton size="xs" icon={<RepeatIcon />} variant="ghost" colorScheme="blue"
+                    aria-label="Mirror strip" title="Add mirrored strip to opposite side" onClick={() => mirrorStrip(strip)} />
+                  <IconButton size="xs" icon={<DeleteIcon />} variant="ghost" colorScheme="red"
+                    aria-label="Remove strip" onClick={() => deleteStrip(strip)} />
+                </HStack>
               </HStack>
-              <IconButton size="xs" icon={<DeleteIcon />} variant="ghost" colorScheme="red"
-                aria-label="Remove strip" onClick={() => deleteStrip(strip)} />
-            </HStack>
-          ))}
+            );
+          })}
         </VStack>
       )}
 

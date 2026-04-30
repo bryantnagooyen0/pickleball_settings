@@ -8,6 +8,8 @@ const tapeStripSchema = new mongoose.Schema({
   // Positive = forward (increasing t), negative = backward. Null on legacy strips.
   arcFraction: { type: Number, default: null },
   weightGrams: { type: Number, default: 0 },
+  lengthInches: { type: Number, default: 0 },
+  densityGramsPerInch: { type: Number, default: 0 },
   label: { type: String, default: '' },
 }, { _id: false });
 
@@ -22,13 +24,15 @@ const setupSchema = new mongoose.Schema(
 
     overgrip: {
       brand: { type: String, default: '' },
-      notes: { type: String, default: '' },
+      count: { type: Number, default: 0 },
     },
+    undergrip: { type: String, default: '' },
     edgeGuard: {
       brand: { type: String, default: '' },
       notes: { type: String, default: '' },
     },
     totalWeightGrams: { type: Number, default: 0 },
+    setupReasoning: { type: String, default: '', maxlength: 2000 },
     notes: { type: String, default: '', maxlength: 1000 },
 
     photoUrl: { type: String, default: '' },

@@ -25,10 +25,12 @@ const NewSetupPage = () => {
   const [selectedPaddleId, setSelectedPaddleId] = useState(searchParams.get('paddleId') || '');
   const [paddleSearch, setPaddleSearch] = useState('');
   const [leadTapeStrips, setLeadTapeStrips] = useState([]);
-  const [overgrip, setOvergrip] = useState({ brand: '', notes: '' });
+  const [overgrip, setOvergrip] = useState({ brand: '', count: '', notes: '' });
+  const [undergrip, setUndergrip] = useState('');
   const [edgeGuard, setEdgeGuard] = useState({ brand: '', notes: '' });
   const [totalWeightGrams, setTotalWeightGrams] = useState('');
   const [notes, setNotes] = useState('');
+  const [setupReasoning, setSetupReasoning] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
 
@@ -61,9 +63,11 @@ const NewSetupPage = () => {
       leadTapeStrips,
       leadTapeTotalGrams,
       overgrip,
+      undergrip,
       edgeGuard,
       totalWeightGrams: parseFloat(totalWeightGrams) || 0,
       notes,
+      setupReasoning,
       photoUrl: photoPreview || '',
     });
     setSubmitting(false);
@@ -141,7 +145,7 @@ const NewSetupPage = () => {
             <Center>
               <SetupCanvas strips={leadTapeStrips} onChange={setLeadTapeStrips} width={220} paddleShape={paddles.find(p => p._id === selectedPaddleId)?.shape} />
             </Center>
-            {leadTapeStrips.length > 0 && (
+            {leadTapeStrips.length > 0 && leadTapeTotalGrams > 0 && (
               <Box bg="gray.800" p={3} borderRadius="md">
                 <Text color="orange.400" fontWeight="bold" fontSize="sm">
                   Total lead tape: {leadTapeTotalGrams.toFixed(2)}g ({leadTapeStrips.length} strip{leadTapeStrips.length !== 1 ? 's' : ''})
@@ -158,43 +162,62 @@ const NewSetupPage = () => {
         {step === 2 && (
           <VStack spacing={4} align="stretch">
             <FormControl>
-              <FormLabel color="gray.300" fontSize="sm">Overgrip Brand</FormLabel>
+              <FormLabel color="gray.300" fontSize="sm">Overgrip Brand / Type</FormLabel>
               <Input
-                placeholder="e.g. Tourna Grip, Wilson Pro..."
+                placeholder="e.g. Cookiegrips Doughy grips"
                 value={overgrip.brand}
                 onChange={(e) => setOvergrip(g => ({ ...g, brand: e.target.value }))}
                 bg="gray.700" color="white" borderColor="gray.600"
               />
             </FormControl>
             <FormControl>
-              <FormLabel color="gray.300" fontSize="sm">Overgrip Notes</FormLabel>
+              <FormLabel color="gray.300" fontSize="sm">Number of Overgrips</FormLabel>
               <Input
-                placeholder="e.g. 1.5 wraps, double wrapped handle"
-                value={overgrip.notes}
-                onChange={(e) => setOvergrip(g => ({ ...g, notes: e.target.value }))}
+                type="number" placeholder="e.g. 1"
+                value={overgrip.count}
+                onChange={(e) => setOvergrip(g => ({ ...g, count: e.target.value }))}
                 bg="gray.700" color="white" borderColor="gray.600"
               />
             </FormControl>
             <FormControl>
-              <FormLabel color="gray.300" fontSize="sm">Edge Guard Brand / Type</FormLabel>
+              <FormLabel color="gray.300" fontSize="sm">Undergrip</FormLabel>
               <Input
-                placeholder="e.g. Fromuth, original, removed..."
+                placeholder="e.g. Hesacore, Stock grip"
+                value={undergrip}
+                onChange={(e) => setUndergrip(e.target.value)}
+                bg="gray.700" color="white" borderColor="gray.600"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel color="gray.300" fontSize="sm">Edge Guard Tape / Type</FormLabel>
+              <Input
+                placeholder="e.g. Electrical tape, Hockey Tape, etc."
                 value={edgeGuard.brand}
                 onChange={(e) => setEdgeGuard(g => ({ ...g, brand: e.target.value }))}
                 bg="gray.700" color="white" borderColor="gray.600"
               />
             </FormControl>
             <FormControl>
-              <FormLabel color="gray.300" fontSize="sm">Total Weight After Mods (grams)</FormLabel>
+              <FormLabel color="gray.300" fontSize="sm">Total Weight After Mods (ounces)</FormLabel>
               <Input
-                type="number" placeholder="e.g. 238"
+                type="number" placeholder="e.g. 8.6 oz"
                 value={totalWeightGrams}
                 onChange={(e) => setTotalWeightGrams(e.target.value)}
                 bg="gray.700" color="white" borderColor="gray.600"
               />
             </FormControl>
             <FormControl>
-              <FormLabel color="gray.300" fontSize="sm">Notes</FormLabel>
+              <FormLabel color="gray.300" fontSize="sm">Why this setup?</FormLabel>
+              <Textarea
+                placeholder="Share your reasoning — what problem were you solving, what do you like about it, and what would you tell someone thinking about copying it?"
+                value={setupReasoning}
+                onChange={(e) => setSetupReasoning(e.target.value)}
+                bg="gray.700" color="white" borderColor="gray.600"
+                rows={4}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel color="gray.300" fontSize="sm">Other Notes</FormLabel>
               <Textarea
                 placeholder="Any other details about your setup..."
                 value={notes}
