@@ -600,19 +600,43 @@ const PaddleDetailPage = () => {
               )}
 
               {/* Community Setups Preview */}
-              <Box w="full" bg="gray.800" borderRadius="lg" p={{ base: 4, md: 6 }} mt={4}>
+              <Box
+                w="full"
+                bg="white"
+                borderRadius={0}
+                boxShadow="0 4px 20px rgba(0,0,0,0.08)"
+                p={{ base: 4, md: 6 }}
+                mt={4}
+              >
                 <HStack justify="space-between" mb={4} flexWrap="wrap" gap={2}>
-                  <Heading size="md" color="white">Community Setups</Heading>
+                  <Heading
+                    size="md"
+                    color="var(--color-text-primary)"
+                    fontFamily="var(--font-display)"
+                  >
+                    Community Setups
+                  </Heading>
                   <HStack spacing={2}>
                     <Button
-                      size="sm" colorScheme="orange" variant="outline"
+                      size="sm"
+                      variant="outline"
+                      borderColor="var(--color-primary)"
+                      color="var(--color-primary)"
+                      borderRadius="full"
+                      fontFamily="var(--font-body)"
+                      _hover={{ bg: 'rgba(44,95,124,0.05)' }}
                       onClick={() => navigate(`/community/new?paddleId=${paddleId}`)}
                     >
                       + Share Your Setup
                     </Button>
                     {paddleSetups.length > 0 && (
                       <Button
-                        size="sm" variant="ghost" color="orange.400"
+                        size="sm"
+                        variant="ghost"
+                        color="var(--color-primary)"
+                        borderRadius="full"
+                        fontFamily="var(--font-body)"
+                        _hover={{ bg: 'rgba(44,95,124,0.05)' }}
                         onClick={() => navigate(`/community/paddle/${paddleId}`)}
                       >
                         See all →
@@ -622,7 +646,9 @@ const PaddleDetailPage = () => {
                 </HStack>
                 {paddleSetups.length === 0 ? (
                   <Box textAlign="center" py={6}>
-                    <Text color="gray.500">No community setups yet — be the first!</Text>
+                    <Text color="var(--color-text-secondary)" fontFamily="var(--font-body)">
+                      No community setups yet — be the first!
+                    </Text>
                   </Box>
                 ) : (
                   <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
