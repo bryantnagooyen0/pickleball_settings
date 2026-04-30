@@ -204,6 +204,11 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
 
   const pathD = getPaddlePath(paddleShape);
 
+  const defaultVB = `${-VB_PAD} ${-VB_PAD} ${VB_W + VB_PAD * 2} ${VB_H + VB_PAD * 2}`;
+  const [svgViewBox, setSvgViewBox] = useState(defaultVB);
+  const [svgHeight, setSvgHeight] = useState((width / VB_W) * VB_H);
+  const svgVBRef = useRef({ x: -VB_PAD, y: -VB_PAD, w: VB_W + VB_PAD * 2, h: VB_H + VB_PAD * 2 });
+
   // Auto-calc weight for new strip
   useEffect(() => {
     const len = parseFloat(lengthInput);
@@ -238,7 +243,16 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     setHoverPt(null);
     hoverTRef.current = null;
     previewAccRef.current = 0;
-  }, [paddleShape]);
+
+    const bb = pathRef.current.getBBox();
+    const vbX = bb.x - VB_PAD;
+    const vbY = bb.y - VB_PAD;
+    const vbW = bb.width + 2 * VB_PAD;
+    const vbH = bb.height + 2 * VB_PAD;
+    svgVBRef.current = { x: vbX, y: vbY, w: vbW, h: vbH };
+    setSvgViewBox(`${vbX} ${vbY} ${vbW} ${vbH}`);
+    setSvgHeight(width * vbH / vbW);
+  }, [paddleShape, width]);
 
   const snap = useCallback((svgX, svgY) => {
     if (!samplesRef.current || !pathRef.current) return null;
@@ -367,17 +381,26 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
   const deleteStrip = (strip) => onChange(strips.filter(s => s !== strip));
 
   const mirrorStrip = (strip) => {
-    const mt = (t) => (1 - t) % 1;
+    if (!samplesRef.current || !pathRef.current || totalLength === 0) return;
+    const L = totalLength;
+    // Reflect across the paddle's vertical center line in path coordinate space
+    const cx = svgVBRef.current.x + svgVBRef.current.w / 2;
+    const pt1 = pathRef.current.getPointAtLength(strip.t1 * L);
+    const m1 = snapToPath(samplesRef.current, 2 * cx - pt1.x, pt1.y, pathRef.current, null);
+    let m2t = strip.t2;
+    if (strip.t2 != null) {
+      const pt2 = pathRef.current.getPointAtLength(strip.t2 * L);
+      const m2 = snapToPath(samplesRef.current, 2 * cx - pt2.x, pt2.y, pathRef.current, null);
+      m2t = m2.t;
+    }
     onChange([...strips, {
       ...strip,
-      t1: mt(strip.t1),
-      t2: strip.t2 != null ? mt(strip.t2) : strip.t2,
+      t1: m1.t,
+      t2: m2t,
       arcFraction: strip.arcFraction != null ? -strip.arcFraction : null,
       label: '',
     }]);
   };
-
-  const svgHeight = (width / VB_W) * VB_H;
 
   // Preserve original indices so edits and deletes target the right strip
   const indexedStrips = strips
@@ -402,29 +425,32 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     const ty = ptB.y - ptA.y;
     const n1 = { x: -ty, y: tx };
     const n2 = { x: ty, y: -tx };
-    const toCx = VB_W / 2 - pt.x;
-    const toCy = VB_H / 2 - pt.y;
+    const { x: vbX, y: vbY, w: vbW, h: vbH } = svgVBRef.current;
+    const paddleCx = vbX + vbW / 2;
+    const paddleCy = vbY + vbH / 2;
+    const toCx = paddleCx - pt.x;
+    const toCy = paddleCy - pt.y;
     const outward = (n1.x * toCx + n1.y * toCy) < 0 ? n1 : n2;
     const mag = Math.sqrt(outward.x ** 2 + outward.y ** 2);
     const nx = outward.x / mag;
     const ny = outward.y / mag;
 
     const OFFSET = 70;
-    const scaleX = width / (VB_W + 2 * VB_PAD);
-    const scaleY = svgHeight / (VB_H + 2 * VB_PAD);
+    const scaleX = width / vbW;
+    const scaleY = svgHeight / vbH;
     return {
-      x: (pt.x + nx * OFFSET + VB_PAD) * scaleX,
-      y: (pt.y + ny * OFFSET + VB_PAD) * scaleY,
+      x: (pt.x + nx * OFFSET - vbX) * scaleX,
+      y: (pt.y + ny * OFFSET - vbY) * scaleY,
     };
   };
 
   const popupOpen = pendingStrip !== null || editingIndex !== null;
 
   return (
-    <Box position="relative" userSelect="none">
+    <Box position="relative" userSelect="none" width={`${width}px`}>
       <svg
         ref={svgRef}
-        viewBox={`${-VB_PAD} ${-VB_PAD} ${VB_W + VB_PAD * 2} ${VB_H + VB_PAD * 2}`}
+        viewBox={svgViewBox}
         width={width}
         height={svgHeight}
         style={{ display: 'block', touchAction: 'none', cursor: readOnly ? 'default' : 'none' }}
