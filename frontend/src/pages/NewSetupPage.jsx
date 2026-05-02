@@ -18,7 +18,7 @@ const NewSetupPage = () => {
   const { paddles, fetchPaddles } = usePaddleStore();
   const { createSetup } = useSetupStore();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(searchParams.get('paddleId') ? 1 : 0);
   const [submitting, setSubmitting] = useState(false);
 
   // Form state
@@ -208,12 +208,12 @@ const NewSetupPage = () => {
                 bg="white"
                 boxShadow="0 4px 20px rgba(0,0,0,0.08)"
                 borderRadius={0}
-                p={4}
+                p={6}
               >
                 <SetupCanvas
                   strips={leadTapeStrips}
                   onChange={setLeadTapeStrips}
-                  width={220}
+                  width={320}
                   paddleShape={paddles.find(p => p._id === selectedPaddleId)?.shape}
                 />
               </Center>

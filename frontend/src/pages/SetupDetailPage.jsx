@@ -24,29 +24,40 @@ const SetupDetailPage = () => {
 
   const [setup, setSetup] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [liking, setLiking] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const controller = new AbortController();
     const load = async () => {
+      setFetchError(null);
       try {
-        const data = await api.get(`/api/setups/${setupId}`);
+        const data = await api.get(`/api/setups/${setupId}`, { signal: controller.signal });
         setSetup(data.data);
         setLikesCount(data.data.likesCount || 0);
         if (user) {
           setLiked(data.data.likes?.some(id => id === user.id || id?._id === user.id));
         }
-      } catch {
-        toast({ title: 'Setup not found', status: 'error' });
-        navigate('/community');
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        const isNotFound = err.message?.toLowerCase().includes('not found') || err.message?.includes('404');
+        if (isNotFound) {
+          toast({ title: 'Setup not found', status: 'error' });
+          navigate('/community');
+        } else {
+          setFetchError('Failed to load setup. Please try again.');
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     load();
-  }, [setupId, user]);
+    return () => controller.abort();
+  }, [setupId, user, retryCount]);
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -84,6 +95,25 @@ const SetupDetailPage = () => {
       >
         <Center minH="60vh">
           <Spinner size="xl" color="#2C5F7C" />
+        </Center>
+      </Box>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <Box minH="100vh" sx={{ '--color-bg': '#FAF9F6', background: 'var(--color-bg)' }}>
+        <Center minH="60vh" flexDirection="column" gap={4}>
+          <Text color="#6B6B6B" fontFamily='"Inter", sans-serif'>{fetchError}</Text>
+          <Button
+            borderRadius="full"
+            bg="#2C5F7C"
+            color="white"
+            _hover={{ bg: '#1e4a61' }}
+            onClick={() => { setFetchError(null); setLoading(true); setRetryCount(c => c + 1); }}
+          >
+            Retry
+          </Button>
         </Center>
       </Box>
     );
@@ -209,122 +239,141 @@ const SetupDetailPage = () => {
           </SimpleGrid>
 
           {/* Mod Details */}
-          <Box
-            bg="white"
-            borderLeft="3px solid var(--color-primary)"
-            boxShadow="0 4px 20px rgba(0,0,0,0.08)"
-            borderRadius={0}
-            p={5}
-          >
-            <Text
-              color="var(--color-text-primary)"
-              fontWeight="bold"
-              mb={4}
-              fontFamily="var(--font-body)"
-            >
-              Setup Details
-            </Text>
-            <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
-              <Box>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" fontFamily="var(--font-body)">Lead Tape</Text>
-                <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
-                  fontFamily="var(--font-body)">
-                  {setup.leadTapeTotalGrams > 0
-                    ? `${setup.leadTapeTotalGrams}g total (${setup.leadTapeStrips?.length} strip${setup.leadTapeStrips?.length !== 1 ? 's' : ''})`
-                    : 'None'}
+          {(() => {
+            const hasLeadTape = setup.leadTapeTotalGrams > 0;
+            const hasWeight = setup.totalWeightGrams > 0;
+            const hasOvergrip = !!setup.overgrip?.brand;
+            const hasUndergrip = !!setup.undergrip;
+            const hasEdgeGuard = !!setup.edgeGuard?.brand;
+            const hasStrips = setup.leadTapeStrips?.length > 0;
+            const hasNotes = !!setup.notes;
+            const hasAny = hasLeadTape || hasWeight || hasOvergrip || hasUndergrip || hasEdgeGuard || hasStrips || hasNotes;
+            if (!hasAny) return null;
+            return (
+              <Box
+                bg="white"
+                borderLeft="3px solid var(--color-primary)"
+                boxShadow="0 4px 20px rgba(0,0,0,0.08)"
+                borderRadius={0}
+                p={5}
+              >
+                <Text
+                  color="var(--color-text-primary)"
+                  fontWeight="bold"
+                  mb={4}
+                  fontFamily="var(--font-body)"
+                >
+                  Setup Details
                 </Text>
-              </Box>
-              <Box>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" fontFamily="var(--font-body)">Total Weight</Text>
-                <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
-                  fontFamily="var(--font-body)">
-                  {setup.totalWeightGrams > 0 ? `${setup.totalWeightGrams} oz` : '—'}
-                </Text>
-              </Box>
-              <Box>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" fontFamily="var(--font-body)">Overgrip</Text>
-                <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
-                  fontFamily="var(--font-body)">
-                  {setup.overgrip?.brand
-                    ? `${setup.overgrip.brand}${setup.overgrip?.count > 0 ? ` × ${setup.overgrip.count}` : ''}`
-                    : '—'}
-                </Text>
-              </Box>
-              <Box>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" fontFamily="var(--font-body)">Undergrip</Text>
-                <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
-                  fontFamily="var(--font-body)">{setup.undergrip || '—'}</Text>
-              </Box>
-              <Box>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" fontFamily="var(--font-body)">Edge Guard</Text>
-                <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
-                  fontFamily="var(--font-body)">{setup.edgeGuard?.brand || '—'}</Text>
-                {setup.edgeGuard?.notes && (
-                  <Text color="var(--color-text-secondary)" fontSize="xs"
-                    fontFamily="var(--font-body)">{setup.edgeGuard.notes}</Text>
+                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+                  {hasLeadTape && (
+                    <Box>
+                      <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                        letterSpacing="wide" fontFamily="var(--font-body)">Lead Tape</Text>
+                      <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
+                        fontFamily="var(--font-body)">
+                        {`${setup.leadTapeTotalGrams}g total (${setup.leadTapeStrips?.length} strip${setup.leadTapeStrips?.length !== 1 ? 's' : ''})`}
+                      </Text>
+                    </Box>
+                  )}
+                  {hasWeight && (
+                    <Box>
+                      <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                        letterSpacing="wide" fontFamily="var(--font-body)">Total Weight</Text>
+                      <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
+                        fontFamily="var(--font-body)">
+                        {`${setup.totalWeightGrams} oz`}
+                      </Text>
+                    </Box>
+                  )}
+                  {hasOvergrip && (
+                    <Box>
+                      <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                        letterSpacing="wide" fontFamily="var(--font-body)">Overgrip</Text>
+                      <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
+                        fontFamily="var(--font-body)">
+                        {`${setup.overgrip.brand}${setup.overgrip?.count > 0 ? ` × ${setup.overgrip.count}` : ''}`}
+                      </Text>
+                    </Box>
+                  )}
+                  {hasUndergrip && (
+                    <Box>
+                      <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                        letterSpacing="wide" fontFamily="var(--font-body)">Undergrip</Text>
+                      <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
+                        fontFamily="var(--font-body)">{setup.undergrip}</Text>
+                    </Box>
+                  )}
+                  {hasEdgeGuard && (
+                    <Box>
+                      <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                        letterSpacing="wide" fontFamily="var(--font-body)">Edge Guard</Text>
+                      <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
+                        fontFamily="var(--font-body)">{setup.edgeGuard.brand}</Text>
+                      {setup.edgeGuard?.notes && (
+                        <Text color="var(--color-text-secondary)" fontSize="xs"
+                          fontFamily="var(--font-body)">{setup.edgeGuard.notes}</Text>
+                      )}
+                    </Box>
+                  )}
+                </SimpleGrid>
+
+                {/* Per-strip breakdown */}
+                {hasStrips && (
+                  <Box mt={5}>
+                    <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                      letterSpacing="wide" mb={2} fontFamily="var(--font-body)">Lead Tape Strips</Text>
+                    <VStack spacing={2} align="stretch">
+                      {setup.leadTapeStrips.map((strip, i) => (
+                        <HStack
+                          key={i}
+                          bg="white"
+                          borderLeft="3px solid var(--color-primary)"
+                          boxShadow="0 1px 6px rgba(0,0,0,0.05)"
+                          px={3} py={2} spacing={4} flexWrap="wrap"
+                        >
+                          <Text color="var(--color-text-secondary)" fontSize="xs" minW="20px">#{i + 1}</Text>
+                          {strip.label && (
+                            <Box>
+                              <Text color="var(--color-text-secondary)" fontSize="xs">Position</Text>
+                              <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.label}</Text>
+                            </Box>
+                          )}
+                          {strip.lengthInches > 0 && (
+                            <Box>
+                              <Text color="var(--color-text-secondary)" fontSize="xs">Length</Text>
+                              <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.lengthInches} in</Text>
+                            </Box>
+                          )}
+                          {strip.densityGramsPerInch > 0 && (
+                            <Box>
+                              <Text color="var(--color-text-secondary)" fontSize="xs">Density</Text>
+                              <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.densityGramsPerInch} g/in</Text>
+                            </Box>
+                          )}
+                          {strip.weightGrams > 0 && (
+                            <Box>
+                              <Text color="var(--color-text-secondary)" fontSize="xs">Weight</Text>
+                              <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.weightGrams} g</Text>
+                            </Box>
+                          )}
+                        </HStack>
+                      ))}
+                    </VStack>
+                  </Box>
+                )}
+
+                {hasNotes && (
+                  <Box mt={4}>
+                    <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
+                      letterSpacing="wide" fontFamily="var(--font-body)">Notes</Text>
+                    <Text color="var(--color-text-primary)" fontSize="sm" mt={1}
+                      fontFamily="var(--font-body)">{setup.notes}</Text>
+                  </Box>
                 )}
               </Box>
-            </SimpleGrid>
-
-            {/* Per-strip breakdown */}
-            {setup.leadTapeStrips?.length > 0 && (
-              <Box mt={5}>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" mb={2} fontFamily="var(--font-body)">Lead Tape Strips</Text>
-                <VStack spacing={2} align="stretch">
-                  {setup.leadTapeStrips.map((strip, i) => (
-                    <HStack
-                      key={i}
-                      bg="white"
-                      borderLeft="3px solid var(--color-primary)"
-                      boxShadow="0 1px 6px rgba(0,0,0,0.05)"
-                      px={3} py={2} spacing={4} flexWrap="wrap"
-                    >
-                      <Text color="var(--color-text-secondary)" fontSize="xs" minW="20px">#{i + 1}</Text>
-                      {strip.label && (
-                        <Box>
-                          <Text color="var(--color-text-secondary)" fontSize="xs">Position</Text>
-                          <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.label}</Text>
-                        </Box>
-                      )}
-                      {strip.lengthInches > 0 && (
-                        <Box>
-                          <Text color="var(--color-text-secondary)" fontSize="xs">Length</Text>
-                          <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.lengthInches} in</Text>
-                        </Box>
-                      )}
-                      {strip.densityGramsPerInch > 0 && (
-                        <Box>
-                          <Text color="var(--color-text-secondary)" fontSize="xs">Density</Text>
-                          <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.densityGramsPerInch} g/in</Text>
-                        </Box>
-                      )}
-                      {strip.weightGrams > 0 && (
-                        <Box>
-                          <Text color="var(--color-text-secondary)" fontSize="xs">Weight</Text>
-                          <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}>{strip.weightGrams} g</Text>
-                        </Box>
-                      )}
-                    </HStack>
-                  ))}
-                </VStack>
-              </Box>
-            )}
-
-            {setup.notes && (
-              <Box mt={4}>
-                <Text color="var(--color-text-secondary)" fontSize="xs" textTransform="uppercase"
-                  letterSpacing="wide" fontFamily="var(--font-body)">Notes</Text>
-                <Text color="var(--color-text-primary)" fontSize="sm" mt={1}
-                  fontFamily="var(--font-body)">{setup.notes}</Text>
-              </Box>
-            )}
-          </Box>
+            );
+          })()}
 
           {/* Why this setup */}
           {setup.setupReasoning && (

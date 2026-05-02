@@ -60,6 +60,7 @@ const SetupCard = ({ setup, compact = false }) => {
         <SetupCanvas
           strips={setup.leadTapeStrips || []}
           readOnly
+          showLabels={false}
           width={canvasWidth}
           paddleShape={setup.paddle?.shape}
         />

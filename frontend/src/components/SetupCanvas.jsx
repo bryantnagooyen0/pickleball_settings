@@ -172,7 +172,7 @@ const StripDetailsForm = ({
   </Box>
 );
 
-const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, paddleShape = 'hybrid' }) => {
+const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, paddleShape = 'hybrid', showLabels = true }) => {
   const uid = useId();
   const clipId = `pc-${uid}`.replace(/:/g, '');
   const svgRef = useRef(null);
@@ -460,69 +460,71 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
 
   const popupOpen = pendingStrip !== null || editingIndex !== null;
 
+  // Group strips by quadrant for the dedicated label rows
+  const quadrantStrips = { 'top-left': [], 'top-right': [], 'bottom-left': [], 'bottom-right': [] };
+  if (!readOnly && !popupOpen && !firstDot) {
+    indexedStrips.forEach(({ strip, originalIndex }) => {
+      const corner = getStripCorner(strip);
+      quadrantStrips[corner].push({ strip, originalIndex });
+    });
+  }
+
+  const renderLabelChip = ({ strip, originalIndex }) => {
+    const isEditing = editingIndex === originalIndex;
+    return (
+      <HStack
+        key={originalIndex}
+        bg={isEditing ? 'gray.600' : 'gray.700'}
+        px={2} py={1}
+        borderRadius="md"
+        spacing={1}
+        zIndex={6}
+        boxShadow="0 2px 8px rgba(0,0,0,0.45)"
+        outline={isEditing ? '1px solid' : 'none'}
+        outlineColor="orange.400"
+        cursor="pointer"
+        onClick={(e) => { e.stopPropagation(); openEdit(originalIndex); }}
+        whiteSpace="nowrap"
+      >
+        <Box w="8px" h="8px" bg={isEditing ? '#FFB347' : '#FF3B30'} borderRadius="sm" flexShrink={0} />
+        <Text color="gray.200" fontSize="10px" fontWeight="medium">
+          {strip.label || `Strip ${originalIndex + 1}`}
+          {strip.weightGrams > 0 && ` · ${strip.weightGrams}g`}
+        </Text>
+        <HStack spacing={0} onClick={e => e.stopPropagation()}>
+          <IconButton size="xs" icon={<EditIcon boxSize="9px" />} variant="ghost" colorScheme="orange"
+            aria-label="Edit strip" minW="18px" h="18px"
+            onClick={() => openEdit(originalIndex)} />
+          <IconButton size="xs" icon={<RepeatIcon boxSize="9px" />} variant="ghost" colorScheme="blue"
+            aria-label="Mirror strip" minW="18px" h="18px"
+            onClick={() => mirrorStrip(strip)} />
+          <IconButton size="xs" icon={<DeleteIcon boxSize="9px" />} variant="ghost" colorScheme="red"
+            aria-label="Remove strip" minW="18px" h="18px"
+            onClick={() => deleteStrip(strip)} />
+        </HStack>
+      </HStack>
+    );
+  };
+
+  const hasTopLabels = quadrantStrips['top-left'].length > 0 || quadrantStrips['top-right'].length > 0;
+  const hasBottomLabels = quadrantStrips['bottom-left'].length > 0 || quadrantStrips['bottom-right'].length > 0;
+
   return (
-    /* Outer box fills the parent container width — strip corner boxes anchor to its corners */
-    <Box position="relative" userSelect="none" width="100%">
+    <Box userSelect="none" width="100%">
 
-      {/* Strip info boxes anchored to corners of the outer (full-width) container */}
-      {!readOnly && !popupOpen && !firstDot && (() => {
-        const BOX_H = 28;
-        const BOX_GAP = 4;
-        const MARGIN = 8;
-        const cornerIdx = {};
-        return indexedStrips.map(({ strip, originalIndex }) => {
-          const corner = getStripCorner(strip);
-          if (cornerIdx[corner] === undefined) cornerIdx[corner] = 0;
-          const stackIdx = cornerIdx[corner]++;
-          const isEditing = editingIndex === originalIndex;
-          const isTop = corner.startsWith('top');
-          const isLeft = corner.endsWith('left');
-          return (
-            <HStack
-              key={originalIndex}
-              position="absolute"
-              {...(isTop
-                ? { top: `${MARGIN + stackIdx * (BOX_H + BOX_GAP)}px` }
-                : { top: `${Math.round(svgHeight * 0.72) + stackIdx * (BOX_H + BOX_GAP)}px` }
-              )}
-              {...(isLeft
-                ? { left: `${MARGIN}px` }
-                : { right: `${MARGIN}px` }
-              )}
-              bg={isEditing ? 'gray.600' : 'gray.700'}
-              px={2} py={1}
-              borderRadius="md"
-              spacing={1}
-              zIndex={6}
-              boxShadow="0 2px 8px rgba(0,0,0,0.45)"
-              outline={isEditing ? '1px solid' : 'none'}
-              outlineColor="orange.400"
-              cursor="pointer"
-              onClick={(e) => { e.stopPropagation(); openEdit(originalIndex); }}
-              whiteSpace="nowrap"
-            >
-              <Box w="8px" h="8px" bg={isEditing ? '#FFB347' : '#FF3B30'} borderRadius="sm" flexShrink={0} />
-              <Text color="gray.200" fontSize="10px" fontWeight="medium">
-                {strip.label || `Strip ${originalIndex + 1}`}
-                {strip.weightGrams > 0 && ` · ${strip.weightGrams}g`}
-              </Text>
-              <HStack spacing={0} onClick={e => e.stopPropagation()}>
-                <IconButton size="xs" icon={<EditIcon boxSize="9px" />} variant="ghost" colorScheme="orange"
-                  aria-label="Edit strip" minW="18px" h="18px"
-                  onClick={() => openEdit(originalIndex)} />
-                <IconButton size="xs" icon={<RepeatIcon boxSize="9px" />} variant="ghost" colorScheme="blue"
-                  aria-label="Mirror strip" minW="18px" h="18px"
-                  onClick={() => mirrorStrip(strip)} />
-                <IconButton size="xs" icon={<DeleteIcon boxSize="9px" />} variant="ghost" colorScheme="red"
-                  aria-label="Remove strip" minW="18px" h="18px"
-                  onClick={() => deleteStrip(strip)} />
-              </HStack>
-            </HStack>
-          );
-        });
-      })()}
+      {/* Top label row — left and right quadrants side by side, never overlaps paddle */}
+      {hasTopLabels && (
+        <HStack justify="space-between" align="flex-start" width="100%" mb={2} px={1}>
+          <VStack align="flex-start" spacing="3px">
+            {quadrantStrips['top-left'].map(renderLabelChip)}
+          </VStack>
+          <VStack align="flex-end" spacing="3px">
+            {quadrantStrips['top-right'].map(renderLabelChip)}
+          </VStack>
+        </HStack>
+      )}
 
-      {/* Inner box: SVG-sized, centered — Mirror buttons are positioned relative to this */}
+      {/* Inner box: SVG-sized, centered */}
       <Box position="relative" width={`${width}px`} mx="auto">
         <svg
           ref={svgRef}
@@ -593,36 +595,33 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
           )}
         </svg>
 
-        {/* Mirror buttons — positioned relative to the inner SVG box */}
-        {!readOnly && !popupOpen && !firstDot && indexedStrips.map(({ strip, originalIndex }) => {
+        {/* Read-only strip labels */}
+        {readOnly && showLabels && indexedStrips.map(({ strip, originalIndex }) => {
           const mid = getMidDomPoint(strip, 70);
           if (!mid) return null;
+          const label = strip.label || `#${originalIndex + 1}`;
           return (
-            <Button
+            <Box
               key={originalIndex}
               position="absolute"
               left={`${mid.x}px`}
               top={`${mid.y}px`}
               transform="translate(-50%, -50%)"
-              size="xs"
-              bg="blue.500"
+              bg="rgba(44,95,124,0.92)"
               color="white"
               borderRadius="full"
               fontSize="10px"
               fontWeight="bold"
-              letterSpacing="0.04em"
+              letterSpacing="0.03em"
               px={2}
-              py={1}
-              h="auto"
-              minW="unset"
+              py="2px"
+              pointerEvents="none"
               zIndex={5}
-              boxShadow="0 2px 6px rgba(0,0,0,0.5)"
-              _hover={{ bg: 'blue.400', transform: 'translate(-50%, -50%) scale(1.08)' }}
-              transition="all 0.15s ease"
-              onClick={(e) => { e.stopPropagation(); mirrorStrip(strip); }}
+              boxShadow="0 1px 4px rgba(0,0,0,0.4)"
+              whiteSpace="nowrap"
             >
-              Mirror
-            </Button>
+              {label}
+            </Box>
           );
         })}
 
@@ -654,13 +653,32 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
             onCancel={cancelEdit}
           />
         )}
+        {!readOnly && (
+          <Text color="gray.500" fontSize="xs" mt={1} textAlign="center">
+            Click two points on the paddle edge to place a tape strip
+          </Text>
+        )}
       </Box>
 
-      {!readOnly && (
-        <Text color="gray.500" fontSize="xs" mt={1} textAlign="center">
-          Click two points on the paddle edge to place a tape strip
-        </Text>
-      )}
+      {/* Bottom label row — visually shifted up to sit near the strips, layout unaffected */}
+      {hasBottomLabels && (() => {
+        const allBottom = [...quadrantStrips['bottom-left'], ...quadrantStrips['bottom-right']];
+        const mids = allBottom.map(({ strip }) => getMidDomPoint(strip, 80)).filter(Boolean);
+        const maxStripY = mids.length > 0 ? Math.max(...mids.map(m => m.y)) : svgHeight * 0.65;
+        const translateUp = svgHeight - maxStripY - 8;
+        return (
+          <HStack justify="space-between" align="flex-end" width="100%"
+            mt={2} px={1}
+            style={{ transform: `translateY(-${translateUp}px)` }}>
+            <VStack align="flex-start" spacing="3px">
+              {quadrantStrips['bottom-left'].map(renderLabelChip)}
+            </VStack>
+            <VStack align="flex-end" spacing="3px">
+              {quadrantStrips['bottom-right'].map(renderLabelChip)}
+            </VStack>
+          </HStack>
+        );
+      })()}
     </Box>
   );
 };
