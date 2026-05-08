@@ -12,6 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
 import SetupCanvas from '../components/SetupCanvas';
 import CommentSection from '../components/CommentSection';
+import ShareButton from '../components/ShareButton';
 
 const SetupDetailPage = () => {
   const { setupId } = useParams();
@@ -170,8 +171,9 @@ const SetupDetailPage = () => {
               </Text>
               <Box w="48px" h="3px" bg="var(--color-secondary)" mt={2} />
             </Box>
-            {isAuthor && (
-              <HStack>
+            <HStack>
+              <ShareButton />
+              {isAuthor && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -181,8 +183,8 @@ const SetupDetailPage = () => {
                 >
                   Delete
                 </Button>
-              </HStack>
-            )}
+              )}
+            </HStack>
           </HStack>
 
           {/* Main content: canvas + photo */}
