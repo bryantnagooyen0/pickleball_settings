@@ -65,11 +65,72 @@ export const validatePlayer = (req, res, next) => {
   next();
 };
 
+const tapeStripSchema = Joi.object({
+  t1: Joi.number().min(0).max(1).optional(),
+  t2: Joi.number().min(0).max(1).optional(),
+  arcFraction: Joi.number().allow(null).optional(),
+  weightGrams: Joi.number().min(0).max(500).optional(),
+  lengthInches: Joi.number().min(0).max(100).optional(),
+  densityGramsPerInch: Joi.number().min(0).max(100).optional(),
+  label: Joi.string().max(50).allow('').optional(),
+});
+
+// Setup validation schema (create)
+export const validateSetup = (req, res, next) => {
+  const schema = Joi.object({
+    paddle: Joi.string().required(),
+    leadTapeStrips: Joi.array().items(tapeStripSchema).max(50).optional(),
+    leadTapeTotalGrams: Joi.number().min(0).max(500).optional(),
+    overgrip: Joi.object({
+      brand: Joi.string().max(100).allow('').optional(),
+      count: Joi.number().integer().min(0).max(10).optional(),
+    }).optional(),
+    undergrip: Joi.string().max(100).allow('').optional(),
+    edgeGuard: Joi.object({
+      brand: Joi.string().max(100).allow('').optional(),
+      notes: Joi.string().max(500).allow('').optional(),
+    }).optional(),
+    totalWeightGrams: Joi.number().min(0).max(1000).optional(),
+    setupReasoning: Joi.string().max(2000).allow('').optional(),
+    notes: Joi.string().max(1000).allow('').optional(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ success: false, message: error.details[0].message });
+  }
+  next();
+};
+
+// Setup validation schema (update — paddle not re-settable)
+export const validateSetupUpdate = (req, res, next) => {
+  const schema = Joi.object({
+    leadTapeStrips: Joi.array().items(tapeStripSchema).max(50).optional(),
+    leadTapeTotalGrams: Joi.number().min(0).max(500).optional(),
+    overgrip: Joi.object({
+      brand: Joi.string().max(100).allow('').optional(),
+      count: Joi.number().integer().min(0).max(10).optional(),
+    }).optional(),
+    edgeGuard: Joi.object({
+      brand: Joi.string().max(100).allow('').optional(),
+      notes: Joi.string().max(500).allow('').optional(),
+    }).optional(),
+    totalWeightGrams: Joi.number().min(0).max(1000).optional(),
+    notes: Joi.string().max(1000).allow('').optional(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ success: false, message: error.details[0].message });
+  }
+  next();
+};
+
 // Comment validation schema
 export const validateComment = (req, res, next) => {
   const schema = Joi.object({
     content: Joi.string().trim().min(1).max(1000).required(),
-    targetType: Joi.string().valid('player', 'paddle').required(),
+    targetType: Joi.string().valid('player', 'paddle', 'setup').required(),
     targetId: Joi.string().required(),
     parentCommentId: Joi.string().allow(null).optional()
   });

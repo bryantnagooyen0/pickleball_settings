@@ -35,8 +35,6 @@ const setupSchema = new mongoose.Schema(
     setupReasoning: { type: String, default: '', maxlength: 2000 },
     notes: { type: String, default: '', maxlength: 1000 },
 
-    photoUrl: { type: String, default: '' },
-
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     likesCount: { type: Number, default: 0 },
 

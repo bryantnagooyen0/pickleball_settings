@@ -77,7 +77,7 @@ export const getSetup = async (req, res) => {
 };
 
 export const createSetup = async (req, res) => {
-  const { paddle, leadTapeStrips, leadTapeTotalGrams, overgrip, edgeGuard, totalWeightGrams, notes, photoUrl } = req.body;
+  const { paddle, leadTapeStrips, leadTapeTotalGrams, overgrip, edgeGuard, totalWeightGrams, notes } = req.body;
   if (!paddle) {
     return res.status(400).json({ success: false, message: 'Paddle is required' });
   }
@@ -92,7 +92,6 @@ export const createSetup = async (req, res) => {
       edgeGuard: edgeGuard || {},
       totalWeightGrams: totalWeightGrams || 0,
       notes: notes || '',
-      photoUrl: photoUrl || '',
     });
     await setup.save();
     const populated = await setup.populate('paddle', 'name brand model shape image');
@@ -115,7 +114,7 @@ export const updateSetup = async (req, res) => {
     if (setup.author.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
-    const allowed = ['leadTapeStrips', 'leadTapeTotalGrams', 'overgrip', 'edgeGuard', 'totalWeightGrams', 'notes', 'photoUrl'];
+    const allowed = ['leadTapeStrips', 'leadTapeTotalGrams', 'overgrip', 'edgeGuard', 'totalWeightGrams', 'notes'];
     allowed.forEach(field => { if (req.body[field] !== undefined) setup[field] = req.body[field]; });
     await setup.save();
     res.status(200).json({ success: true, data: setup });

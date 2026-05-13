@@ -64,20 +64,6 @@ const SetupCard = ({ setup, compact = false }) => {
           width={canvasWidth}
           paddleShape={setup.paddle?.shape}
         />
-        {setup.photoUrl && (
-          <Badge
-            position="absolute"
-            top={2}
-            right={2}
-            bg={BRAND.accent}
-            color="white"
-            fontSize="xs"
-            borderRadius="0"
-            px={1.5}
-          >
-            📷
-          </Badge>
-        )}
       </Box>
 
       {/* Info */}

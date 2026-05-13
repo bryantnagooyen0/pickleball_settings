@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Container, VStack, HStack, Text, Heading, Button, Badge,
-  Spinner, Center, Image, SimpleGrid, Divider, useToast, AlertDialog,
+  Spinner, Center, SimpleGrid, Divider, useToast, AlertDialog,
   AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent,
   AlertDialogOverlay, useDisclosure,
 } from '@chakra-ui/react';
@@ -187,58 +187,33 @@ const SetupDetailPage = () => {
             </HStack>
           </HStack>
 
-          {/* Main content: canvas + photo */}
-          <SimpleGrid columns={{ base: 1, md: setup.photoUrl ? 2 : 1 }} spacing={6}>
-            <Box>
-              <Text
-                color="var(--color-text-secondary)"
-                fontSize="xs"
-                mb={2}
-                fontWeight="bold"
-                fontFamily="var(--font-body)"
-                textTransform="uppercase"
-                letterSpacing="0.05em"
-              >
-                Lead Tape Placement
-              </Text>
-              <Center
-                bg="white"
-                boxShadow="0 4px 20px rgba(0,0,0,0.08)"
-                borderRadius={0}
-                p={4}
-              >
-                <SetupCanvas
-                  strips={setup.leadTapeStrips || []}
-                  readOnly
-                  width={220}
-                  paddleShape={setup.paddle?.shape}
-                />
-              </Center>
-            </Box>
-            {setup.photoUrl && (
-              <Box>
-                <Text
-                  color="var(--color-text-secondary)"
-                  fontSize="xs"
-                  mb={2}
-                  fontWeight="bold"
-                  fontFamily="var(--font-body)"
-                  textTransform="uppercase"
-                  letterSpacing="0.05em"
-                >
-                  Setup Photo
-                </Text>
-                <Image
-                  src={setup.photoUrl}
-                  alt="Setup photo"
-                  borderRadius={0}
-                  maxH="360px"
-                  objectFit="cover"
-                  w="100%"
-                />
-              </Box>
-            )}
-          </SimpleGrid>
+          {/* Main content: canvas */}
+          <Box>
+            <Text
+              color="var(--color-text-secondary)"
+              fontSize="xs"
+              mb={2}
+              fontWeight="bold"
+              fontFamily="var(--font-body)"
+              textTransform="uppercase"
+              letterSpacing="0.05em"
+            >
+              Lead Tape Placement
+            </Text>
+            <Center
+              bg="white"
+              boxShadow="0 4px 20px rgba(0,0,0,0.08)"
+              borderRadius={0}
+              p={4}
+            >
+              <SetupCanvas
+                strips={setup.leadTapeStrips || []}
+                readOnly
+                width={220}
+                paddleShape={setup.paddle?.shape}
+              />
+            </Center>
+          </Box>
 
           {/* Mod Details */}
           {(() => {

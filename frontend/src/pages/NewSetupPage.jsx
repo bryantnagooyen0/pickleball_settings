@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Container, VStack, HStack, Text, Heading, Button, Input,
   Textarea, FormControl, FormLabel, useToast, Spinner,
-  Center, Progress, Image,
+  Center, Progress,
 } from '@chakra-ui/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePaddleStore } from '../store/paddle';
 import { useSetupStore } from '../store/setup';
 import SetupCanvas from '../components/SetupCanvas';
 
-const STEPS = ['Select Paddle', 'Lead Tape', 'Other Mods', 'Photo & Submit'];
+const STEPS = ['Select Paddle', 'Lead Tape', 'Other Mods', 'Review & Submit'];
 
 const NewSetupPage = () => {
   const navigate = useNavigate();
@@ -31,9 +31,6 @@ const NewSetupPage = () => {
   const [totalWeightGrams, setTotalWeightGrams] = useState('');
   const [notes, setNotes] = useState('');
   const [setupReasoning, setSetupReasoning] = useState('');
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState('');
-
   useEffect(() => { fetchPaddles(); }, []);
 
   const leadTapeTotalGrams = leadTapeStrips.reduce((sum, s) => sum + (s.weightGrams || 0), 0);
@@ -42,15 +39,6 @@ const NewSetupPage = () => {
     p.name.toLowerCase().includes(paddleSearch.toLowerCase()) ||
     p.brand.toLowerCase().includes(paddleSearch.toLowerCase())
   );
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setPhotoFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setPhotoPreview(ev.target.result);
-    reader.readAsDataURL(file);
-  };
 
   const handleSubmit = async () => {
     if (!selectedPaddleId) {
@@ -68,7 +56,6 @@ const NewSetupPage = () => {
       totalWeightGrams: parseFloat(totalWeightGrams) || 0,
       notes,
       setupReasoning,
-      photoUrl: photoPreview || '',
     });
     setSubmitting(false);
     if (result.success) {
@@ -320,27 +307,9 @@ const NewSetupPage = () => {
             </VStack>
           )}
 
-          {/* Step 3: Photo & Submit */}
+          {/* Step 3: Review & Submit */}
           {step === 3 && (
             <VStack spacing={4} align="stretch">
-              <FormControl>
-                <FormLabel color="var(--color-text-primary)" fontWeight={600} fontSize="sm"
-                  fontFamily="var(--font-body)">
-                  Photo of your setup (optional)
-                </FormLabel>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  bg="white"
-                  color="var(--color-text-primary)"
-                  borderColor="gray.300"
-                  p={1}
-                />
-              </FormControl>
-              {photoPreview && (
-                <Image src={photoPreview} borderRadius={0} maxH="200px" objectFit="cover" />
-              )}
               <Box
                 bg="white"
                 borderLeft="3px solid var(--color-primary)"
