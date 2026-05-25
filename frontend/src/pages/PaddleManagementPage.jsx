@@ -40,6 +40,7 @@ import { usePlayerStore } from '../store/player';
 import { SearchIcon, EditIcon, DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, useAnimation } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -828,6 +829,19 @@ const PaddleManagementPage = () => {
       minH="100vh"
       position="relative"
     >
+      <SEO
+        title="Paddles"
+        description="Browse the complete pickleball paddle database. Compare specs, shapes, core materials, and find which pros use each paddle."
+        url="/paddles"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'Pickleball Paddle Database',
+          description:
+            'Complete database of professional-grade pickleball paddles with full specifications',
+          url: 'https://www.pickleballsettings.com/paddles',
+        }}
+      />
       {/* Subtle background gradient */}
       <Box
         position="fixed"

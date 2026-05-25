@@ -32,6 +32,7 @@ import PlayerCard from '../components/PlayerCard';
 import { SearchIcon } from '@chakra-ui/icons';
 import { FaFilter } from 'react-icons/fa';
 import { motion, useInView } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -138,13 +139,6 @@ const Players = () => {
     fetchPlayers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only fetch once on mount - fetchPlayers is stable from Zustand
-
-  useEffect(() => {
-    document.title = 'Pickleball Settings';
-    return () => {
-      document.title = 'Pickleball Settings';
-    };
-  }, []);
 
   useEffect(() => {
     sessionStorage.removeItem('restorePaddleListScroll');
@@ -283,7 +277,21 @@ const Players = () => {
   ).length;
 
   return (
-    <Box
+    <>
+      <SEO
+        title="Pro Players"
+        description="Browse all professional pickleball players and their equipment settings. Discover what paddles, shoes, and gear the pros use."
+        url="/players"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'Professional Pickleball Players',
+          description:
+            'Complete database of professional pickleball player equipment settings',
+          url: 'https://www.pickleballsettings.com/players',
+        }}
+      />
+      <Box
       sx={{
         '--font-display': '"Merriweather", serif',
         '--font-body': '"Inter", sans-serif',
@@ -1046,7 +1054,8 @@ const Players = () => {
           </DrawerContent>
         </Drawer>
       </Container>
-    </Box>
+      </Box>
+    </>
   );
 };
 
