@@ -16,10 +16,6 @@ import SignupPage from './pages/SignupPage';
 import AccountPage from './pages/AccountPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import LegalNoticePage from './pages/LegalNoticePage';
-import CommunityPage from './pages/CommunityPage';
-import PaddleSetupsPage from './pages/PaddleSetupsPage';
-import SetupDetailPage from './pages/SetupDetailPage';
-import NewSetupPage from './pages/NewSetupPage';
 import Footer from './components/Footer';
 import { useAuth } from './hooks/useAuth';
 import { keepAlive } from './utils/api';
@@ -81,10 +77,6 @@ function App() {
           <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path='/signup' element={<PublicRoute><SignupPage /></PublicRoute>} />
           <Route path='/account' element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
-          <Route path='/community' element={<CommunityPage />} />
-          <Route path='/community/paddle/:paddleId' element={<PaddleSetupsPage />} />
-          <Route path='/community/new' element={<ProtectedRoute><NewSetupPage /></ProtectedRoute>} />
-          <Route path='/setup/:setupId' element={<SetupDetailPage />} />
           <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
           <Route path='/legal-notice' element={<LegalNoticePage />} />
         </Routes>

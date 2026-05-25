@@ -5,7 +5,6 @@ import { connectDB } from './config/db.js';
 import playerRoutes from './routes/player.route.js';
 import paddleRoutes from './routes/paddle.route.js';
 import commentRoutes from './routes/comment.route.js';
-import setupRoutes from './routes/setup.route.js';
 import userRoutes from './controllers/users_controller.mjs';
 import sitemapRoute from './routes/sitemap.route.js';
 import cors from 'cors';
@@ -90,7 +89,6 @@ app.use('/api/players', playerRoutes);
 app.use('/api/paddles', paddleRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/setups', setupRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
