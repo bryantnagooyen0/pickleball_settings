@@ -63,6 +63,12 @@ export const updatePlayer = async (req, res) => {
       .status(404)
       .json({ success: false, message: 'Invalid Player Id' });
   }
+
+  // Stamp updatedAt server-side so client cannot forge the timestamp
+  if (player.sourceInfo && (player.sourceInfo.label || player.sourceInfo.url)) {
+    player.sourceInfo.updatedAt = new Date();
+  }
+
   try {
     const updatedPlayer = await Player.findByIdAndUpdate(id, player, {
       new: true,
