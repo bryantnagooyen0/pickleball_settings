@@ -550,6 +550,64 @@ const PlayerDetailPage = () => {
                     ]}
                   />
                 </VStack>
+
+                {/* Source Info Footer */}
+                {player.sourceInfo?.updatedAt && (
+                  <Box
+                    borderTop="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.08)"
+                    pt={4}
+                    mt={4}
+                    display="flex"
+                    alignItems="flex-start"
+                    gap={3}
+                  >
+                    <Text fontSize="md" color="var(--color-text-secondary)" mt="1px" flexShrink={0}>
+                      🕐
+                    </Text>
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        fontWeight={500}
+                        color="var(--color-text-primary)"
+                        fontFamily="var(--font-body)"
+                      >
+                        Last updated{' '}
+                        {new Date(player.sourceInfo.updatedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </Text>
+                      <Text
+                        fontSize="xs"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        mt={1}
+                      >
+                        Source:{' '}
+                        {player.sourceInfo.url ? (
+                          <Box
+                            as="a"
+                            href={player.sourceInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            color="var(--color-primary)"
+                            textDecoration="underline"
+                            fontWeight={500}
+                            _hover={{ color: 'var(--color-accent)' }}
+                          >
+                            {player.sourceInfo.label} ↗
+                          </Box>
+                        ) : (
+                          <Box as="span" color="var(--color-text-primary)" fontWeight={500}>
+                            {player.sourceInfo.label}
+                          </Box>
+                        )}
+                      </Text>
+                    </Box>
+                  </Box>
+                )}
               </Box>
 
               {/* Action Buttons */}
