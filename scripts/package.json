@@ -2,12 +2,14 @@
   "name": "pickleball-scraper",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.6.0"
+  },
   "scripts": {
     "scrape": "node --env-file=.env scrape-paddles.js",
     "test": "node --test"
   },
   "dependencies": {
-    "playwright": "^1.44.0",
-    "dotenv": "^16.4.5"
+    "playwright": "^1.44.0"
   }
 }
