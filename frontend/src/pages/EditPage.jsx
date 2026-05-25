@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Heading,
   Input,
   Textarea,
@@ -25,6 +26,8 @@ const EditPage = () => {
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [selectedPaddle, setSelectedPaddle] = useState(null);
+  const [sourceLabel, setSourceLabel] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
   const [player, setPlayer] = useState({
     name: '',
     paddle: '',
@@ -76,6 +79,11 @@ const EditPage = () => {
         const result = await api.get(`/api/players/${playerId}`);
         setPlayer(result.data);
 
+        if (result.data.sourceInfo) {
+          setSourceLabel(result.data.sourceInfo.label || '');
+          setSourceUrl(result.data.sourceInfo.url || '');
+        }
+
         // Set selected paddle if player has paddle data
         if (result.data.paddle) {
           setSelectedPaddle({
@@ -112,7 +120,24 @@ const EditPage = () => {
   }, [playerId, navigate, toast]);
 
   const handleUpdatePlayer = async () => {
-    const { success, message } = await updatePlayer(playerId, player);
+    // Validate: URL requires a label
+    if (sourceUrl && !sourceLabel) {
+      toast({
+        title: 'Source label required',
+        description: 'Please add a source label when providing a source URL.',
+        status: 'warning',
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Build payload — only include sourceInfo if label is present
+    const payload = { ...player };
+    if (sourceLabel) {
+      payload.sourceInfo = { label: sourceLabel, url: sourceUrl };
+    }
+
+    const { success, message } = await updatePlayer(playerId, payload);
     if (!success) {
       toast({
         title: 'Error',
@@ -410,6 +435,39 @@ const EditPage = () => {
                 onChange={e => setPlayer({ ...player, additionalModificationImage: e.target.value })}
               />
             </FormControl>
+
+            <Divider my={2} />
+
+            <Box w='full'>
+              <Text
+                fontSize='sm'
+                fontWeight={700}
+                textTransform='uppercase'
+                letterSpacing='0.05em'
+                color='gray.500'
+                mb={4}
+              >
+                Source Update
+              </Text>
+              <VStack spacing={4}>
+                <FormControl>
+                  <FormLabel>Source Label</FormLabel>
+                  <Input
+                    placeholder='e.g. PPA tournament footage, Player Instagram'
+                    value={sourceLabel}
+                    onChange={e => setSourceLabel(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Source URL (optional)</FormLabel>
+                  <Input
+                    placeholder='e.g. https://youtube.com/...'
+                    value={sourceUrl}
+                    onChange={e => setSourceUrl(e.target.value)}
+                  />
+                </FormControl>
+              </VStack>
+            </Box>
 
             <Button colorScheme='blue' onClick={handleUpdatePlayer} w='full'>
               Update Player
