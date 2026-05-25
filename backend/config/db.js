@@ -1,4 +1,11 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Node.js on Windows falls back to TCP for SRV queries, which some routers block.
+// Use public DNS servers that support TCP to ensure mongodb+srv:// works locally.
+if (process.env.NODE_ENV !== 'production') {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+}
 
 export const connectDB = async () => {
   try {
