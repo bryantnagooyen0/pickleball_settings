@@ -70,7 +70,7 @@ const PlayerDetailPage = () => {
   // Fire-and-forget: increment view count each time a player page is opened.
   // Failures are silently swallowed so a network error never breaks the page.
   useEffect(() => {
-    api.post(`/api/players/${playerId}/view`).catch(() => {});
+    api.post(`/api/players/${playerId}/view`, {}).catch(() => {});
   }, [playerId]);
 
   useEffect(() => {
