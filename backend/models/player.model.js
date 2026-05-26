@@ -130,6 +130,10 @@ const playerSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    viewCount: {
+      type: Number,
+      default: 0,
+    },
     sourceInfo: {
       label: {
         type: String,
