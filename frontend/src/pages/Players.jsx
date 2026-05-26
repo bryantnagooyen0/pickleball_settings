@@ -174,6 +174,22 @@ const Players = () => {
     localStorage.setItem('playerFilters', JSON.stringify(filters));
   }, [filters]);
 
+  // Recently updated players (top 6 sorted by updatedAt)
+  const recentlyUpdated = useMemo(() =>
+    [...players]
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 6),
+    [players]
+  );
+
+  // Trending players (top 6 sorted by viewCount)
+  const trending = useMemo(() =>
+    [...players]
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .slice(0, 6),
+    [players]
+  );
+
   // Filter players based on search query and filters
   const filteredPlayers = useMemo(() => {
     let filtered = players;
