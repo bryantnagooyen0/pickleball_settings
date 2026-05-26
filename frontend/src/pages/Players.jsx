@@ -320,7 +320,7 @@ const Players = () => {
   };
 
   const clearFilters = () => {
-    const clearedFilters = {
+    setFilters({
       paddle: '',
       paddleThickness: '',
       paddleShape: '',
@@ -331,9 +331,8 @@ const Players = () => {
       totalWeight: '',
       weightComplete: '',
       sponsor: '',
-    };
-    setFilters(clearedFilters);
-    localStorage.setItem('playerFilters', JSON.stringify(clearedFilters));
+    });
+    setSearchQuery('');
   };
 
   const activeFiltersCount = Object.values(filters).filter(
@@ -1150,9 +1149,9 @@ const Players = () => {
                   >
                     Apply Filters
                   </Button>
-                  <Button 
-                    variant='outline' 
-                    onClick={clearFilters} 
+                  <Button
+                    variant='outline'
+                    onClick={() => { clearFilters(); onClose(); }}
                     flex={1}
                     border="1px solid"
                     borderColor="var(--color-primary)"
