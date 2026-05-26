@@ -105,7 +105,7 @@ export const incrementViewCount = async (req, res) => {
   }
 
   try {
-    await Player.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+    await Player.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }, { timestamps: false });
     res.status(200).json({ success: true });
   } catch (error) {
     console.log('error in incrementing view count:', error.message);

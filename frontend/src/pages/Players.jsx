@@ -202,7 +202,10 @@ const Players = () => {
   // Trending players (top 6 sorted by viewCount)
   const trending = useMemo(() =>
     [...players]
-      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .sort((a, b) =>
+        (b.viewCount ?? 0) - (a.viewCount ?? 0) ||
+        new Date(b.createdAt) - new Date(a.createdAt)
+      )
       .slice(0, 6),
     [players]
   );
@@ -561,43 +564,47 @@ const Players = () => {
           ) : (
             <VStack w="full" spacing={{ base: 12, md: 16 }}>
 
-              {/* Recently Updated */}
-              <Box w="full">
-                <SectionLabel>Recently Updated</SectionLabel>
-                <SimpleGrid
-                  columns={{ base: 1, md: 2, lg: 3 }}
-                  spacing={{ base: 8, md: 10 }}
-                  w="full"
-                >
-                  {recentlyUpdated.map((player) => (
-                    <Box key={player._id}>
-                      <PlayerCard
-                        player={player}
-                        onPlayerDeleted={handlePlayerDeleted}
-                      />
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              </Box>
+              {players.length > 6 && (
+                <>
+                  {/* Recently Updated */}
+                  <Box w="full">
+                    <SectionLabel>Recently Updated</SectionLabel>
+                    <SimpleGrid
+                      columns={{ base: 1, md: 2, lg: 3 }}
+                      spacing={{ base: 8, md: 10 }}
+                      w="full"
+                    >
+                      {recentlyUpdated.map((player) => (
+                        <Box key={player._id}>
+                          <PlayerCard
+                            player={player}
+                            onPlayerDeleted={handlePlayerDeleted}
+                          />
+                        </Box>
+                      ))}
+                    </SimpleGrid>
+                  </Box>
 
-              {/* Trending */}
-              <Box w="full">
-                <SectionLabel>Trending</SectionLabel>
-                <SimpleGrid
-                  columns={{ base: 1, md: 2, lg: 3 }}
-                  spacing={{ base: 8, md: 10 }}
-                  w="full"
-                >
-                  {trending.map((player) => (
-                    <Box key={player._id}>
-                      <PlayerCard
-                        player={player}
-                        onPlayerDeleted={handlePlayerDeleted}
-                      />
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              </Box>
+                  {/* Trending */}
+                  <Box w="full">
+                    <SectionLabel>Trending</SectionLabel>
+                    <SimpleGrid
+                      columns={{ base: 1, md: 2, lg: 3 }}
+                      spacing={{ base: 8, md: 10 }}
+                      w="full"
+                    >
+                      {trending.map((player) => (
+                        <Box key={player._id}>
+                          <PlayerCard
+                            player={player}
+                            onPlayerDeleted={handlePlayerDeleted}
+                          />
+                        </Box>
+                      ))}
+                    </SimpleGrid>
+                  </Box>
+                </>
+              )}
 
               {/* All Players */}
               <Box w="full">
