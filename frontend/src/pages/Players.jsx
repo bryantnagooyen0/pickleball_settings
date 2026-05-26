@@ -39,6 +39,23 @@ const MotionVStack = motion(VStack);
 const MotionHeading = motion(Heading);
 const MotionText = motion(Text);
 
+const SectionLabel = ({ children }) => (
+  <HStack w="full" align="center" spacing={4} mb={6}>
+    <Text
+      fontSize="xs"
+      fontFamily="var(--font-body)"
+      fontWeight={700}
+      letterSpacing="0.1em"
+      textTransform="uppercase"
+      color="var(--color-text-secondary)"
+      whiteSpace="nowrap"
+    >
+      {children}
+    </Text>
+    <Box flex={1} h="1px" bg="rgba(0, 0, 0, 0.08)" />
+  </HStack>
+);
+
 // Isolated header so it doesn't re-render when players/filters load (avoids animation jank)
 // Animation matches Paddles page header exactly for comparison
 const PlayersPageHeader = React.memo(({ headerRef, headerInView, onAnimationComplete }) => (
@@ -536,91 +553,132 @@ const Players = () => {
             )}
           </VStack>
 
-          {/* Players Grid - Simple and Clean */}
-          <MotionBox
-            w="full"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {players.length === 0 || !contentReady ? (
-              <Center py={16}>
-                <Spinner size="xl" color="var(--color-primary)" thickness="4px" />
-              </Center>
-            ) : filteredPlayers.length === 0 ? (
-              <Box
-                textAlign="center"
-                py={16}
-                bg="white"
-                borderRadius="0"
-                border="1px solid"
-                borderColor="rgba(0, 0, 0, 0.08)"
-                px={8}
-              >
-                <MotionText
-                  fontSize={{ base: 'xl', md: '2xl' }}
-                  fontFamily="var(--font-display)"
-                  fontWeight={600}
-                  color="var(--color-text-primary)"
-                  mb={4}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
+          {/* Curated sections + full grid */}
+          {players.length === 0 || !contentReady ? (
+            <Center py={16}>
+              <Spinner size="xl" color="var(--color-primary)" thickness="4px" />
+            </Center>
+          ) : (
+            <VStack w="full" spacing={{ base: 12, md: 16 }}>
+
+              {/* Recently Updated */}
+              <Box w="full">
+                <SectionLabel>Recently Updated</SectionLabel>
+                <SimpleGrid
+                  columns={{ base: 1, md: 2, lg: 3 }}
+                  spacing={{ base: 8, md: 10 }}
+                  w="full"
                 >
-                  {searchQuery.trim() || activeFiltersCount > 0 ? (
-                    <>
-                      No players found
-                      <br />
-                      <Text 
-                        fontSize={{ base: 'md', md: 'lg' }} 
-                        mt={4}
-                        fontFamily="var(--font-body)"
-                        color="var(--color-text-secondary)"
-                        fontWeight={400}
-                      >
-                        Try adjusting your search or filters
-                      </Text>
-                    </>
-                  ) : (
-                    <>
-                      No players yet
-                      <br />
-                      <Link to={'/create'}>
-                        <Text
-                          as='span'
-                          color="var(--color-primary)"
-                          fontFamily="var(--font-body)"
-                          fontWeight={600}
-                          fontSize={{ base: 'md', md: 'lg' }}
-                          _hover={{ 
-                            textDecoration: 'underline',
-                          }}
-                          transition="color 0.2s"
-                        >
-                          Create the first one
-                        </Text>
-                      </Link>
-                    </>
-                  )}
-                </MotionText>
+                  {recentlyUpdated.map((player) => (
+                    <Box key={player._id}>
+                      <PlayerCard
+                        player={player}
+                        onPlayerDeleted={handlePlayerDeleted}
+                      />
+                    </Box>
+                  ))}
+                </SimpleGrid>
               </Box>
-            ) : (
-              <SimpleGrid
-                columns={{ base: 1, md: 2, lg: 3 }}
-                spacing={{ base: 8, md: 10 }}
-                w={'full'}
-              >
-                {filteredPlayers.map((player) => (
-                  <Box key={player._id}>
-                    <PlayerCard
-                      player={player}
-                      onPlayerDeleted={handlePlayerDeleted}
-                    />
+
+              {/* Trending */}
+              <Box w="full">
+                <SectionLabel>Trending</SectionLabel>
+                <SimpleGrid
+                  columns={{ base: 1, md: 2, lg: 3 }}
+                  spacing={{ base: 8, md: 10 }}
+                  w="full"
+                >
+                  {trending.map((player) => (
+                    <Box key={player._id}>
+                      <PlayerCard
+                        player={player}
+                        onPlayerDeleted={handlePlayerDeleted}
+                      />
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              </Box>
+
+              {/* All Players */}
+              <Box w="full">
+                <SectionLabel>All Players</SectionLabel>
+                {filteredPlayers.length === 0 ? (
+                  <Box
+                    textAlign="center"
+                    py={16}
+                    bg="white"
+                    borderRadius="0"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.08)"
+                    px={8}
+                  >
+                    <MotionText
+                      fontSize={{ base: 'xl', md: '2xl' }}
+                      fontFamily="var(--font-display)"
+                      fontWeight={600}
+                      color="var(--color-text-primary)"
+                      mb={4}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      {searchQuery.trim() || activeFiltersCount > 0 ? (
+                        <>
+                          No players found
+                          <br />
+                          <Text
+                            fontSize={{ base: 'md', md: 'lg' }}
+                            mt={4}
+                            fontFamily="var(--font-body)"
+                            color="var(--color-text-secondary)"
+                            fontWeight={400}
+                          >
+                            Try adjusting your search or filters
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          No players yet
+                          <br />
+                          <Link to={'/create'}>
+                            <Text
+                              as='span'
+                              color="var(--color-primary)"
+                              fontFamily="var(--font-body)"
+                              fontWeight={600}
+                              fontSize={{ base: 'md', md: 'lg' }}
+                              _hover={{
+                                textDecoration: 'underline',
+                              }}
+                              transition="color 0.2s"
+                            >
+                              Create the first one
+                            </Text>
+                          </Link>
+                        </>
+                      )}
+                    </MotionText>
                   </Box>
-                ))}
-              </SimpleGrid>
-            )}
-          </MotionBox>
+                ) : (
+                  <SimpleGrid
+                    columns={{ base: 1, md: 2, lg: 3 }}
+                    spacing={{ base: 8, md: 10 }}
+                    w="full"
+                  >
+                    {filteredPlayers.map((player) => (
+                      <Box key={player._id}>
+                        <PlayerCard
+                          player={player}
+                          onPlayerDeleted={handlePlayerDeleted}
+                        />
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                )}
+              </Box>
+
+            </VStack>
+          )}
         </VStack>
 
         {/* Filter Drawer */}
