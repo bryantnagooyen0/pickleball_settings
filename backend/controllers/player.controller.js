@@ -96,3 +96,19 @@ export const deletePlayer = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+export const incrementViewCount = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ success: false, message: 'Invalid Player Id' });
+  }
+
+  try {
+    await Player.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log('error in incrementing view count:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
