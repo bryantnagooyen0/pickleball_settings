@@ -143,6 +143,10 @@ const playerSchema = new mongoose.Schema(
         type: Date,
         required: false,
       },
+      updateNotes: {
+        type: String,
+        required: false,
+      },
     },
   },
   {

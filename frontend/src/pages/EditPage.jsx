@@ -28,6 +28,7 @@ const EditPage = () => {
   const [selectedPaddle, setSelectedPaddle] = useState(null);
   const [sourceLabel, setSourceLabel] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [updateNotes, setUpdateNotes] = useState('');
   const [player, setPlayer] = useState({
     name: '',
     paddle: '',
@@ -82,6 +83,7 @@ const EditPage = () => {
         if (result.data.sourceInfo) {
           setSourceLabel(result.data.sourceInfo.label || '');
           setSourceUrl(result.data.sourceInfo.url || '');
+          setUpdateNotes(result.data.sourceInfo.updateNotes || '');
         }
 
         // Set selected paddle if player has paddle data
@@ -134,7 +136,7 @@ const EditPage = () => {
     // Build payload — only include sourceInfo if label is present
     const payload = { ...player };
     if (sourceLabel) {
-      payload.sourceInfo = { label: sourceLabel, url: sourceUrl };
+      payload.sourceInfo = { label: sourceLabel, url: sourceUrl, updateNotes };
     }
 
     const { success, message } = await updatePlayer(playerId, payload);
@@ -464,6 +466,16 @@ const EditPage = () => {
                     placeholder='e.g. https://youtube.com/...'
                     value={sourceUrl}
                     onChange={e => setSourceUrl(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>What was updated? (optional)</FormLabel>
+                  <Textarea
+                    placeholder='e.g. Updated paddle to Joola Hyperion, confirmed via Instagram story'
+                    value={updateNotes}
+                    onChange={e => setUpdateNotes(e.target.value)}
+                    rows={3}
+                    resize='vertical'
                   />
                 </FormControl>
               </VStack>

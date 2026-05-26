@@ -547,21 +547,25 @@ const PlayerDetailPage = () => {
                 {/* Source Info Footer */}
                 {player.sourceInfo?.updatedAt && (
                   <Box
-                    borderTop="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.08)"
-                    pt={4}
-                    mt={4}
+                    borderTop="2px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    pt={5}
+                    mt={5}
                     display="flex"
                     alignItems="flex-start"
                     gap={3}
+                    bg="rgba(0,0,0,0.02)"
+                    borderRadius="md"
+                    px={4}
+                    pb={4}
                   >
-                    <Text fontSize="md" color="var(--color-text-secondary)" mt="1px" flexShrink={0}>
+                    <Text fontSize="lg" color="var(--color-text-secondary)" mt="2px" flexShrink={0}>
                       🕐
                     </Text>
                     <Box>
                       <Text
-                        fontSize="sm"
-                        fontWeight={500}
+                        fontSize="md"
+                        fontWeight={600}
                         color="var(--color-text-primary)"
                         fontFamily="var(--font-body)"
                       >
@@ -572,8 +576,18 @@ const PlayerDetailPage = () => {
                           day: 'numeric',
                         })}
                       </Text>
+                      {player.sourceInfo.updateNotes && (
+                        <Text
+                          fontSize="sm"
+                          color="var(--color-text-secondary)"
+                          fontFamily="var(--font-body)"
+                          mt={1}
+                        >
+                          {player.sourceInfo.updateNotes}
+                        </Text>
+                      )}
                       <Text
-                        fontSize="xs"
+                        fontSize="sm"
                         color="var(--color-text-secondary)"
                         fontFamily="var(--font-body)"
                         mt={1}
