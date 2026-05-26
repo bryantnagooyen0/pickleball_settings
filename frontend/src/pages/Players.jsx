@@ -601,7 +601,7 @@ const Players = () => {
 
               {/* All Players */}
               <Box w="full">
-                <SectionLabel>All Players</SectionLabel>
+                <SectionLabel>All Players ({filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'})</SectionLabel>
                 {filteredPlayers.length === 0 ? (
                   <Box
                     textAlign="center"
