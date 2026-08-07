@@ -31,6 +31,7 @@ import { SearchIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 import { FaUsers } from 'react-icons/fa';
 import { MdPerson } from 'react-icons/md';
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -114,25 +115,54 @@ const LandingPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        '--font-display': '"Playfair Display", serif',
-        '--font-body': '"Inter", sans-serif',
-        '--font-accent': '"Space Grotesk", sans-serif',
-        '--color-primary': '#2C5F7C',
-        '--color-secondary': '#D4A574',
-        '--color-accent': '#8B9DC3',
-        '--color-bg': '#FAF9F6',
-        '--color-bg-dark': '#1A1A1A',
-        '--color-text-primary': '#1A1A1A',
-        '--color-text-secondary': '#6B6B6B',
-        fontFamily: 'var(--font-body)',
-      }}
-      bg="var(--color-bg)"
-      minH="100vh"
-      position="relative"
-      overflow="hidden"
-    >
+    <>
+      <SEO
+        url="/"
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Pickleball Settings',
+            url: 'https://www.pickleballsettings.com',
+            description: 'Professional pickleball player equipment database',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate:
+                  'https://www.pickleballsettings.com/players?search={search_term_string}',
+              },
+              'query-input': 'required name=search_term_string',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Pickleball Settings',
+            url: 'https://www.pickleballsettings.com',
+            logo: 'https://www.pickleballsettings.com/logo6.png',
+          },
+        ]}
+      />
+      <Box
+        sx={{
+          '--font-display': '"Playfair Display", serif',
+          '--font-body': '"Inter", sans-serif',
+          '--font-accent': '"Space Grotesk", sans-serif',
+          '--color-primary': '#2C5F7C',
+          '--color-secondary': '#D4A574',
+          '--color-accent': '#8B9DC3',
+          '--color-bg': '#FAF9F6',
+          '--color-bg-dark': '#1A1A1A',
+          '--color-text-primary': '#1A1A1A',
+          '--color-text-secondary': '#6B6B6B',
+          fontFamily: 'var(--font-body)',
+        }}
+        bg="var(--color-bg)"
+        minH="100vh"
+        position="relative"
+        overflow="hidden"
+      >
       {/* Fluid gradient background */}
       <Box
         position="fixed"
@@ -936,7 +966,8 @@ const LandingPage = () => {
           </MotionBox>
         </MotionVStack>
       </Container>
-    </Box>
+      </Box>
+    </>
   );
 };
 

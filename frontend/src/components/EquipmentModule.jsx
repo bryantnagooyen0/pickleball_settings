@@ -568,10 +568,10 @@ const EquipmentModule = ({
                   <Image
                     src={getImage()}
                     alt={title}
-                    w={24}
+                    w={icon === 'shoes' ? 32 : 24}
                     h={24}
                     borderRadius='md'
-                    objectFit='cover'
+                    objectFit='contain'
                     border='none'
                     flexShrink={0}
                     loading='lazy'

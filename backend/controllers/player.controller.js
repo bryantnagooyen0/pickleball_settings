@@ -63,6 +63,12 @@ export const updatePlayer = async (req, res) => {
       .status(404)
       .json({ success: false, message: 'Invalid Player Id' });
   }
+
+  // Stamp updatedAt server-side so client cannot forge the timestamp
+  if (player.sourceInfo && (player.sourceInfo.label || player.sourceInfo.url)) {
+    player.sourceInfo.updatedAt = new Date();
+  }
+
   try {
     const updatedPlayer = await Player.findByIdAndUpdate(id, player, {
       new: true,
@@ -87,6 +93,22 @@ export const deletePlayer = async (req, res) => {
     res.status(200).json({ success: true, message: 'Player deleted' });
   } catch (error) {
     console.log('error in deleting players:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const incrementViewCount = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ success: false, message: 'Invalid Player Id' });
+  }
+
+  try {
+    await Player.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }, { timestamps: false });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log('error in incrementing view count:', error.message);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

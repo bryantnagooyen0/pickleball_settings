@@ -21,6 +21,16 @@ import EquipmentModule from '../components/EquipmentModule';
 import CommentSection from '../components/CommentSection';
 import { usePaddleStore } from '../store/paddle';
 import { api } from '../utils/api';
+import SEO from '../components/SEO';
+
+const SITE_URL = 'https://www.pickleballsettings.com';
+
+// og:image must be absolute; self-hosted headshots are stored as /players/... paths
+const absoluteImageUrl = (raw) => {
+  const path = raw || '/logo_preview_card.png';
+  if (path.startsWith('http')) return path;
+  return `${SITE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+};
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -66,6 +76,12 @@ const PlayerDetailPage = () => {
     return () => clearTimeout(timeoutId);
   }, [playerId]);
 
+  // Fire-and-forget: increment view count each time a player page is opened.
+  // Failures are silently swallowed so a network error never breaks the page.
+  useEffect(() => {
+    api.post(`/api/players/${playerId}/view`, {}).catch(() => {});
+  }, [playerId]);
+
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
@@ -89,53 +105,6 @@ const PlayerDetailPage = () => {
     fetchPlayer();
     fetchPaddles();
   }, [playerId, navigate, toast, fetchPaddles]);
-
-  // Set dynamic meta tags for social media previews
-  useEffect(() => {
-    if (player) {
-      const baseUrl = 'https://www.pickleballsettings.com';
-      const playerUrl = `${baseUrl}/player/${playerId}`;
-      // og:image must be absolute; self-hosted headshots are stored as /players/... paths
-      const rawImage = player.image || '/logo_preview_card.png';
-      const playerImage = rawImage.startsWith('http')
-        ? rawImage
-        : `${baseUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
-      
-      // Update document title
-      document.title = `${player.name} | Pickleball Profile`;
-      
-      // Update or create meta tags
-      const updateMetaTag = (property, content) => {
-        let meta = document.querySelector(`meta[property="${property}"]`) || 
-                   document.querySelector(`meta[name="${property}"]`);
-        if (!meta) {
-          meta = document.createElement('meta');
-          if (property.startsWith('og:')) {
-            meta.setAttribute('property', property);
-          } else {
-            meta.setAttribute('name', property);
-          }
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute('content', content);
-      };
-
-      // Open Graph meta tags
-      updateMetaTag('og:title', `${player.name} | Pickleball Profile`);
-      updateMetaTag('og:description', `View detailed stats and equipment for ${player.name}.`);
-      updateMetaTag('og:image', playerImage);
-      updateMetaTag('og:image:width', '1608');
-      updateMetaTag('og:image:height', '630');
-      updateMetaTag('og:type', 'website');
-      updateMetaTag('og:url', playerUrl);
-      
-      // Twitter Card meta tags
-      updateMetaTag('twitter:card', 'summary_large_image');
-      updateMetaTag('twitter:title', `${player.name} | Pickleball Profile`);
-      updateMetaTag('twitter:description', `View detailed stats and equipment for ${player.name}.`);
-      updateMetaTag('twitter:image', playerImage);
-    }
-  }, [player, playerId]);
 
   // Enhance player data with paddle template information when paddles are loaded
   useEffect(() => {
@@ -203,6 +172,41 @@ const PlayerDetailPage = () => {
     >
       <Container maxW='container.xl' py={{ base: 12, md: 16 }} position="relative" zIndex={1}>
         <VStack spacing={{ base: 6, md: 8 }}>
+          {player && (
+            <SEO
+              title={player.name}
+              description={`See ${player.name}'s professional pickleball equipment: ${
+                player.paddleBrand
+                  ? `${player.paddleBrand}${player.paddleModel ? ` ${player.paddleModel}` : ''} paddle`
+                  : 'paddle setup'
+              }, ${player.shoes ? player.shoes : 'shoes'}, and full gear configuration.`}
+              image={absoluteImageUrl(player.image)}
+              url={`/player/${playerId}`}
+              type="profile"
+              jsonLd={{
+                '@context': 'https://schema.org',
+                '@type': 'Person',
+                name: player.name,
+                image: absoluteImageUrl(player.image),
+                jobTitle: 'Professional Pickleball Player',
+                description:
+                  player.about ||
+                  `Professional pickleball player ${player.name}'s equipment settings and gear configuration.`,
+                ...(player.mlpTeam
+                  ? { memberOf: { '@type': 'SportsTeam', name: player.mlpTeam } }
+                  : {}),
+                ...(player.currentLocation
+                  ? {
+                      address: {
+                        '@type': 'PostalAddress',
+                        addressLocality: player.currentLocation,
+                      },
+                    }
+                  : {}),
+                ...(player.sponsor ? { sponsor: { '@type': 'Organization', name: player.sponsor } } : {}),
+              }}
+            />
+          )}
           {/* Back Button */}
           <MotionBox
             alignSelf="flex-start"
@@ -554,6 +558,78 @@ const PlayerDetailPage = () => {
                     ]}
                   />
                 </VStack>
+
+                {/* Source Info Footer */}
+                {player.sourceInfo?.updatedAt && (
+                  <Box
+                    borderTop="2px solid"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                    pt={5}
+                    mt={5}
+                    display="flex"
+                    alignItems="flex-start"
+                    gap={3}
+                    bg="rgba(0,0,0,0.02)"
+                    borderRadius="md"
+                    px={4}
+                    pb={4}
+                  >
+                    <Text fontSize="lg" color="var(--color-text-secondary)" mt="2px" flexShrink={0}>
+                      🕐
+                    </Text>
+                    <Box>
+                      <Text
+                        fontSize="md"
+                        fontWeight={600}
+                        color="var(--color-text-primary)"
+                        fontFamily="var(--font-body)"
+                      >
+                        Last updated{' '}
+                        {new Date(player.sourceInfo.updatedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </Text>
+                      {player.sourceInfo.updateNotes && (
+                        <Text
+                          fontSize="sm"
+                          color="var(--color-text-secondary)"
+                          fontFamily="var(--font-body)"
+                          mt={1}
+                        >
+                          {player.sourceInfo.updateNotes}
+                        </Text>
+                      )}
+                      <Text
+                        fontSize="sm"
+                        color="var(--color-text-secondary)"
+                        fontFamily="var(--font-body)"
+                        mt={1}
+                      >
+                        Source:{' '}
+                        {player.sourceInfo.url ? (
+                          <Box
+                            as="a"
+                            href={player.sourceInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            color="var(--color-primary)"
+                            textDecoration="underline"
+                            fontWeight={500}
+                            _hover={{ color: 'var(--color-accent)' }}
+                          >
+                            {player.sourceInfo.label} ↗
+                          </Box>
+                        ) : (
+                          <Box as="span" color="var(--color-text-primary)" fontWeight={500}>
+                            {player.sourceInfo.label}
+                          </Box>
+                        )}
+                      </Text>
+                    </Box>
+                  </Box>
+                )}
               </Box>
 
               {/* Action Buttons */}

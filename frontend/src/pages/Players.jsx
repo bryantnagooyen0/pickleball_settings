@@ -30,13 +30,45 @@ import { usePlayerStore } from '../store/player';
 import { Link, useLocation } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
 import { SearchIcon } from '@chakra-ui/icons';
-import { FaFilter } from 'react-icons/fa';
+import { FaFilter, FaClock, FaFire, FaUsers } from 'react-icons/fa';
 import { motion, useInView } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
 const MotionHeading = motion(Heading);
 const MotionText = motion(Text);
+
+const SectionLabel = ({ children, icon: Icon, accentColor = 'var(--color-primary)' }) => (
+  <HStack w="full" align="center" spacing={5} mb={8}>
+    <HStack
+      spacing={3}
+      align="center"
+      borderLeft="4px solid"
+      borderColor={accentColor}
+      pl={4}
+      py={1}
+      flexShrink={0}
+    >
+      {Icon && (
+        <Box color={accentColor} display="flex" alignItems="center">
+          <Icon size={22} />
+        </Box>
+      )}
+      <Text
+        fontSize={{ base: '2xl', md: '3xl' }}
+        fontFamily="var(--font-display)"
+        fontWeight={700}
+        letterSpacing="-0.02em"
+        color="var(--color-text-primary)"
+        whiteSpace="nowrap"
+      >
+        {children}
+      </Text>
+    </HStack>
+    <Box flex={1} h="1px" bg="rgba(0, 0, 0, 0.1)" />
+  </HStack>
+);
 
 // Isolated header so it doesn't re-render when players/filters load (avoids animation jank)
 // Animation matches Paddles page header exactly for comparison
@@ -76,8 +108,22 @@ const Players = () => {
   const headerRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, amount: 0.3 });
   const [contentReady, setContentReady] = useState(false);
+  const sentinelRef = useRef(null);
+  const [isSticky, setIsSticky] = useState(false);
 
   const handleHeaderAnimationComplete = useCallback(() => setContentReady(true), []);
+
+  // Detect when search bar becomes sticky
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsSticky(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   // Fallback: show list after 700ms if header callback never fires (e.g. header off-screen on load)
   useEffect(() => {
@@ -140,13 +186,6 @@ const Players = () => {
   }, []); // Only fetch once on mount - fetchPlayers is stable from Zustand
 
   useEffect(() => {
-    document.title = 'Pickleball Settings';
-    return () => {
-      document.title = 'Pickleball Settings';
-    };
-  }, []);
-
-  useEffect(() => {
     sessionStorage.removeItem('restorePaddleListScroll');
     sessionStorage.removeItem('paddleListScrollPosition');
   }, []);
@@ -179,6 +218,25 @@ const Players = () => {
   useEffect(() => {
     localStorage.setItem('playerFilters', JSON.stringify(filters));
   }, [filters]);
+
+  // Recently updated players (top 6 sorted by updatedAt)
+  const recentlyUpdated = useMemo(() =>
+    [...players]
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 6),
+    [players]
+  );
+
+  // Trending players (top 6 sorted by viewCount)
+  const trending = useMemo(() =>
+    [...players]
+      .sort((a, b) =>
+        (b.viewCount ?? 0) - (a.viewCount ?? 0) ||
+        new Date(b.createdAt) - new Date(a.createdAt)
+      )
+      .slice(0, 6),
+    [players]
+  );
 
   // Filter players based on search query and filters
   const filteredPlayers = useMemo(() => {
@@ -262,7 +320,7 @@ const Players = () => {
   };
 
   const clearFilters = () => {
-    const clearedFilters = {
+    setFilters({
       paddle: '',
       paddleThickness: '',
       paddleShape: '',
@@ -273,9 +331,8 @@ const Players = () => {
       totalWeight: '',
       weightComplete: '',
       sponsor: '',
-    };
-    setFilters(clearedFilters);
-    localStorage.setItem('playerFilters', JSON.stringify(clearedFilters));
+    });
+    setSearchQuery('');
   };
 
   const activeFiltersCount = Object.values(filters).filter(
@@ -283,7 +340,21 @@ const Players = () => {
   ).length;
 
   return (
-    <Box
+    <>
+      <SEO
+        title="Pro Players"
+        description="Browse all professional pickleball players and their equipment settings. Discover what paddles, shoes, and gear the pros use."
+        url="/players"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'Professional Pickleball Players',
+          description:
+            'Complete database of professional pickleball player equipment settings',
+          url: 'https://www.pickleballsettings.com/players',
+        }}
+      />
+      <Box
       sx={{
         '--font-display': '"Merriweather", serif',
         '--font-body': '"Inter", sans-serif',
@@ -321,282 +392,343 @@ const Players = () => {
           {/* Simple Header - memoized so it doesn't re-render when players load (smoother animation) */}
           <PlayersPageHeader headerRef={headerRef} headerInView={headerInView} onAnimationComplete={handleHeaderAnimationComplete} />
 
-          {/* Search and Filter - Clean Design */}
-          <VStack 
-            w='full' 
-            spacing={{ base: 4, md: 5 }}
+          {/* Sentinel — when this scrolls out of view, the bar is stuck */}
+          <Box ref={sentinelRef} h="1px" w="full" pointerEvents="none" />
+
+          {/* Search and Filter - Sticky */}
+          <Box
+            position="sticky"
+            top={{ base: "64px", md: "72px" }}
+            zIndex={10}
+            w="full"
             maxW="800px"
+            bg={isSticky ? "transparent" : "rgba(250, 249, 246, 0.85)"}
+            backdropFilter={isSticky ? "none" : "blur(12px)"}
+            borderRadius="2xl"
+            px={2}
+            py={2}
+            transition="background 0.2s ease, backdrop-filter 0.2s ease"
           >
-            <HStack w='full' spacing={4} align="center">
-              <Box flex={1}>
-                <InputGroup size="lg">
-                  <InputLeftElement pointerEvents='none' h="100%">
-                    <SearchIcon color="var(--color-text-secondary)" />
-                  </InputLeftElement>
-                  <Input
-                    placeholder='Search players by name or sponsor...'
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    bg='white'
-                    color="var(--color-text-primary)"
-                    border="1px solid"
-                    borderColor="rgba(0, 0, 0, 0.1)"
-                    borderRadius="full"
-                    fontSize="md"
+            <VStack
+              w='full'
+              spacing={{ base: 4, md: 5 }}
+            >
+              <HStack w='full' spacing={4} align="center">
+                <Box flex={1}>
+                  <InputGroup size="lg">
+                    <InputLeftElement pointerEvents='none' h="100%">
+                      <SearchIcon color="var(--color-text-secondary)" />
+                    </InputLeftElement>
+                    <Input
+                      placeholder='Search players by name or sponsor...'
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      bg='white'
+                      color="var(--color-text-primary)"
+                      border="1px solid"
+                      borderColor="rgba(0, 0, 0, 0.1)"
+                      borderRadius="full"
+                      fontSize="md"
+                      fontFamily="var(--font-body)"
+                      fontWeight={400}
+                      h="56px"
+                      _placeholder={{
+                        color: "var(--color-text-secondary)",
+                        opacity: 0.5,
+                      }}
+                      _focus={{
+                        borderColor: "var(--color-primary)",
+                        boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
+                        outline: "none",
+                      }}
+                      _hover={{
+                        borderColor: "var(--color-accent)",
+                      }}
+                      transition="all 0.3s ease"
+                    />
+                  </InputGroup>
+                </Box>
+
+                <HStack spacing={4} align="center">
+                  <Tooltip label='Filter Players' placement='top'>
+                    <IconButton
+                      icon={<FaFilter />}
+                      onClick={onOpen}
+                      size="lg"
+                      h="56px"
+                      w="56px"
+                      bg={activeFiltersCount > 0 ? "var(--color-primary)" : "white"}
+                      color={activeFiltersCount > 0 ? "white" : "var(--color-text-primary)"}
+                      border="1px solid"
+                      borderColor={activeFiltersCount > 0 ? "var(--color-primary)" : "rgba(0, 0, 0, 0.1)"}
+                      borderRadius="full"
+                      aria-label='Filter players'
+                      position='relative'
+                      _hover={{
+                        bg: activeFiltersCount > 0 ? "var(--color-accent)" : "var(--color-primary)",
+                        color: "white",
+                        borderColor: activeFiltersCount > 0 ? "var(--color-accent)" : "var(--color-primary)",
+                      }}
+                      transition="all 0.3s ease"
+                      as={motion.button}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {activeFiltersCount > 0 && (
+                        <MotionBox
+                          position="absolute"
+                          top={-1}
+                          right={-1}
+                          w="20px"
+                          h="20px"
+                          bg="var(--color-secondary)"
+                          color="white"
+                          borderRadius="full"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          fontSize="xs"
+                          fontWeight={700}
+                          fontFamily="var(--font-body)"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                        >
+                          {activeFiltersCount}
+                        </MotionBox>
+                      )}
+                    </IconButton>
+                  </Tooltip>
+
+                  <MotionText
+                    fontSize={{ base: 'md', md: 'lg' }}
+                    color="var(--color-text-secondary)"
                     fontFamily="var(--font-body)"
                     fontWeight={400}
-                    h="56px"
-                    _placeholder={{
-                      color: "var(--color-text-secondary)",
-                      opacity: 0.5,
-                    }}
-                    _focus={{
-                      borderColor: "var(--color-primary)",
-                      boxShadow: "0 0 0 3px rgba(44, 95, 124, 0.1)",
-                      outline: "none",
-                    }}
-                    _hover={{
-                      borderColor: "var(--color-accent)",
-                    }}
-                    transition="all 0.3s ease"
-                  />
-                </InputGroup>
-              </Box>
-
-              <HStack spacing={4} align="center">
-                <Tooltip label='Filter Players' placement='top'>
-                  <IconButton
-                    icon={<FaFilter />}
-                    onClick={onOpen}
-                    size="lg"
-                    h="56px"
-                    w="56px"
-                    bg={activeFiltersCount > 0 ? "var(--color-primary)" : "white"}
-                    color={activeFiltersCount > 0 ? "white" : "var(--color-text-primary)"}
-                    border="1px solid"
-                    borderColor={activeFiltersCount > 0 ? "var(--color-primary)" : "rgba(0, 0, 0, 0.1)"}
-                    borderRadius="full"
-                    aria-label='Filter players'
-                    position='relative'
-                    _hover={{
-                      bg: activeFiltersCount > 0 ? "var(--color-accent)" : "var(--color-primary)",
-                      color: "white",
-                      borderColor: activeFiltersCount > 0 ? "var(--color-accent)" : "var(--color-primary)",
-                    }}
-                    transition="all 0.3s ease"
-                    as={motion.button}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whiteSpace="nowrap"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: isSticky ? 0 : 1 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {activeFiltersCount > 0 && (
-                      <MotionBox
-                        position="absolute"
-                        top={-1}
-                        right={-1}
-                        w="20px"
-                        h="20px"
+                    {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'}
+                  </MotionText>
+                </HStack>
+              </HStack>
+
+              {/* Active Filters Display */}
+              {(activeFiltersCount > 0 || searchQuery.trim()) && (
+                <MotionBox
+                  w='full'
+                  bg="white"
+                  p={5}
+                  borderRadius="full"
+                  border="1px solid"
+                  borderColor="rgba(0, 0, 0, 0.08)"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <HStack w='full' flexWrap='wrap' spacing={3}>
+                    <Text
+                      fontSize='sm'
+                      color="var(--color-text-secondary)"
+                      fontWeight='500'
+                      fontFamily="var(--font-body)"
+                    >
+                      Filters:
+                    </Text>
+                    {Object.entries(filters).map(
+                      ([key, value]) =>
+                        value && (
+                          <Badge
+                            key={key}
+                            bg="var(--color-primary)"
+                            color="white"
+                            borderRadius="full"
+                            fontFamily="var(--font-body)"
+                            fontSize="xs"
+                            px={3}
+                            py={1}
+                            fontWeight={600}
+                            as={motion.div}
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            {key}: {value}
+                          </Badge>
+                        )
+                    )}
+                    {searchQuery.trim() && (
+                      <Badge
                         bg="var(--color-secondary)"
                         color="white"
                         borderRadius="full"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        fontSize="xs"
-                        fontWeight={700}
                         fontFamily="var(--font-body)"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                        fontSize="xs"
+                        px={3}
+                        py={1}
+                        fontWeight={600}
+                        as={motion.div}
+                        whileHover={{ scale: 1.1 }}
                       >
-                        {activeFiltersCount}
-                      </MotionBox>
+                        "{searchQuery}"
+                      </Badge>
                     )}
-                  </IconButton>
-                </Tooltip>
-
-                <MotionText
-                  fontSize={{ base: 'md', md: 'lg' }}
-                  color="var(--color-text-secondary)"
-                  fontFamily="var(--font-body)"
-                  fontWeight={400}
-                  whiteSpace="nowrap"
-                  initial={{ opacity: 1 }}
-                  animate={headerInView ? { opacity: 1 } : { opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'}
-                </MotionText>
-              </HStack>
-            </HStack>
-
-            {/* Active Filters Display */}
-            {(activeFiltersCount > 0 || searchQuery.trim()) && (
-              <MotionBox
-                w='full'
-                bg="white"
-                p={5}
-                borderRadius="full"
-                border="1px solid"
-                borderColor="rgba(0, 0, 0, 0.08)"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <HStack w='full' flexWrap='wrap' spacing={3}>
-                  <Text 
-                    fontSize='sm' 
-                    color="var(--color-text-secondary)" 
-                    fontWeight='500'
-                    fontFamily="var(--font-body)"
-                  >
-                    Filters:
-                  </Text>
-                  {Object.entries(filters).map(
-                    ([key, value]) =>
-                      value && (
-                        <Badge 
-                          key={key} 
-                          bg="var(--color-primary)"
-                          color="white"
-                          borderRadius="full"
-                          fontFamily="var(--font-body)"
-                          fontSize="xs"
-                          px={3}
-                          py={1}
-                          fontWeight={600}
-                          as={motion.div}
-                          whileHover={{ scale: 1.1 }}
-                        >
-                          {key}: {value}
-                        </Badge>
-                      )
-                  )}
-                  {searchQuery.trim() && (
-                    <Badge 
-                      bg="var(--color-secondary)"
-                      color="white"
+                    <Button
+                      size='xs'
+                      variant='ghost'
+                      onClick={clearFilters}
                       borderRadius="full"
                       fontFamily="var(--font-body)"
+                      fontWeight={500}
+                      color="var(--color-text-secondary)"
                       fontSize="xs"
-                      px={3}
-                      py={1}
-                      fontWeight={600}
-                      as={motion.div}
-                      whileHover={{ scale: 1.1 }}
+                      _hover={{
+                        color: "var(--color-primary)",
+                        bg: "rgba(44, 95, 124, 0.05)",
+                      }}
+                      transition="all 0.2s"
+                      as={motion.button}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      "{searchQuery}"
-                    </Badge>
-                  )}
-                  <Button 
-                    size='xs' 
-                    variant='ghost' 
-                    onClick={clearFilters}
-                    borderRadius="full"
-                    fontFamily="var(--font-body)"
-                    fontWeight={500}
-                    color="var(--color-text-secondary)"
-                    fontSize="xs"
-                    _hover={{
-                      color: "var(--color-primary)",
-                      bg: "rgba(44, 95, 124, 0.05)",
-                    }}
-                    transition="all 0.2s"
-                    as={motion.button}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Clear all
-                  </Button>
-                </HStack>
-              </MotionBox>
-            )}
-          </VStack>
+                      Clear all
+                    </Button>
+                  </HStack>
+                </MotionBox>
+              )}
+            </VStack>
+          </Box>
 
-          {/* Players Grid - Simple and Clean */}
-          <MotionBox
-            w="full"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {players.length === 0 || !contentReady ? (
-              <Center py={16}>
-                <Spinner size="xl" color="var(--color-primary)" thickness="4px" />
-              </Center>
-            ) : filteredPlayers.length === 0 ? (
-              <Box
-                textAlign="center"
-                py={16}
-                bg="white"
-                borderRadius="0"
-                border="1px solid"
-                borderColor="rgba(0, 0, 0, 0.08)"
-                px={8}
-              >
-                <MotionText
-                  fontSize={{ base: 'xl', md: '2xl' }}
-                  fontFamily="var(--font-display)"
-                  fontWeight={600}
-                  color="var(--color-text-primary)"
-                  mb={4}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  {searchQuery.trim() || activeFiltersCount > 0 ? (
-                    <>
-                      No players found
-                      <br />
-                      <Text 
-                        fontSize={{ base: 'md', md: 'lg' }} 
-                        mt={4}
-                        fontFamily="var(--font-body)"
-                        color="var(--color-text-secondary)"
-                        fontWeight={400}
-                      >
-                        Try adjusting your search or filters
-                      </Text>
-                    </>
-                  ) : (
-                    <>
-                      No players yet
-                      <br />
-                      <Link to={'/create'}>
-                        <Text
-                          as='span'
-                          color="var(--color-primary)"
-                          fontFamily="var(--font-body)"
-                          fontWeight={600}
-                          fontSize={{ base: 'md', md: 'lg' }}
-                          _hover={{ 
-                            textDecoration: 'underline',
-                          }}
-                          transition="color 0.2s"
-                        >
-                          Create the first one
-                        </Text>
-                      </Link>
-                    </>
-                  )}
-                </MotionText>
-              </Box>
-            ) : (
-              <SimpleGrid
-                columns={{ base: 1, md: 2, lg: 3 }}
-                spacing={{ base: 8, md: 10 }}
-                w={'full'}
-              >
-                {filteredPlayers.map((player) => (
-                  <Box key={player._id}>
-                    <PlayerCard
-                      player={player}
-                      onPlayerDeleted={handlePlayerDeleted}
-                    />
+          {/* Curated sections + full grid */}
+          {players.length === 0 || !contentReady ? (
+            <Center py={16}>
+              <Spinner size="xl" color="var(--color-primary)" thickness="4px" />
+            </Center>
+          ) : (
+            <VStack w="full" spacing={{ base: 12, md: 16 }}>
+
+              {players.length > 6 && !searchQuery.trim() && (
+                <>
+                  {/* Recently Updated */}
+                  <Box w="full">
+                    <SectionLabel icon={FaClock} accentColor="var(--color-primary)">Recently Updated</SectionLabel>
+                    <SimpleGrid
+                      columns={{ base: 1, md: 2, lg: 3 }}
+                      spacing={{ base: 8, md: 10 }}
+                      w="full"
+                    >
+                      {recentlyUpdated.map((player) => (
+                        <Box key={player._id}>
+                          <PlayerCard
+                            player={player}
+                            onPlayerDeleted={handlePlayerDeleted}
+                          />
+                        </Box>
+                      ))}
+                    </SimpleGrid>
                   </Box>
-                ))}
-              </SimpleGrid>
-            )}
-          </MotionBox>
+
+                  {/* Trending */}
+                  <Box w="full">
+                    <SectionLabel icon={FaFire} accentColor="var(--color-secondary)">Trending</SectionLabel>
+                    <SimpleGrid
+                      columns={{ base: 1, md: 2, lg: 3 }}
+                      spacing={{ base: 8, md: 10 }}
+                      w="full"
+                    >
+                      {trending.map((player) => (
+                        <Box key={player._id}>
+                          <PlayerCard
+                            player={player}
+                            onPlayerDeleted={handlePlayerDeleted}
+                          />
+                        </Box>
+                      ))}
+                    </SimpleGrid>
+                  </Box>
+                </>
+              )}
+
+              {/* All Players */}
+              <Box w="full">
+                <SectionLabel icon={FaUsers} accentColor="var(--color-primary)">All Players ({filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'})</SectionLabel>
+                {filteredPlayers.length === 0 ? (
+                  <Box
+                    textAlign="center"
+                    py={16}
+                    bg="white"
+                    borderRadius="0"
+                    border="1px solid"
+                    borderColor="rgba(0, 0, 0, 0.08)"
+                    px={8}
+                  >
+                    <MotionText
+                      fontSize={{ base: 'xl', md: '2xl' }}
+                      fontFamily="var(--font-display)"
+                      fontWeight={600}
+                      color="var(--color-text-primary)"
+                      mb={4}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      {searchQuery.trim() || activeFiltersCount > 0 ? (
+                        <>
+                          No players found
+                          <br />
+                          <Text
+                            fontSize={{ base: 'md', md: 'lg' }}
+                            mt={4}
+                            fontFamily="var(--font-body)"
+                            color="var(--color-text-secondary)"
+                            fontWeight={400}
+                          >
+                            Try adjusting your search or filters
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          No players yet
+                          <br />
+                          <Link to={'/create'}>
+                            <Text
+                              as='span'
+                              color="var(--color-primary)"
+                              fontFamily="var(--font-body)"
+                              fontWeight={600}
+                              fontSize={{ base: 'md', md: 'lg' }}
+                              _hover={{
+                                textDecoration: 'underline',
+                              }}
+                              transition="color 0.2s"
+                            >
+                              Create the first one
+                            </Text>
+                          </Link>
+                        </>
+                      )}
+                    </MotionText>
+                  </Box>
+                ) : (
+                  <SimpleGrid
+                    columns={{ base: 1, md: 2, lg: 3 }}
+                    spacing={{ base: 8, md: 10 }}
+                    w="full"
+                  >
+                    {filteredPlayers.map((player) => (
+                      <Box key={player._id}>
+                        <PlayerCard
+                          player={player}
+                          onPlayerDeleted={handlePlayerDeleted}
+                        />
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                )}
+              </Box>
+
+            </VStack>
+          )}
         </VStack>
 
         {/* Filter Drawer */}
@@ -1017,9 +1149,9 @@ const Players = () => {
                   >
                     Apply Filters
                   </Button>
-                  <Button 
-                    variant='outline' 
-                    onClick={clearFilters} 
+                  <Button
+                    variant='outline'
+                    onClick={() => { clearFilters(); onClose(); }}
                     flex={1}
                     border="1px solid"
                     borderColor="var(--color-primary)"
@@ -1046,7 +1178,8 @@ const Players = () => {
           </DrawerContent>
         </Drawer>
       </Container>
-    </Box>
+      </Box>
+    </>
   );
 };
 

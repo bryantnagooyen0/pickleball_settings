@@ -130,6 +130,28 @@ const playerSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    viewCount: {
+      type: Number,
+      default: 0,
+    },
+    sourceInfo: {
+      label: {
+        type: String,
+        required: false,
+      },
+      url: {
+        type: String,
+        required: false,
+      },
+      updatedAt: {
+        type: Date,
+        required: false,
+      },
+      updateNotes: {
+        type: String,
+        required: false,
+      },
+    },
   },
   {
     timestamps: true, // createdAt, updatedAt

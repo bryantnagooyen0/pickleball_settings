@@ -76,7 +76,6 @@ const Navbar = () => {
     const items = [
       { to: '/players', label: 'Players' },
       { to: '/paddles', label: 'Paddles' },
-      { to: '/community', label: 'Community' },
     ];
 
     if (user?.role === 'admin') {
@@ -224,36 +223,6 @@ const Navbar = () => {
                     transition="all 0.3s ease"
                   >
                     Paddles
-                  </Button>
-                </MiddleClickLink>
-              </Box>
-              <Box
-                position="relative"
-                _after={{
-                  content: '""',
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "2px",
-                  bg: "transparent",
-                  transition: "all 0.3s ease",
-                }}
-              >
-                <MiddleClickLink to={'/community'}>
-                  <Button
-                    variant={'ghost'}
-                    color="var(--color-text-primary)"
-                    fontFamily='"Merriweather", serif'
-                    fontWeight={600}
-                    border="none"
-                    borderRadius={0}
-                    _hover={{
-                      bg: "transparent",
-                    }}
-                    transition="all 0.3s ease"
-                  >
-                    Community
                   </Button>
                 </MiddleClickLink>
               </Box>

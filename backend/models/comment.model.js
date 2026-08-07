@@ -20,7 +20,7 @@ const commentSchema = new mongoose.Schema(
     targetType: {
       type: String,
       required: true,
-      enum: ['player', 'paddle', 'setup'],
+      enum: ['player', 'paddle'],
     },
     targetId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -6,6 +6,7 @@ import {
   getPlayers,
   getPlayer,
   updatePlayer,
+  incrementViewCount,
 } from '../controllers/player.controller.js';
 import { authMiddleware, adminMiddleware } from '../middleware/auth.js';
 import { validatePlayer } from '../middleware/validation.js';
@@ -22,8 +23,6 @@ router.put('/:id', authMiddleware, adminMiddleware, validatePlayer, updatePlayer
 
 router.delete('/:id', authMiddleware, adminMiddleware, deletePlayer);
 
-router.get('/', (req, res) => {
-  res.send('API is working');
-});
+router.post('/:id/view', incrementViewCount);
 
 export default router;
