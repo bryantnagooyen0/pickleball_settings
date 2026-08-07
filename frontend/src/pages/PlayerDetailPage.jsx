@@ -23,6 +23,15 @@ import { usePaddleStore } from '../store/paddle';
 import { api } from '../utils/api';
 import SEO from '../components/SEO';
 
+const SITE_URL = 'https://www.pickleballsettings.com';
+
+// og:image must be absolute; self-hosted headshots are stored as /players/... paths
+const absoluteImageUrl = (raw) => {
+  const path = raw || '/logo_preview_card.png';
+  if (path.startsWith('http')) return path;
+  return `${SITE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
 const MotionHStack = motion(HStack);
@@ -171,14 +180,14 @@ const PlayerDetailPage = () => {
                   ? `${player.paddleBrand}${player.paddleModel ? ` ${player.paddleModel}` : ''} paddle`
                   : 'paddle setup'
               }, ${player.shoes ? player.shoes : 'shoes'}, and full gear configuration.`}
-              image={player.image || undefined}
+              image={absoluteImageUrl(player.image)}
               url={`/player/${playerId}`}
               type="profile"
               jsonLd={{
                 '@context': 'https://schema.org',
                 '@type': 'Person',
                 name: player.name,
-                image: player.image,
+                image: absoluteImageUrl(player.image),
                 jobTitle: 'Professional Pickleball Player',
                 description:
                   player.about ||

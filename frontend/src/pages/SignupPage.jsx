@@ -29,8 +29,7 @@ function SignupPage() {
     }
     setLoading(true);
     try {
-      const data = await api.post('/api/users/signup', { username, password });
-
+      await api.post('/api/users/signup', { username, password });
       toast({ title: 'Account created', status: 'success', duration: 2000, isClosable: true });
       navigate('/login');
     } catch (err) {

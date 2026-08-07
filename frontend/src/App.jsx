@@ -14,6 +14,10 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AccountPage from './pages/AccountPage';
+import CommunityPage from './pages/CommunityPage';
+import PaddleSetupsPage from './pages/PaddleSetupsPage';
+import NewSetupPage from './pages/NewSetupPage';
+import SetupDetailPage from './pages/SetupDetailPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import LegalNoticePage from './pages/LegalNoticePage';
 import Footer from './components/Footer';
@@ -77,6 +81,11 @@ function App() {
           <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path='/signup' element={<PublicRoute><SignupPage /></PublicRoute>} />
           <Route path='/account' element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path='/community' element={<CommunityPage />} />
+          <Route path='/community/paddle/:paddleId' element={<PaddleSetupsPage />} />
+          <Route path='/community/new' element={<ProtectedRoute><NewSetupPage /></ProtectedRoute>} />
+          <Route path='/setup/:setupId' element={<SetupDetailPage />} />
+          <Route path='/setup/:setupId/edit' element={<ProtectedRoute><NewSetupPage /></ProtectedRoute>} />
           <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
           <Route path='/legal-notice' element={<LegalNoticePage />} />
         </Routes>

@@ -20,6 +20,8 @@ import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import PlayerCard from '../components/PlayerCard';
 import CommentSection from '../components/CommentSection';
+import SetupCard from '../components/SetupCard';
+import { useSetupStore } from '../store/setup';
 import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
@@ -35,6 +37,8 @@ const PaddleDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [paddle, setPaddle] = useState(null);
   const [playersUsingPaddle, setPlayersUsingPaddle] = useState([]);
+  const { fetchSetups } = useSetupStore();
+  const [paddleSetups, setPaddleSetups] = useState([]);
   const { paddles, fetchPaddles } = usePaddleStore();
   const { players, fetchPlayers } = usePlayerStore();
   const headerRef = useRef(null);
@@ -68,6 +72,8 @@ const PaddleDetailPage = () => {
         const foundPaddle = currentPaddles.find(p => p._id === paddleId);
         if (foundPaddle) {
           setPaddle(foundPaddle);
+          const setupResult = await fetchSetups(paddleId, 'likes');
+          if (setupResult?.data) setPaddleSetups(setupResult.data.slice(0, 3));
           // Find players using this paddle (matching name, shape, and thickness)
           const usingPaddle = currentPlayerStore.filter(player => {
             // First check if paddle name matches
@@ -620,6 +626,66 @@ const PaddleDetailPage = () => {
                   </Text>
                 </Box>
               )}
+
+              {/* Community Setups Preview */}
+              <Box
+                w="full"
+                bg="white"
+                borderRadius={0}
+                boxShadow="0 4px 20px rgba(0,0,0,0.08)"
+                p={{ base: 4, md: 6 }}
+                mt={4}
+              >
+                <HStack justify="space-between" mb={4} flexWrap="wrap" gap={2}>
+                  <Heading
+                    size="md"
+                    color="var(--color-text-primary)"
+                    fontFamily="var(--font-display)"
+                  >
+                    Community Setups
+                  </Heading>
+                  <HStack spacing={2}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      borderColor="var(--color-primary)"
+                      color="var(--color-primary)"
+                      borderRadius="full"
+                      fontFamily="var(--font-body)"
+                      _hover={{ bg: 'rgba(44,95,124,0.05)' }}
+                      onClick={() => navigate(`/community/new?paddleId=${paddleId}`)}
+                    >
+                      + Share Your Setup
+                    </Button>
+                    {paddleSetups.length > 0 && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        color="var(--color-primary)"
+                        borderRadius="full"
+                        fontFamily="var(--font-body)"
+                        _hover={{ bg: 'rgba(44,95,124,0.05)' }}
+                        onClick={() => navigate(`/community/paddle/${paddleId}`)}
+                      >
+                        See all →
+                      </Button>
+                    )}
+                  </HStack>
+                </HStack>
+                {paddleSetups.length === 0 ? (
+                  <Box textAlign="center" py={6}>
+                    <Text color="var(--color-text-secondary)" fontFamily="var(--font-body)">
+                      No community setups yet — be the first!
+                    </Text>
+                  </Box>
+                ) : (
+                  <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+                    {paddleSetups.map(setup => (
+                      <SetupCard key={setup._id} setup={setup} />
+                    ))}
+                  </SimpleGrid>
+                )}
+              </Box>
 
               {/* Comments Section */}
               <Box

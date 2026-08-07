@@ -29,8 +29,6 @@ function LoginPage() {
     setLoading(true);
     try {
       const data = await api.post('/api/users/login', { username, password, rememberMe });
-
-      // Use the auth hook to handle login
       login(data.token, data.username, rememberMe);
       toast({ title: 'Logged in', status: 'success', duration: 2000, isClosable: true });
       navigate('/');
@@ -57,8 +55,8 @@ function LoginPage() {
             <Input type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
           </FormControl>
           <FormControl>
-            <Checkbox 
-              isChecked={rememberMe} 
+            <Checkbox
+              isChecked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
               colorScheme='blue'
             >

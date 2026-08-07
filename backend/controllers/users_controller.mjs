@@ -1,9 +1,12 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/users_model.mjs';
 import { authMiddleware, adminMiddleware } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/rateLimiter.js';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = express.Router();
 
@@ -65,6 +68,64 @@ router.post('/login', authLimiter, async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// POST /google — Google OAuth sign-in / sign-up
+router.post('/google', authLimiter, async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential is required' });
+    }
+
+    // Verify the ID token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    // Try to find an existing user by googleId first, then by email
+    let user = await User.findOne({ googleId });
+    if (!user && email) {
+      user = await User.findOne({ email });
+      if (user) {
+        // Link the Google account to the existing email-matched user
+        user.googleId = googleId;
+        await user.save();
+      }
+    }
+
+    // Create a new user if none found
+    if (!user) {
+      // Derive a username from the Google display name or email prefix
+      const baseUsername = (name || email.split('@')[0])
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '_')
+        .slice(0, 20);
+
+      let username = baseUsername;
+      let suffix = 1;
+      while (await User.findOne({ username })) {
+        username = `${baseUsername}${suffix}`;
+        suffix++;
+      }
+
+      user = await User.create({ username, email, googleId, role: 'user' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    return res.status(200).json({ token, username: user.username });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return res.status(401).json({ message: 'Google authentication failed' });
   }
 });
 
