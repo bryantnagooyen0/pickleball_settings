@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Container, VStack, HStack, Text, Heading, Button, Input,
-  SimpleGrid, Spinner, Center, InputGroup, InputLeftElement, Image,
+  SimpleGrid, Spinner, Center, InputGroup, InputLeftElement, Image, Badge,
 } from '@chakra-ui/react';
 import { SearchIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
@@ -98,6 +98,40 @@ const PaddleCard = ({ paddle, count }) => {
         <Text color={BRAND.textSecondary} fontSize="md" fontFamily={BRAND.fontBody}>
           {paddle.brand}
         </Text>
+        {(paddle.shape || paddle.thickness) && (
+          <HStack mt={2} spacing={2} flexWrap="wrap">
+            {paddle.shape && (
+              <Badge
+                bg={`${BRAND.accent}22`}
+                color={BRAND.primary}
+                fontSize="xs"
+                borderRadius="0"
+                fontFamily={BRAND.fontBody}
+                fontWeight={500}
+                textTransform="none"
+                px={2}
+                py={0.5}
+              >
+                {paddle.shape}
+              </Badge>
+            )}
+            {paddle.thickness && (
+              <Badge
+                bg={`${BRAND.secondary}22`}
+                color={BRAND.textPrimary}
+                fontSize="xs"
+                borderRadius="0"
+                fontFamily={BRAND.fontBody}
+                fontWeight={500}
+                textTransform="none"
+                px={2}
+                py={0.5}
+              >
+                {paddle.thickness}
+              </Badge>
+            )}
+          </HStack>
+        )}
         <Text color={BRAND.primary} fontSize="md" mt={3} fontWeight={500} letterSpacing="0.03em">
           {count} setup{count !== 1 ? 's' : ''} →
         </Text>
@@ -131,10 +165,11 @@ const CommunityPage = () => {
     .filter(p => p.isActive !== false)
     .map(p => ({ paddle: p, count: setupCountMap[p._id] || 0 }));
 
-  const filteredPaddles = allPaddlesWithCount.filter(({ paddle }) =>
-    paddle.name.toLowerCase().includes(search.toLowerCase()) ||
-    paddle.brand.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredPaddles = allPaddlesWithCount.filter(({ paddle }) => {
+    const q = search.toLowerCase();
+    return [paddle.name, paddle.brand, paddle.shape, paddle.thickness]
+      .some(field => field?.toLowerCase().includes(q));
+  });
 
   if (loading) {
     return (

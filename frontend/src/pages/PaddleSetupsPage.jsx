@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Container, VStack, HStack, Text, Heading, Button,
-  SimpleGrid, Spinner, Center, Select,
+  SimpleGrid, Spinner, Center, Select, Badge,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSetupStore } from '../store/setup';
@@ -87,6 +87,40 @@ const PaddleSetupsPage = () => {
               <Text color="var(--color-text-secondary)" fontFamily="var(--font-body)">
                 {paddle?.brand}
               </Text>
+              {(paddle?.shape || paddle?.thickness) && (
+                <HStack mt={1} spacing={2} flexWrap="wrap">
+                  {paddle.shape && (
+                    <Badge
+                      bg="rgba(139,157,195,0.13)"
+                      color="var(--color-primary)"
+                      fontSize="xs"
+                      borderRadius="0"
+                      fontFamily="var(--font-body)"
+                      fontWeight={500}
+                      textTransform="none"
+                      px={2}
+                      py={0.5}
+                    >
+                      {paddle.shape}
+                    </Badge>
+                  )}
+                  {paddle.thickness && (
+                    <Badge
+                      bg="rgba(212,165,116,0.13)"
+                      color="var(--color-text-primary)"
+                      fontSize="xs"
+                      borderRadius="0"
+                      fontFamily="var(--font-body)"
+                      fontWeight={500}
+                      textTransform="none"
+                      px={2}
+                      py={0.5}
+                    >
+                      {paddle.thickness}
+                    </Badge>
+                  )}
+                </HStack>
+              )}
               <Text color="var(--color-text-secondary)" fontSize="sm" mt={1}
                 fontFamily="var(--font-body)">
                 {setups.length} community setup{setups.length !== 1 ? 's' : ''}
