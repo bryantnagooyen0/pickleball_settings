@@ -1,19 +1,24 @@
-import React, { useRef } from 'react';
-import { 
-  Box, 
-  Container, 
-  Heading, 
-  Text, 
+import React, { useRef, useState, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Heading,
+  Text,
   VStack,
   HStack,
   Badge,
   Spinner,
   Center,
+  SimpleGrid,
+  Button,
 } from '@chakra-ui/react';
 import { motion, useInView } from 'framer-motion';
+import { Link as RouterLink } from 'react-router-dom';
 import UserComments from '../components/UserComments';
 import AdminComments from '../components/AdminComments';
+import SetupCard from '../components/SetupCard';
 import { useAuth } from '../hooks/useAuth';
+import { useSetupStore } from '../store/setup';
 
 const MotionBox = motion(Box);
 const MotionVStack = motion(VStack);
@@ -26,6 +31,22 @@ function AccountPage() {
   const accountRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, amount: 0 });
   const accountInView = useInView(accountRef, { once: true, amount: 0 });
+
+  const fetchSetupsByAuthor = useSetupStore((s) => s.fetchSetupsByAuthor);
+  const [mySetups, setMySetups] = useState([]);
+  const [setupsLoading, setSetupsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    setSetupsLoading(true);
+    fetchSetupsByAuthor(user.id).then((result) => {
+      if (cancelled) return;
+      if (result.success) setMySetups(result.data);
+      setSetupsLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [user?.id, fetchSetupsByAuthor]);
   
   let token;
   let username;
@@ -185,42 +206,62 @@ function AccountPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <VStack align="start" spacing={4}>
-                <Heading
-                  as="h2"
-                  fontSize={{ base: 'xl', md: '2xl' }}
-                  fontFamily="var(--font-display)"
-                  fontWeight={700}
-                  color="var(--color-text-primary)"
-                >
-                  My Setups - Coming Soon
-                </Heading>
-                <Text
-                  fontSize="md"
-                  color="var(--color-text-secondary)"
-                  fontFamily="var(--font-body)"
-                  lineHeight="1.6"
-                >
-                  This feature will allow you to view and manage your paddle setups. 
-                  Stay tuned for updates!
-                </Text>
-                <Box 
-                  bg="var(--color-bg)" 
-                  p={6} 
-                  borderRadius={0}
-                  w="full"
-                  border="1px dashed"
-                  borderColor="rgba(0, 0, 0, 0.1)"
-                >
-                  <Text 
-                    fontSize="sm" 
-                    color="var(--color-text-secondary)" 
-                    textAlign="center"
-                    fontFamily="var(--font-body)"
+              <VStack align="start" spacing={4} w="full">
+                <HStack justify="space-between" w="full" align="center" flexWrap="wrap" gap={2}>
+                  <Heading
+                    as="h2"
+                    fontSize={{ base: 'xl', md: '2xl' }}
+                    fontFamily="var(--font-display)"
+                    fontWeight={700}
+                    color="var(--color-text-primary)"
                   >
-                    Setup management coming soon...
-                  </Text>
-                </Box>
+                    My Setups
+                    {!setupsLoading && mySetups.length > 0 && ` (${mySetups.length})`}
+                  </Heading>
+                  <Button
+                    as={RouterLink}
+                    to="/community/new"
+                    size="sm"
+                    borderRadius={0}
+                    bg="var(--color-primary)"
+                    color="white"
+                    fontFamily="var(--font-body)"
+                    _hover={{ bg: 'var(--color-primary)', opacity: 0.9 }}
+                  >
+                    Share a Setup
+                  </Button>
+                </HStack>
+
+                {setupsLoading ? (
+                  <Center w="full" py={6}>
+                    <Spinner color="var(--color-primary)" />
+                  </Center>
+                ) : mySetups.length === 0 ? (
+                  <Box
+                    bg="var(--color-bg)"
+                    p={6}
+                    borderRadius={0}
+                    w="full"
+                    border="1px dashed"
+                    borderColor="rgba(0, 0, 0, 0.1)"
+                  >
+                    <Text
+                      fontSize="sm"
+                      color="var(--color-text-secondary)"
+                      textAlign="center"
+                      fontFamily="var(--font-body)"
+                    >
+                      You haven't shared a setup yet. Post your paddle and lead tape
+                      layout so other players can see what you're running.
+                    </Text>
+                  </Box>
+                ) : (
+                  <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4} w="full">
+                    {mySetups.map((setup) => (
+                      <SetupCard key={setup._id} setup={setup} compact />
+                    ))}
+                  </SimpleGrid>
+                )}
               </VStack>
             </MotionBox>
           )}

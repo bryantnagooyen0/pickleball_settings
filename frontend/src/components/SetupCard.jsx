@@ -107,7 +107,7 @@ const SetupCard = ({ setup, compact = false }) => {
               {setup.overgrip.brand}
             </Badge>
           )}
-          {setup.totalWeightGrams > 0 && (
+          {setup.totalWeightOz > 0 && (
             <Badge
               bg={`${BRAND.accent}22`}
               color={BRAND.primary}
@@ -116,7 +116,7 @@ const SetupCard = ({ setup, compact = false }) => {
               fontFamily={BRAND.fontBody}
               fontWeight={500}
             >
-              {setup.totalWeightGrams}g total
+              {setup.totalWeightOz} oz total
             </Badge>
           )}
         </HStack>

@@ -2,9 +2,15 @@ import Setup from '../models/setup.model.js';
 import mongoose from 'mongoose';
 
 export const getSetups = async (req, res) => {
-  const { paddleId, sort = 'likes', page = 1, limit = 20 } = req.query;
+  const { paddleId, author, sort = 'likes', page = 1, limit = 20 } = req.query;
   const filter = { isActive: true };
-  if (paddleId) filter.paddle = paddleId;
+  for (const [key, value] of [['paddle', paddleId], ['author', author]]) {
+    if (!value) continue;
+    if (!mongoose.Types.ObjectId.isValid(value)) {
+      return res.status(400).json({ success: false, message: `Invalid ${key} ID` });
+    }
+    filter[key] = value;
+  }
   const sortObj = sort === 'newest' ? { createdAt: -1 } : { likesCount: -1, createdAt: -1 };
   try {
     const setups = await Setup.find(filter)
@@ -77,7 +83,7 @@ export const getSetup = async (req, res) => {
 };
 
 export const createSetup = async (req, res) => {
-  const { paddle, leadTapeStrips, leadTapeTotalGrams, overgrip, edgeGuard, totalWeightGrams, notes } = req.body;
+  const { paddle, leadTapeStrips, leadTapeTotalGrams, overgrip, undergrip, edgeGuard, totalWeightOz, notes, setupReasoning } = req.body;
   if (!paddle) {
     return res.status(400).json({ success: false, message: 'Paddle is required' });
   }
@@ -88,10 +94,15 @@ export const createSetup = async (req, res) => {
       authorName: req.user.username,
       leadTapeStrips: leadTapeStrips || [],
       leadTapeTotalGrams: leadTapeTotalGrams || 0,
-      overgrip: overgrip || {},
+      overgrip: {
+        brand: overgrip?.brand || '',
+        count: Number(overgrip?.count) || 0,
+      },
+      undergrip: undergrip || '',
       edgeGuard: edgeGuard || {},
-      totalWeightGrams: totalWeightGrams || 0,
+      totalWeightOz: totalWeightOz || 0,
       notes: notes || '',
+      setupReasoning: setupReasoning || '',
     });
     await setup.save();
     const populated = await setup.populate('paddle', 'name brand model shape image');
@@ -114,7 +125,7 @@ export const updateSetup = async (req, res) => {
     if (setup.author.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
-    const allowed = ['leadTapeStrips', 'leadTapeTotalGrams', 'overgrip', 'edgeGuard', 'totalWeightGrams', 'notes'];
+    const allowed = ['leadTapeStrips', 'leadTapeTotalGrams', 'overgrip', 'undergrip', 'edgeGuard', 'totalWeightOz', 'notes', 'setupReasoning'];
     allowed.forEach(field => { if (req.body[field] !== undefined) setup[field] = req.body[field]; });
     await setup.save();
     res.status(200).json({ success: true, data: setup });

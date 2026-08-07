@@ -72,7 +72,6 @@ const StripDetailsForm = ({
   densityPreset, setDensityPreset,
   densityCustom, setDensityCustom,
   weightInput, setWeightInput,
-  labelInput, setLabelInput,
   onConfirm, onCancel,
   autoFocus = true,
 }) => (
@@ -110,12 +109,6 @@ const StripDetailsForm = ({
           value={weightInput} onChange={e => setWeightInput(e.target.value)}
           bg="gray.700" color="white" borderColor="gray.500" />
       </Box>
-      <Box>
-        <Text color="gray.400" fontSize="xs" mb={1}>Position (optional)</Text>
-        <Input size="sm" placeholder="e.g. 3 o'clock"
-          value={labelInput} onChange={e => setLabelInput(e.target.value)}
-          bg="gray.700" color="white" borderColor="gray.500" />
-      </Box>
       <HStack>
         <Button size="sm" colorScheme="orange" onClick={onConfirm} flex={1}>{confirmLabel}</Button>
         <Button size="sm" variant="ghost" color="gray.400" onClick={onCancel}>Cancel</Button>
@@ -131,8 +124,12 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
   const pathRef = useRef(null);
   const samplesRef = useRef(null);
   const hoverTRef = useRef(null);
+  const hoverPtRef = useRef(null);
   const firstDotRef = useRef(null);
   const previewAccRef = useRef(0);
+  // Index of a strip the finger came down on, so touchend can open its editor
+  // instead of dropping a new dot on top of it.
+  const tapStripRef = useRef(null);
 
   const [totalLength, setTotalLength] = useState(0);
   const [firstDot, setFirstDot] = useState(null);
@@ -141,7 +138,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
 
   // New-strip form state
   const [weightInput, setWeightInput] = useState('');
-  const [labelInput, setLabelInput] = useState('');
   const [lengthInput, setLengthInput] = useState('');
   const [densityPreset, setDensityPreset] = useState('');
   const [densityCustom, setDensityCustom] = useState('');
@@ -149,17 +145,17 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
   // Edit-strip form state
   const [editingIndex, setEditingIndex] = useState(null);
   const [editWeight, setEditWeight] = useState('');
-  const [editLabel, setEditLabel] = useState('');
   const [editLength, setEditLength] = useState('');
   const [editDensityPreset, setEditDensityPreset] = useState('');
   const [editDensityCustom, setEditDensityCustom] = useState('');
 
   const pathD = getPaddlePath(paddleShape);
 
-  const defaultVB = `${-VB_PAD} ${-VB_PAD} ${VB_W + VB_PAD * 2} ${VB_H + VB_PAD * 2}`;
-  const [svgViewBox, setSvgViewBox] = useState(defaultVB);
+  const defaultVB = { x: -VB_PAD, y: -VB_PAD, w: VB_W + VB_PAD * 2, h: VB_H + VB_PAD * 2 };
+  const [vb, setVb] = useState(defaultVB);
+  const svgViewBox = `${vb.x} ${vb.y} ${vb.w} ${vb.h}`;
   const [svgHeight, setSvgHeight] = useState((width / VB_W) * VB_H);
-  const svgVBRef = useRef({ x: -VB_PAD, y: -VB_PAD, w: VB_W + VB_PAD * 2, h: VB_H + VB_PAD * 2 });
+  const svgVBRef = useRef(defaultVB);
 
   // Auto-calc weight for new strip
   useEffect(() => {
@@ -194,16 +190,19 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     setFirstDot(null);
     setHoverPt(null);
     hoverTRef.current = null;
+    hoverPtRef.current = null;
     previewAccRef.current = 0;
 
     const bb = pathRef.current.getBBox();
-    const vbX = bb.x - VB_PAD;
-    const vbY = bb.y - VB_PAD;
-    const vbW = bb.width + 2 * VB_PAD;
-    const vbH = bb.height + 2 * VB_PAD;
-    svgVBRef.current = { x: vbX, y: vbY, w: vbW, h: vbH };
-    setSvgViewBox(`${vbX} ${vbY} ${vbW} ${vbH}`);
-    setSvgHeight(width * vbH / vbW);
+    const next = {
+      x: bb.x - VB_PAD,
+      y: bb.y - VB_PAD,
+      w: bb.width + 2 * VB_PAD,
+      h: bb.height + 2 * VB_PAD,
+    };
+    svgVBRef.current = next;
+    setVb(next);
+    setSvgHeight(width * next.h / next.w);
   }, [paddleShape, width]);
 
   const snap = useCallback((svgX, svgY) => {
@@ -216,7 +215,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     if (!strip) return;
     setEditingIndex(originalIndex);
     setEditWeight(strip.weightGrams > 0 ? String(strip.weightGrams) : '');
-    setEditLabel(strip.label || '');
     setEditLength(strip.lengthInches > 0 ? String(strip.lengthInches) : '');
     const d = strip.densityGramsPerInch;
     if (!d || d === 0) {
@@ -239,7 +237,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     onChange(strips.map((s, i) => i === editingIndex ? {
       ...s,
       weightGrams: parseFloat(editWeight) || 0,
-      label: editLabel || '',
       lengthInches: parseFloat(editLength) || 0,
       densityGramsPerInch: density,
     } : s));
@@ -248,21 +245,29 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
 
   const cancelEdit = () => setEditingIndex(null);
 
-  const handleMouseMove = useCallback((e) => {
-    if (readOnly || !svgRef.current) return;
-    const pt = getSVGPoint(svgRef.current, e.clientX, e.clientY);
+  // Moves the hover dot to the nearest point on the paddle edge, accumulating
+  // how far around the rim the pointer has travelled since the first dot so the
+  // strip follows the direction actually traced rather than the shortest way round.
+  const updateHover = useCallback((clientX, clientY) => {
+    if (readOnly || !svgRef.current) return null;
+    const pt = getSVGPoint(svgRef.current, clientX, clientY);
     const snapped = snap(pt.x, pt.y);
-    if (snapped) {
-      if (firstDotRef.current !== null && hoverTRef.current !== null) {
-        let delta = snapped.t - hoverTRef.current;
-        if (delta > 0.5) delta -= 1;
-        if (delta < -0.5) delta += 1;
-        previewAccRef.current += delta;
-      }
-      hoverTRef.current = snapped.t;
-      setHoverPt(snapped);
+    if (!snapped) return null;
+    if (firstDotRef.current !== null && hoverTRef.current !== null) {
+      let delta = snapped.t - hoverTRef.current;
+      if (delta > 0.5) delta -= 1;
+      if (delta < -0.5) delta += 1;
+      previewAccRef.current += delta;
     }
+    hoverTRef.current = snapped.t;
+    hoverPtRef.current = snapped;
+    setHoverPt(snapped);
+    return snapped;
   }, [readOnly, snap]);
+
+  const handleMouseMove = useCallback((e) => {
+    updateHover(e.clientX, e.clientY);
+  }, [updateHover]);
 
   const doClick = useCallback((snapped) => {
     setFirstDot(prev => {
@@ -272,7 +277,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
       }
       setPendingStrip({ t1: prev.t, t2: snapped.t, arcFraction: previewAccRef.current });
       setWeightInput('');
-      setLabelInput('');
       setLengthInput('');
       setDensityPreset('');
       setDensityCustom('');
@@ -285,29 +289,34 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     doClick(hoverPt);
   }, [readOnly, hoverPt, doClick, editingIndex]);
 
-  const handleTouchMove = (e) => {
-    e.preventDefault();
-    if (readOnly || !svgRef.current) return;
+  // A plain tap fires touchstart -> touchend with no touchmove in between, so
+  // touchstart has to seed the hover point that touchend then commits.
+  const handleTouchStart = useCallback((e) => {
+    if (readOnly) return;
     const touch = e.touches[0];
-    const pt = getSVGPoint(svgRef.current, touch.clientX, touch.clientY);
-    const snapped = snap(pt.x, pt.y);
-    if (snapped) {
-      if (firstDotRef.current !== null && hoverTRef.current !== null) {
-        let delta = snapped.t - hoverTRef.current;
-        if (delta > 0.5) delta -= 1;
-        if (delta < -0.5) delta += 1;
-        previewAccRef.current += delta;
-      }
-      hoverTRef.current = snapped.t;
-      setHoverPt(snapped);
-    }
-  };
+    if (touch) updateHover(touch.clientX, touch.clientY);
+  }, [readOnly, updateHover]);
 
-  const handleTouchEnd = (e) => {
+  const handleTouchMove = useCallback((e) => {
     e.preventDefault();
-    if (readOnly || !hoverPt || editingIndex !== null) return;
-    doClick(hoverPt);
-  };
+    if (readOnly) return;
+    tapStripRef.current = null; // dragging means drawing, not tapping a strip
+    const touch = e.touches[0];
+    if (touch) updateHover(touch.clientX, touch.clientY);
+  }, [readOnly, updateHover]);
+
+  const handleTouchEnd = useCallback((e) => {
+    // Suppresses the synthetic click that would otherwise place a second dot.
+    e.preventDefault();
+    const tappedStrip = tapStripRef.current;
+    tapStripRef.current = null;
+    if (readOnly || editingIndex !== null) return;
+    if (tappedStrip !== null) {
+      openEdit(tappedStrip);
+      return;
+    }
+    if (hoverPtRef.current) doClick(hoverPtRef.current);
+  }, [readOnly, editingIndex, openEdit, doClick]);
 
   const confirmStrip = () => {
     if (!pendingStrip) return;
@@ -317,7 +326,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
     onChange([...strips, {
       ...pendingStrip,
       weightGrams: parseFloat(weightInput) || 0,
-      label: labelInput || '',
       lengthInches: parseFloat(lengthInput) || 0,
       densityGramsPerInch: density,
     }]);
@@ -485,8 +493,9 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
           height={svgHeight}
           style={{ display: 'block', touchAction: 'none', cursor: readOnly ? 'default' : 'none' }}
           onMouseMove={handleMouseMove}
-          onMouseLeave={() => { if (!readOnly) setHoverPt(null); }}
+          onMouseLeave={() => { if (!readOnly) { hoverPtRef.current = null; setHoverPt(null); } }}
           onClick={handleClick}
+          onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
@@ -509,7 +518,8 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
                     stroke="transparent" strokeWidth="32" fill="none" strokeLinecap="butt"
                     strokeDasharray={seg.dasharray} strokeDashoffset={seg.dashoffset}
                     style={{ cursor: 'pointer' }}
-                    onClick={(e) => { e.stopPropagation(); openEdit(originalIndex); }} />
+                    onClick={(e) => { e.stopPropagation(); openEdit(originalIndex); }}
+                    onTouchStart={() => { tapStripRef.current = originalIndex; }} />
                 )}
               </React.Fragment>
             ));
@@ -536,13 +546,15 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
           )}
 
           {!readOnly && indexedStrips.length === 0 && !firstDot && (
-            <text x="514" y="1160" textAnchor="middle" fill="#718096" fontSize="46" fontFamily="sans-serif">
-              Click edge to start strip
+            <text x={vb.x + vb.w / 2} y={vb.y + vb.h * 0.3} textAnchor="middle"
+              fill="#718096" fontSize="34" fontFamily="sans-serif" pointerEvents="none">
+              Tap edge to start
             </text>
           )}
           {!readOnly && firstDot && (
-            <text x="514" y="1160" textAnchor="middle" fill="#FF6B35" fontSize="46" fontFamily="sans-serif">
-              Click second point
+            <text x={vb.x + vb.w / 2} y={vb.y + vb.h * 0.3} textAnchor="middle"
+              fill="#FF6B35" fontSize="34" fontFamily="sans-serif" pointerEvents="none">
+              Tap edge to finish
             </text>
           )}
         </svg>
@@ -586,7 +598,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
             densityPreset={densityPreset} setDensityPreset={setDensityPreset}
             densityCustom={densityCustom} setDensityCustom={setDensityCustom}
             weightInput={weightInput} setWeightInput={setWeightInput}
-            labelInput={labelInput} setLabelInput={setLabelInput}
             onConfirm={confirmStrip}
             onCancel={cancelStrip}
           />
@@ -600,7 +611,6 @@ const SetupCanvas = ({ strips = [], onChange, readOnly = false, width = 200, pad
             densityPreset={editDensityPreset} setDensityPreset={setEditDensityPreset}
             densityCustom={editDensityCustom} setDensityCustom={setEditDensityCustom}
             weightInput={editWeight} setWeightInput={setEditWeight}
-            labelInput={editLabel} setLabelInput={setEditLabel}
             onConfirm={saveEdit}
             onCancel={cancelEdit}
           />

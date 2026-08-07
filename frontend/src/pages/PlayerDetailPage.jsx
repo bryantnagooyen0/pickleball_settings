@@ -93,9 +93,13 @@ const PlayerDetailPage = () => {
   // Set dynamic meta tags for social media previews
   useEffect(() => {
     if (player) {
-      const baseUrl = 'https://pickleball-settings.vercel.app';
+      const baseUrl = 'https://www.pickleballsettings.com';
       const playerUrl = `${baseUrl}/player/${playerId}`;
-      const playerImage = player.image || `${baseUrl}/logo_preview_card.png`;
+      // og:image must be absolute; self-hosted headshots are stored as /players/... paths
+      const rawImage = player.image || '/logo_preview_card.png';
+      const playerImage = rawImage.startsWith('http')
+        ? rawImage
+        : `${baseUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
       
       // Update document title
       document.title = `${player.name} | Pickleball Profile`;

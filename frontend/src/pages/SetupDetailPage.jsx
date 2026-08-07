@@ -13,6 +13,7 @@ import { api } from '../utils/api';
 import SetupCanvas from '../components/SetupCanvas';
 import CommentSection from '../components/CommentSection';
 import ShareButton from '../components/ShareButton';
+import SEO from '../components/SEO';
 
 const SetupDetailPage = () => {
   const { setupId } = useParams();
@@ -139,6 +140,17 @@ const SetupDetailPage = () => {
         '--font-body': '"Inter", sans-serif',
       }}
     >
+      <SEO
+        title={`${setup.paddle?.name || 'Paddle'} Setup${setup.authorName ? ` by ${setup.authorName}` : ''}`}
+        description={`${setup.authorName ? `${setup.authorName}'s` : 'A community'} ${
+          setup.paddle?.name || 'pickleball paddle'
+        } setup${setup.leadTapeTotalGrams > 0 ? ` — ${setup.leadTapeTotalGrams}g of lead tape` : ''}${
+          setup.totalWeightOz > 0 ? `, ${setup.totalWeightOz} oz total` : ''
+        }. See the exact tape placement and grip configuration.`}
+        image={setup.paddle?.image || undefined}
+        url={`/setup/${setup._id}`}
+        type="article"
+      />
       <Container maxW="900px" py={{ base: 8, md: 12 }}>
         <VStack spacing={6} align="stretch">
 
@@ -174,15 +186,28 @@ const SetupDetailPage = () => {
             <HStack>
               <ShareButton />
               {isAuthor && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  colorScheme="red"
-                  borderRadius="full"
-                  onClick={onOpen}
-                >
-                  Delete
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    borderRadius="full"
+                    color="var(--color-primary)"
+                    borderColor="var(--color-primary)"
+                    _hover={{ bg: 'rgba(44,95,124,0.06)' }}
+                    onClick={() => navigate(`/setup/${setupId}/edit`)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    colorScheme="red"
+                    borderRadius="full"
+                    onClick={onOpen}
+                  >
+                    Delete
+                  </Button>
+                </>
               )}
             </HStack>
           </HStack>
@@ -218,7 +243,7 @@ const SetupDetailPage = () => {
           {/* Mod Details */}
           {(() => {
             const hasLeadTape = setup.leadTapeTotalGrams > 0;
-            const hasWeight = setup.totalWeightGrams > 0;
+            const hasWeight = setup.totalWeightOz > 0;
             const hasOvergrip = !!setup.overgrip?.brand;
             const hasUndergrip = !!setup.undergrip;
             const hasEdgeGuard = !!setup.edgeGuard?.brand;
@@ -259,7 +284,7 @@ const SetupDetailPage = () => {
                         letterSpacing="wide" fontFamily="var(--font-body)">Total Weight</Text>
                       <Text color="var(--color-text-primary)" fontSize="sm" fontWeight={600}
                         fontFamily="var(--font-body)">
-                        {`${setup.totalWeightGrams} oz`}
+                        {`${setup.totalWeightOz} oz`}
                       </Text>
                     </Box>
                   )}

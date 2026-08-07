@@ -4,34 +4,94 @@ import {
   Textarea, FormControl, FormLabel, useToast, Spinner,
   Center, Progress,
 } from '@chakra-ui/react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { usePaddleStore } from '../store/paddle';
 import { useSetupStore } from '../store/setup';
+import { useAuth } from '../hooks/useAuth';
+import { api } from '../utils/api';
 import SetupCanvas from '../components/SetupCanvas';
 
-const STEPS = ['Select Paddle', 'Lead Tape', 'Other Mods', 'Review & Submit'];
+const CREATE_STEPS = ['Select Paddle', 'Lead Tape', 'Other Mods', 'Review & Submit'];
+const EDIT_STEPS = ['Lead Tape', 'Other Mods', 'Review & Save'];
+
+// Strips come back from Mongo carrying only these keys, but the update schema
+// rejects anything else — so both load and submit go through this filter.
+const STRIP_FIELDS = ['t1', 't2', 'arcFraction', 'weightGrams', 'lengthInches', 'densityGramsPerInch', 'label'];
+const pickStripFields = (strip) => {
+  const out = {};
+  for (const key of STRIP_FIELDS) {
+    if (strip[key] !== undefined) out[key] = strip[key];
+  }
+  return out;
+};
 
 const NewSetupPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { setupId } = useParams();
+  const isEdit = !!setupId;
   const toast = useToast();
   const { paddles, fetchPaddles } = usePaddleStore();
-  const { createSetup } = useSetupStore();
+  const { createSetup, updateSetup } = useSetupStore();
+  const { user, loading: authLoading } = useAuth();
 
-  const [step, setStep] = useState(searchParams.get('paddleId') ? 1 : 0);
+  const STEPS = isEdit ? EDIT_STEPS : CREATE_STEPS;
+  const FIRST_STEP = isEdit ? 1 : 0;
+  const LAST_STEP = FIRST_STEP + STEPS.length - 1;
+
+  const [step, setStep] = useState(isEdit || searchParams.get('paddleId') ? 1 : 0);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingSetup, setLoadingSetup] = useState(isEdit);
 
   // Form state
   const [selectedPaddleId, setSelectedPaddleId] = useState(searchParams.get('paddleId') || '');
   const [paddleSearch, setPaddleSearch] = useState('');
   const [leadTapeStrips, setLeadTapeStrips] = useState([]);
-  const [overgrip, setOvergrip] = useState({ brand: '', count: '', notes: '' });
+  const [overgrip, setOvergrip] = useState({ brand: '', count: '' });
   const [undergrip, setUndergrip] = useState('');
   const [edgeGuard, setEdgeGuard] = useState({ brand: '', notes: '' });
-  const [totalWeightGrams, setTotalWeightGrams] = useState('');
+  const [totalWeightOz, setTotalWeightOz] = useState('');
   const [notes, setNotes] = useState('');
   const [setupReasoning, setSetupReasoning] = useState('');
   useEffect(() => { fetchPaddles(); }, []);
+
+  // Edit mode: pull the existing setup in and prefill every field.
+  useEffect(() => {
+    if (!isEdit || authLoading) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get(`/api/setups/${setupId}`);
+        if (cancelled) return;
+        const existing = res.data;
+        if (user && existing.author !== user.id) {
+          toast({ title: 'You can only edit your own setups', status: 'error' });
+          navigate(`/setup/${setupId}`);
+          return;
+        }
+        setSelectedPaddleId(existing.paddle?._id || '');
+        setLeadTapeStrips((existing.leadTapeStrips || []).map(pickStripFields));
+        setOvergrip({
+          brand: existing.overgrip?.brand || '',
+          count: existing.overgrip?.count ? String(existing.overgrip.count) : '',
+        });
+        setUndergrip(existing.undergrip || '');
+        setEdgeGuard({
+          brand: existing.edgeGuard?.brand || '',
+          notes: existing.edgeGuard?.notes || '',
+        });
+        setTotalWeightOz(existing.totalWeightOz ? String(existing.totalWeightOz) : '');
+        setNotes(existing.notes || '');
+        setSetupReasoning(existing.setupReasoning || '');
+        setLoadingSetup(false);
+      } catch (error) {
+        if (cancelled) return;
+        toast({ title: 'Could not load this setup', status: 'error' });
+        navigate('/community');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isEdit, setupId, authLoading]);
 
   const leadTapeTotalGrams = leadTapeStrips.reduce((sum, s) => sum + (s.weightGrams || 0), 0);
 
@@ -41,28 +101,33 @@ const NewSetupPage = () => {
   );
 
   const handleSubmit = async () => {
-    if (!selectedPaddleId) {
+    if (!isEdit && !selectedPaddleId) {
       toast({ title: 'Please select a paddle', status: 'error' });
       return;
     }
-    setSubmitting(true);
-    const result = await createSetup({
-      paddle: selectedPaddleId,
-      leadTapeStrips,
+    const payload = {
+      leadTapeStrips: leadTapeStrips.map(pickStripFields),
       leadTapeTotalGrams,
-      overgrip,
+      overgrip: { brand: overgrip.brand, count: parseInt(overgrip.count, 10) || 0 },
       undergrip,
       edgeGuard,
-      totalWeightGrams: parseFloat(totalWeightGrams) || 0,
+      totalWeightOz: parseFloat(totalWeightOz) || 0,
       notes,
       setupReasoning,
-    });
+    };
+    setSubmitting(true);
+    const result = isEdit
+      ? await updateSetup(setupId, payload)
+      : await createSetup({ paddle: selectedPaddleId, ...payload });
     setSubmitting(false);
     if (result.success) {
-      toast({ title: 'Setup shared!', status: 'success' });
-      navigate(`/setup/${result.data._id}`);
+      toast({ title: isEdit ? 'Setup updated!' : 'Setup shared!', status: 'success' });
+      navigate(`/setup/${isEdit ? setupId : result.data._id}`);
     } else {
-      toast({ title: result.message || 'Failed to submit setup', status: 'error' });
+      toast({
+        title: result.message || `Failed to ${isEdit ? 'save changes' : 'submit setup'}`,
+        status: 'error',
+      });
     }
   };
 
@@ -96,6 +161,11 @@ const NewSetupPage = () => {
       }}
     >
       <Container maxW="600px" py={{ base: 8, md: 12 }}>
+        {loadingSetup ? (
+          <Center py={20}>
+            <Spinner size="xl" color="var(--color-primary)" />
+          </Center>
+        ) : (
         <VStack spacing={6} align="stretch">
 
           <Box>
@@ -105,13 +175,19 @@ const NewSetupPage = () => {
               fontFamily="var(--font-display)"
               letterSpacing="-0.02em"
             >
-              Share Your Setup
+              {isEdit ? 'Edit Your Setup' : 'Share Your Setup'}
             </Heading>
             <Box w="48px" h="3px" bg="var(--color-secondary)" mt={2} mb={1} />
+            {isEdit && (
+              <Text color="var(--color-text-secondary)" fontSize="sm" mt={2}
+                fontFamily="var(--font-body)">
+                The paddle can't be changed — delete and re-post if you switched paddles.
+              </Text>
+            )}
           </Box>
 
           <Progress
-            value={((step + 1) / STEPS.length) * 100}
+            value={((step - FIRST_STEP + 1) / STEPS.length) * 100}
             borderRadius="full"
             sx={{ '& > div': { background: 'var(--color-primary) !important' } }}
           />
@@ -120,8 +196,8 @@ const NewSetupPage = () => {
               <Text
                 key={s}
                 fontSize="xs"
-                color={i === step ? 'var(--color-primary)' : 'var(--color-text-secondary)'}
-                fontWeight={i === step ? 'bold' : 'normal'}
+                color={i === step - FIRST_STEP ? 'var(--color-primary)' : 'var(--color-text-secondary)'}
+                fontWeight={i === step - FIRST_STEP ? 'bold' : 'normal'}
                 fontFamily="var(--font-body)"
               >
                 {s}
@@ -276,9 +352,9 @@ const NewSetupPage = () => {
                   fontFamily="var(--font-body)">Total Weight After Mods (ounces)</FormLabel>
                 <Input
                   type="number"
-                  placeholder="e.g. 8.6 oz"
-                  value={totalWeightGrams}
-                  onChange={(e) => setTotalWeightGrams(e.target.value)}
+                  placeholder="e.g. 8.6"
+                  value={totalWeightOz}
+                  onChange={(e) => setTotalWeightOz(e.target.value)}
                   {...inputStyles}
                 />
               </FormControl>
@@ -335,9 +411,9 @@ const NewSetupPage = () => {
                     Edge guard: {edgeGuard.brand}
                   </Text>
                 )}
-                {totalWeightGrams && (
+                {totalWeightOz && (
                   <Text color="var(--color-text-secondary)" fontSize="xs" fontFamily="var(--font-body)">
-                    Total weight: {totalWeightGrams}g
+                    Total weight: {totalWeightOz} oz
                   </Text>
                 )}
               </Box>
@@ -352,11 +428,13 @@ const NewSetupPage = () => {
               borderRadius="full"
               fontFamily="var(--font-body)"
               _hover={{ bg: 'rgba(0,0,0,0.05)' }}
-              onClick={() => step === 0 ? navigate('/community') : setStep(s => s - 1)}
+              onClick={() => step === FIRST_STEP
+                ? navigate(isEdit ? `/setup/${setupId}` : '/community')
+                : setStep(s => s - 1)}
             >
-              {step === 0 ? 'Cancel' : 'Back'}
+              {step === FIRST_STEP ? 'Cancel' : 'Back'}
             </Button>
-            {step < STEPS.length - 1 ? (
+            {step < LAST_STEP ? (
               <Button
                 bg="var(--color-primary)"
                 color="white"
@@ -380,12 +458,13 @@ const NewSetupPage = () => {
                 onClick={handleSubmit}
                 isLoading={submitting}
               >
-                Share Setup
+                {isEdit ? 'Save Changes' : 'Share Setup'}
               </Button>
             )}
           </HStack>
 
         </VStack>
+        )}
       </Container>
     </Box>
   );

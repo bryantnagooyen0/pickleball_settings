@@ -83,14 +83,14 @@ export const validateSetup = (req, res, next) => {
     leadTapeTotalGrams: Joi.number().min(0).max(500).optional(),
     overgrip: Joi.object({
       brand: Joi.string().max(100).allow('').optional(),
-      count: Joi.number().integer().min(0).max(10).optional(),
+      count: Joi.number().integer().min(0).max(10).allow('', null).optional(),
     }).optional(),
     undergrip: Joi.string().max(100).allow('').optional(),
     edgeGuard: Joi.object({
       brand: Joi.string().max(100).allow('').optional(),
       notes: Joi.string().max(500).allow('').optional(),
     }).optional(),
-    totalWeightGrams: Joi.number().min(0).max(1000).optional(),
+    totalWeightOz: Joi.number().min(0).max(100).optional(),
     setupReasoning: Joi.string().max(2000).allow('').optional(),
     notes: Joi.string().max(1000).allow('').optional(),
   });
@@ -109,13 +109,15 @@ export const validateSetupUpdate = (req, res, next) => {
     leadTapeTotalGrams: Joi.number().min(0).max(500).optional(),
     overgrip: Joi.object({
       brand: Joi.string().max(100).allow('').optional(),
-      count: Joi.number().integer().min(0).max(10).optional(),
+      count: Joi.number().integer().min(0).max(10).allow('', null).optional(),
     }).optional(),
+    undergrip: Joi.string().max(100).allow('').optional(),
     edgeGuard: Joi.object({
       brand: Joi.string().max(100).allow('').optional(),
       notes: Joi.string().max(500).allow('').optional(),
     }).optional(),
-    totalWeightGrams: Joi.number().min(0).max(1000).optional(),
+    totalWeightOz: Joi.number().min(0).max(100).optional(),
+    setupReasoning: Joi.string().max(2000).allow('').optional(),
     notes: Joi.string().max(1000).allow('').optional(),
   });
 

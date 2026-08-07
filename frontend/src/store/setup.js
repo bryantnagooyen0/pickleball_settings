@@ -18,6 +18,17 @@ export const useSetupStore = create((set) => ({
     }
   },
 
+  // Returns the caller's own setups without touching the shared `setups` list,
+  // so the Account page can't clobber whatever Community is showing.
+  fetchSetupsByAuthor: async (authorId) => {
+    try {
+      const data = await api.get(`/api/setups?author=${authorId}&sort=newest`);
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+
   fetchRecentSetups: async () => {
     try {
       const data = await api.get('/api/setups/recent');

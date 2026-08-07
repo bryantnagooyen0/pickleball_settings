@@ -31,7 +31,7 @@ const setupSchema = new mongoose.Schema(
       brand: { type: String, default: '' },
       notes: { type: String, default: '' },
     },
-    totalWeightGrams: { type: Number, default: 0 },
+    totalWeightOz: { type: Number, default: 0 },
     setupReasoning: { type: String, default: '', maxlength: 2000 },
     notes: { type: String, default: '', maxlength: 1000 },
 

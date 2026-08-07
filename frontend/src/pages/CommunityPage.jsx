@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSetupStore } from '../store/setup';
 import { usePaddleStore } from '../store/paddle';
 import SetupCard from '../components/SetupCard';
+import SEO from '../components/SEO';
 
 const BRAND = {
   bg: '#FAF9F6',
@@ -160,6 +161,19 @@ const CommunityPage = () => {
         '--color-text-secondary': BRAND.textSecondary,
       }}
     >
+      <SEO
+        title="Community Setups"
+        description="See how other players set up their paddles — lead tape placement, overgrips, edge guards, and total weight. Share your own setup with the community."
+        url="/community"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'Community Pickleball Setups',
+          description:
+            'Player-submitted pickleball paddle setups with lead tape placement and grip configurations',
+          url: 'https://www.pickleballsettings.com/community',
+        }}
+      />
       <Container maxW="1200px" py={12}>
         <VStack spacing={12} align="stretch">
 

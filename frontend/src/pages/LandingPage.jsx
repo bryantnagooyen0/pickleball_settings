@@ -549,9 +549,9 @@ const LandingPage = () => {
                 },
                 {
                   title: 'Community Setups',
-                  description: 'Coming soon - Share your setup and discover how other users are playing',
+                  description: 'Share your setup and discover how other players are dialing in their paddles',
                   icon: <FaUsers size={40} />,
-                  link: null,
+                  link: '/community',
                   color: 'var(--color-accent)',
                 },
               ].map((category, index) => (

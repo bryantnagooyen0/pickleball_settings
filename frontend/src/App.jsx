@@ -85,6 +85,7 @@ function App() {
           <Route path='/community/paddle/:paddleId' element={<PaddleSetupsPage />} />
           <Route path='/community/new' element={<ProtectedRoute><NewSetupPage /></ProtectedRoute>} />
           <Route path='/setup/:setupId' element={<SetupDetailPage />} />
+          <Route path='/setup/:setupId/edit' element={<ProtectedRoute><NewSetupPage /></ProtectedRoute>} />
           <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
           <Route path='/legal-notice' element={<LegalNoticePage />} />
         </Routes>

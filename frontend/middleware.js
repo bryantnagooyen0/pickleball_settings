@@ -3,7 +3,7 @@ import { next } from '@vercel/edge';
 const CRAWLER_RE =
   /Discordbot|Twitterbot|facebookexternalhit|Slackbot|WhatsApp|Applebot|LinkedInBot|TelegramBot/i;
 
-const SITE_URL = 'https://pickleball-settings.vercel.app';
+const SITE_URL = 'https://www.pickleballsettings.com';
 
 const escHtml = (s) =>
   String(s)
