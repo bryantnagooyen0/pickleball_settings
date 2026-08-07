@@ -3,19 +3,15 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   FormControl,
   FormLabel,
   Heading,
-  HStack,
   Input,
   Stack,
-  Text,
   useToast,
   Checkbox,
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
 
@@ -43,23 +39,6 @@ function LoginPage() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      const data = await api.post('/api/users/google', {
-        credential: credentialResponse.credential,
-      });
-      login(data.token, data.username, true);
-      toast({ title: 'Logged in with Google', status: 'success', duration: 2000, isClosable: true });
-      navigate('/');
-    } catch (err) {
-      toast({ title: err.message || 'Google login failed', status: 'error', duration: 3000, isClosable: true });
-    }
-  };
-
-  const handleGoogleError = () => {
-    toast({ title: 'Google sign-in was cancelled or failed', status: 'error', duration: 3000, isClosable: true });
-  };
-
   return (
     <Container maxW={'420px'} py={10}>
       <Box bg={'white'} p={6} rounded={'md'} shadow={'md'}>
@@ -67,21 +46,6 @@ function LoginPage() {
           <Heading size={'md'} textAlign={'center'}>
             Login
           </Heading>
-          <Box display={'flex'} justifyContent={'center'}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              useOneTap={false}
-              width={'368'}
-            />
-          </Box>
-          <HStack>
-            <Divider />
-            <Text fontSize={'sm'} color={'gray.500'} whiteSpace={'nowrap'} px={2}>
-              or
-            </Text>
-            <Divider />
-          </HStack>
           <FormControl isRequired>
             <FormLabel>Username</FormLabel>
             <Input value={username} onChange={(e) => setUsername(e.target.value)} />
