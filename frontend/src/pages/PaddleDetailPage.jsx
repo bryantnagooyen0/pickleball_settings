@@ -20,6 +20,8 @@ import { usePaddleStore } from '../store/paddle';
 import { usePlayerStore } from '../store/player';
 import PlayerCard from '../components/PlayerCard';
 import CommentSection from '../components/CommentSection';
+import SetupCard from '../components/SetupCard';
+import { useSetupStore } from '../store/setup';
 import SEO from '../components/SEO';
 
 const MotionBox = motion(Box);
@@ -35,6 +37,8 @@ const PaddleDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [paddle, setPaddle] = useState(null);
   const [playersUsingPaddle, setPlayersUsingPaddle] = useState([]);
+  const { fetchSetups } = useSetupStore();
+  const [paddleSetups, setPaddleSetups] = useState([]);
   const { paddles, fetchPaddles } = usePaddleStore();
   const { players, fetchPlayers } = usePlayerStore();
   const headerRef = useRef(null);
@@ -68,6 +72,8 @@ const PaddleDetailPage = () => {
         const foundPaddle = currentPaddles.find(p => p._id === paddleId);
         if (foundPaddle) {
           setPaddle(foundPaddle);
+          const setupResult = await fetchSetups(paddleId, 'likes');
+          if (setupResult?.data) setPaddleSetups(setupResult.data.slice(0, 3));
           // Find players using this paddle (matching name, shape, and thickness)
           const usingPaddle = currentPlayerStore.filter(player => {
             // First check if paddle name matches
