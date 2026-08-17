@@ -106,31 +106,38 @@ const PlayerDetailPage = () => {
     fetchPaddles();
   }, [playerId, navigate, toast, fetchPaddles]);
 
-  // Enhance player data with paddle template information when paddles are loaded
+  // Enhance player data with paddle template information when paddles are loaded.
+  // Any field the player leaves blank falls back to the shared Paddle document —
+  // notably paddleImage, which is stored once per paddle rather than per player.
   useEffect(() => {
-    if (player && paddles.length > 0 && player.paddle && !player.paddlePriceLink) {
-      const paddleTemplate = paddles.find(p => p.name === player.paddle);
-      
-      if (paddleTemplate && paddleTemplate.priceLink) {
-        const enhancedPlayerData = {
-          ...player,
-          paddleCore: player.paddleCore || paddleTemplate.core || '',
-          paddleWeight: player.paddleWeight || paddleTemplate.weight || '',
-          paddleBrand: player.paddleBrand || paddleTemplate.brand || '',
-          paddleModel: player.paddleModel || paddleTemplate.model || '',
-          paddleShape: player.paddleShape || paddleTemplate.shape || '',
-          paddleThickness: player.paddleThickness || paddleTemplate.thickness || '',
-          paddleHandleLength: player.paddleHandleLength || paddleTemplate.handleLength || '',
-          paddleLength: player.paddleLength || paddleTemplate.length || '',
-          paddleWidth: player.paddleWidth || paddleTemplate.width || '',
-          paddleColor: player.paddleColor || paddleTemplate.color || '',
-          paddleImage: player.paddleImage || paddleTemplate.image || '',
-          paddlePriceLink: paddleTemplate.priceLink,
-        };
-        setPlayer(enhancedPlayerData);
-      }
-    }
-  }, [paddles.length, player?.paddle, player?.paddlePriceLink]);
+    if (!player || !player.paddle || paddles.length === 0) return;
+
+    const paddleTemplate = paddles.find(p => p.name === player.paddle);
+    if (!paddleTemplate) return;
+
+    const enhancedPlayerData = {
+      ...player,
+      paddleCore: player.paddleCore || paddleTemplate.core || '',
+      paddleWeight: player.paddleWeight || paddleTemplate.weight || '',
+      paddleBrand: player.paddleBrand || paddleTemplate.brand || '',
+      paddleModel: player.paddleModel || paddleTemplate.model || '',
+      paddleShape: player.paddleShape || paddleTemplate.shape || '',
+      paddleThickness: player.paddleThickness || paddleTemplate.thickness || '',
+      paddleHandleLength: player.paddleHandleLength || paddleTemplate.handleLength || '',
+      paddleLength: player.paddleLength || paddleTemplate.length || '',
+      paddleWidth: player.paddleWidth || paddleTemplate.width || '',
+      paddleColor: player.paddleColor || paddleTemplate.color || '',
+      paddleImage: player.paddleImage || paddleTemplate.image || '',
+      paddlePriceLink: player.paddlePriceLink || paddleTemplate.priceLink || '',
+    };
+
+    // Only re-render when the template actually contributed something, otherwise
+    // setPlayer would hand back a new object every run and loop forever.
+    const changed = Object.keys(enhancedPlayerData).some(
+      key => enhancedPlayerData[key] !== player[key]
+    );
+    if (changed) setPlayer(enhancedPlayerData);
+  }, [paddles, player]);
 
   if (loading) {
     return (

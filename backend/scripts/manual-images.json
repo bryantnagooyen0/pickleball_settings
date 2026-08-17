@@ -1,0 +1,28 @@
+[
+  {
+    "file": "joola-premium-overgrip-white.jpg",
+    "note": "JOOLA Premium Synthetic Overgrip, White 3-pack (FEEL-TEC). Replaces a dead joola.com link.",
+    "targets": [
+      { "model": "Player", "name": "Ben Johns", "field": "overgripImage" },
+      { "model": "Player", "name": "Collin Johns", "field": "overgripImage" }
+    ]
+  },
+  {
+    "file": "babolat-sfx3-wimbledon.jpg",
+    "note": "Babolat SFX3 All Court Wimbledon, women's. Replaces a dead doittennis.com link.",
+    "targets": [{ "model": "Player", "name": "Etta Tuionetoa", "field": "shoeImage" }]
+  },
+  {
+    "file": "nox-lux-tempo-white.jpg",
+    "note": "NOX Lux Tempo, white/grey. Replaces a dead noxsportusa.com link.",
+    "targets": [
+      { "model": "Player", "name": "Judit Castillo", "field": "shoeImage" },
+      { "model": "Player", "name": "Grayson Goldin", "field": "shoeImage" }
+    ]
+  },
+  {
+    "file": "kswiss-teal.jpg",
+    "note": "K-Swiss pickleball shoe, teal/green. Replaces a dead bigcommerce.com link.",
+    "targets": [{ "model": "Player", "name": "CJ Klinger", "field": "shoeImage" }]
+  }
+]
