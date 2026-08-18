@@ -90,7 +90,11 @@ async function main() {
 
   if (apply) {
     for (const p of promotions) {
-      await Paddle.updateOne({ _id: p.paddleId }, { $set: { image: p.image } });
+      await Paddle.updateOne(
+        { _id: p.paddleId },
+        { $set: { image: p.image } },
+        { timestamps: false }
+      );
       paddlesByName.get(p.paddleName).image = p.image;
     }
   } else {
@@ -119,7 +123,8 @@ async function main() {
   if (apply && clears.length) {
     await Player.updateMany(
       { _id: { $in: clears.map(p => p._id) } },
-      { $unset: { paddleImage: '' } }
+      { $unset: { paddleImage: '' } },
+      { timestamps: false }
     );
   }
 

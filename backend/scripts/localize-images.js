@@ -234,7 +234,11 @@ async function adoptManualImages() {
       if (apply) {
         mkdirSync(join(PUBLIC_DIR, dir), { recursive: true });
         writeFileSync(join(PUBLIC_DIR, dir, filename), optimized);
-        await Model.updateOne({ _id: doc._id }, { $set: { [target.field]: localPath } });
+        await Model.updateOne(
+          { _id: doc._id },
+          { $set: { [target.field]: localPath } },
+          { timestamps: false }
+        );
       }
 
       adopted.push({
@@ -319,7 +323,11 @@ async function main() {
     for (const r of succeeded) {
       for (const ref of r.entry.refs) {
         const Model = ref.model === 'Paddle' ? Paddle : Player;
-        await Model.updateOne({ _id: ref.id }, { $set: { [ref.field]: r.localPath } });
+        await Model.updateOne(
+          { _id: ref.id },
+          { $set: { [ref.field]: r.localPath } },
+          { timestamps: false }
+        );
         updatedRefs += 1;
       }
     }
